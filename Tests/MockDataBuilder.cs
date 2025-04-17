@@ -93,8 +93,11 @@ public abstract class MockDataBuilder :DebugHelpers {
 			nodes.Add(x.Item2, bnode);
 		}
 
-		foreach (var x in nodeTemplate) {
-			nodes[x.Item1].Children.Add(x.Item2, nodes[x.Item2]);
+		foreach (var(parent, child, xfm) in nodeTemplate) {
+			// add children
+			nodes[parent].Children.Add(child, nodes[child]);
+			// add parent
+			nodes[child].ParentBone = nodes[parent];
 		}
 		return nodes;
 	}

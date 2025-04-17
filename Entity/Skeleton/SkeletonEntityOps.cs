@@ -40,6 +40,7 @@ public class SkeletonEntityOps {
 
 		foreach (var (parent, child, transform) in nodeTemplate) {
 			nodes[parent].Children.Add(child, nodes[child]);
+			nodes[child].ParentBone = nodes[parent];
 		}
 
 		return nodes;
