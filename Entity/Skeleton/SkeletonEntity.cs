@@ -8,6 +8,7 @@ public class SkeletonEntity {
 
 	public BoneNode RootNode;
 	public Dictionary<string, BoneNode> Bones = [];
+	public int? BoneDepth;
 
 	public SkeletonEntity(string name, BoneNode root, Dictionary<string, BoneNode>? bones = null) {
 		Name = name;

@@ -1,4 +1,6 @@
-﻿namespace BoneUtils.Entity.Skeleton;
+﻿using System.Diagnostics;
+
+namespace BoneUtils.Entity.Skeleton;
 public class SkeletonEntityOps {
 	public bool ValidateBoneNodeTree(SkeletonEntity sken) {
 		// DFS validation of skeleton
@@ -7,23 +9,48 @@ public class SkeletonEntityOps {
 		int maxDepth = 100;
 		seen.Add("Root", sken.RootNode);
 
-		return RecurseBoneNode(sken.RootNode, seen, depth, maxDepth);
-	}
-	private bool RecurseBoneNode(BoneNode bn, Dictionary<string, BoneNode> seen, int depth, int maxDepth) {
-		if(depth+1 > maxDepth) return false;
+		return Recurse(sken.RootNode, seen, depth, maxDepth);
 
-		depth++;
+		bool Recurse(BoneNode bn, Dictionary<string, BoneNode> seen, int depth, int maxDepth) {
+			if(depth+1 > maxDepth) return false;
 
-		foreach(var bone in bn.Children) {
-			if(seen.ContainsKey(bone.Key))
-				return false;
-			else
-				seen.Add(bone.Key, bone.Value);
+			depth++;
 
-			if(!RecurseBoneNode(bone.Value, seen, depth, maxDepth))
-				return false;
+			foreach(var bone in bn.Children) {
+				if(seen.ContainsKey(bone.Key))
+					return false;
+				else
+					seen.Add(bone.Key, bone.Value);
+
+				if(!Recurse(bone.Value, seen, depth, maxDepth))
+					return false;
+			}
+			return true;
 		}
-		return true;
+	}
+	public int? LabelDepthBoneNodeTree(SkeletonEntity sken, int depthLimit = 100) {
+		// BFS for setting BoneNode depth
+		var queue = new Queue<(BoneNode node, int depth)>();
+
+		queue.Enqueue((sken.RootNode, 0));
+		int maxDepth = 0;
+
+		while(queue.Count > 0) {
+			var (node, depth) = queue.Dequeue();
+			node.TreeDepth = depth;
+
+			maxDepth = int.Max(maxDepth, depth);
+			if(maxDepth > depthLimit) 
+				return null;
+
+
+			foreach(var bone in node.Children.Values) {
+				queue.Enqueue((bone, depth+1));
+			}
+		}
+
+		sken.BoneDepth = maxDepth;
+		return maxDepth;
 	}
 	public Dictionary<string, BoneNode> ConstructBoneNodeTreeFromList(List<(string, string, Transform)> nodeTemplate, bool addRootNode = true) {
 		Dictionary<string, BoneNode> nodes = [];

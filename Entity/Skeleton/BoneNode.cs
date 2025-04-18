@@ -7,7 +7,7 @@ public class BoneNode {
 	public string Name;
 	public BoneNode? ParentBone;
 	public SkeletonEntity? ParentEntity;
-	// TODO could add a leveldepth counter
+	public int? TreeDepth;
 	public Dictionary<string, BoneNode> Children = [];
 	public Transform Transform;
 
@@ -18,6 +18,7 @@ public class BoneNode {
 		Children = children ?? [];
 	}
 	public bool Branching => Children.Count > 1;
+	public bool HasChildren => Children.Count > 0;
 	public void Translate(Vector3 offset) {
 		Transform.Position += offset;
 		foreach (var child in Children) 
