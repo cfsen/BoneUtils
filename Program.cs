@@ -11,6 +11,7 @@ using System.Numerics;
 
 RayLibVisualTest rlvt = new();
 SkeletonEntity spine = rlvt.SimpleSpine();
+
 Quaternion q = Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f);
 
 Raylib.InitWindow(800, 600, "3D Test");
@@ -36,18 +37,7 @@ while (!Raylib.WindowShouldClose()) {
     Raylib.EndMode3D();
 	Raylib.DrawFPS(10, 10);
 
-	if(Raylib.IsKeyPressed(KeyboardKey.One)) {
-		spine.RootNode.Rotate(q);
-	}
-	if(Raylib.IsKeyPressed(KeyboardKey.Two)) {
-		spine.Bones["SpineA"].Rotate(q);
-	}
-	if(Raylib.IsKeyPressed(KeyboardKey.Three)) {
-		spine.Bones["SpineB"].Rotate(q);
-	}
-	if(Raylib.IsKeyPressed(KeyboardKey.Four)) {
-		spine.Bones["SpineC"].Rotate(q);
-	}
+	rlvt.HandleInput(spine, q);
 
     Raylib.EndDrawing();
 }
