@@ -1,4 +1,5 @@
 ﻿using BoneUtils.Entity.Skeleton;
+using System.ComponentModel;
 using System.Numerics;
 
 namespace BoneUtils.Tests;
@@ -17,65 +18,26 @@ public abstract class MockDataBuilder :DebugHelpers {
 	}
 	internal SkeletonEntity Mock_Spine() {
 		List<(string, string, Transform)> nodeTemplate = []; // parent, child
-		nodeTemplate.Add((
-			"Root", "SpineA", new Transform(
-				position: new Vector3(0, 1, 0),
-				rotation: Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f)
-				)
-			));
-		nodeTemplate.Add((
-			"SpineA", "SpineB", new Transform(
-				position: new Vector3(0, 2, 0),
-				rotation: Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f)
-				)
-			));
-		nodeTemplate.Add((
-			"SpineB", "SpineC", new Transform(
-				position: new Vector3(0, 3, 0),
-				rotation: Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f)
-				)
-			));
+		nodeTemplate.Add(NewNode("Root", "SpineA",			(0, 1, 0),				(0.0f, MathF.PI/2, 0.0f)));
+		nodeTemplate.Add(NewNode("SpineA", "SpineB",		(0, 2, 0),				(0.0f, MathF.PI/2, 0.0f)));
+		nodeTemplate.Add(NewNode("SpineB", "SpineC",		(0, 3, 0),				(0.0f, MathF.PI/2, 0.0f)));
+
 		var nodes = ConstructBoneDictFromList(nodeTemplate);
 		return new SkeletonEntity("TestEntity01", nodes["Root"], nodes);
 	}
 	internal SkeletonEntity Mock_TestEntity01() {
 		List<(string, string, Transform)> nodeTemplate = []; // parent, child
-		nodeTemplate.Add((
-			"Root", "SpineA", new Transform(
-				position: Vector3.Zero,
-				rotation: Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f)
-				)
-			));
-		nodeTemplate.Add((
-			"SpineA", "SpineB", new Transform(
-				position: new Vector3(0, 1, 0),
-				rotation: Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f)
-				)
-			));
-		nodeTemplate.Add((
-			"SpineB", "SpineC", new Transform(
-				position: new Vector3(0, 2, 0),
-				rotation: Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f)
-				)
-			));
-		nodeTemplate.Add((
-			"SpineC", "L_Shoulder", new Transform(
-				position: new Vector3(-1, 2, 0),
-				rotation: Quaternion.CreateFromYawPitchRoll(-MathF.PI, 0.0f, 0.0f)
-				)
-			));
-		nodeTemplate.Add((
-			"SpineC", "R_Shoulder", new Transform(
-				position: new Vector3(1, 2, 0),
-				rotation: Quaternion.CreateFromYawPitchRoll(MathF.PI/2, 0.0f, 0.0f)
-				)
-			));
-		nodeTemplate.Add((
-			"SpineC", "Neck", new Transform(
-				position: new Vector3(0, 3, 0),
-				rotation: Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f)
-				)
-			));
+		nodeTemplate.Add(NewNode("Root", "SpineA",			(0,0,0),				(0, MathF.PI/2, 0)));
+		nodeTemplate.Add(NewNode("SpineA", "SpineB",		(0,1,0),				(0, MathF.PI/2, 0)));
+		nodeTemplate.Add(NewNode("SpineB", "SpineC",		(0,2,0),				(0, MathF.PI/2, 0)));
+		nodeTemplate.Add(NewNode("SpineC", "L_Shoulder",	(-1, 2, 0),				(-MathF.PI/2, 0.0f, 0.0f)));
+		nodeTemplate.Add(NewNode("SpineC", "R_Shoulder",	(1, 2, 0),				(MathF.PI/2, 0.0f, 0.0f)));
+		nodeTemplate.Add(NewNode("L_Shoulder", "L_Elbow",	(-2.5f, 2, 0),			(-MathF.PI/2, 0.0f, 0.0f)));
+		nodeTemplate.Add(NewNode("R_Shoulder", "R_Elbow",	(2.5f, 2, 0),			(MathF.PI/2, 0.0f, 0.0f)));
+		nodeTemplate.Add(NewNode("L_Elbow", "L_Wrist",		(-4, 2, 0),				(-MathF.PI/2, 0.0f, 0.0f)));
+		nodeTemplate.Add(NewNode("R_Elbow", "R_Wrist",		(4, 2, 0),				(MathF.PI/2, 0.0f, 0.0f)));
+		nodeTemplate.Add(NewNode("SpineC", "Neck",			(0, 3, 0),				(0.0f, MathF.PI/2, 0.0f)));
+		nodeTemplate.Add(NewNode("Neck", "Head",			(0, 4, 0),				(0.0f, MathF.PI/2, 0.0f)));
 
 		var nodes = ConstructBoneDictFromList(nodeTemplate);
 		return new SkeletonEntity("TestEntity01", nodes["Root"], nodes);
@@ -100,6 +62,13 @@ public abstract class MockDataBuilder :DebugHelpers {
 			nodes[child].ParentBone = nodes[parent];
 		}
 		return nodes;
+	}
+
+	private (string, string, Transform) NewNode(string parent, string name, (float, float, float) position, (float, float, float) q) {
+		return (parent, name, new Transform(
+			position: new Vector3(position.Item1, position.Item2, position.Item3), 
+			rotation: Quaternion.CreateFromYawPitchRoll(q.Item1, q.Item2, q.Item3))
+			);
 	}
 
 }
