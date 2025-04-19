@@ -1,39 +1,42 @@
 ﻿using BoneUtils.Entity.Skeleton;
+using BoneUtils.Tests.RayLibDemos;
 using Raylib_cs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BoneUtils.Tests;
 public class RayLibVisualTest :MockDataBuilder{
-	public SkeletonEntityOps skeops = new();
-	public SkeletonEntity SimpleSpine() { 
-		var spine = Mock_Spine();
+	private SkeletonEntityOps SkelOps;
+	private int DemoSelector = 0;
+	private List<IDemo> Demos = [];
+	private bool EnableHelpOverlay = true;
 
-		if(!skeops.ValidateBoneNodeTree(spine)) 
-			throw new FormatException("BoneNode tree is invalid: check for duplicates or circular relationships.");
-		if(skeops.LabelDepthBoneNodeTree(spine) == null)
-			throw new Exception("BoneNode tree is too deep.");
-
-		return spine;
+	public RayLibVisualTest() {
+		this.SkelOps = new();
+		InitDemos();
 	}
 
-	public void HandleInput(SkeletonEntity spine, Quaternion q) {
-		if(Raylib.IsKeyPressed(KeyboardKey.One)) {
-			spine.RootNode.Rotate(q);
+	public IDemo ActiveDemo => Demos[DemoSelector];
+	public void DrawDemo() => ActiveDemo.Draw();
+
+	private void InitDemos() {
+		Demos.Add(new DemoSimpleSpine(SkelOps));
+		Demos.Add(new DemoCharacter(SkelOps));
+	}
+	public void DrawHelpOverlay() {
+		if(EnableHelpOverlay) {
+			ActiveDemo.DrawHelpOverlay();
 		}
-		if(Raylib.IsKeyPressed(KeyboardKey.Two)) {
-			spine.Bones["SpineA"].Rotate(q);
-		}
-		if(Raylib.IsKeyPressed(KeyboardKey.Three)) {
-			spine.Bones["SpineB"].Rotate(q);
-		}
-		if(Raylib.IsKeyPressed(KeyboardKey.Four)) {
-			spine.Bones["SpineC"].Rotate(q);
-		}
+	}
+	public void HandleInput() {
+		if(Raylib.IsKeyPressed(KeyboardKey.F1))
+			EnableHelpOverlay = !EnableHelpOverlay;
+		if(Raylib.IsKeyPressed(KeyboardKey.F2))
+			DemoSelector = 0;
+		if(Raylib.IsKeyPressed(KeyboardKey.F3))
+			DemoSelector = 1;
+		//if(Raylib.IsKeyPressed(KeyboardKey.F2))
+	}
+	public void DrawHelp() {
+		Raylib.DrawText("Press F1 for controls.", 290, 10, 20, Color.Yellow);
 	}
 }
 

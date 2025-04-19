@@ -2,6 +2,7 @@
 using BoneUtils.Entity.Skeleton;
 using Raylib_cs;
 using System.Numerics;
+using System.Diagnostics;
 
 //SkeletonEntityTests bt = new();
 //bt.Entity_TranslateSpine();
@@ -10,11 +11,8 @@ using System.Numerics;
 //return;
 
 RayLibVisualTest rlvt = new();
-SkeletonEntity spine = rlvt.SimpleSpine();
 
-Quaternion q = Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f);
-
-Raylib.InitWindow(800, 600, "3D Test");
+Raylib.InitWindow(800, 600, "BoneUtils RayLib Demo");
 Raylib.SetTargetFPS(60);
 
 Camera3D camera = new Camera3D {
@@ -28,19 +26,19 @@ Camera3D camera = new Camera3D {
 while (!Raylib.WindowShouldClose()) {
     Raylib.BeginDrawing();
     Raylib.ClearBackground(Color.Black);
+
     Raylib.BeginMode3D(camera);
-
-	foreach(var bone in spine.Bones.Values) {
-		Raylib.DrawSphere(spine.BoneWorldPosition(bone), 0.25f, Color.Red);
-	}
-
+	rlvt.DrawDemo();
     Raylib.EndMode3D();
-	Raylib.DrawFPS(10, 10);
 
-	rlvt.HandleInput(spine, q);
+	Raylib.DrawFPS(10, 10);
+	rlvt.DrawHelp();
+	rlvt.DrawHelpOverlay();
+
+	rlvt.HandleInput();
+	rlvt.ActiveDemo.HandleDemoInput();
 
     Raylib.EndDrawing();
 }
 
 Raylib.CloseWindow();
-
