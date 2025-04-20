@@ -1,8 +1,9 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 
 namespace BoneUtils.Helpers;
 public static class MathHelper {
-	public static Vector3 QuaternionToEuler(Quaternion q, bool degrees = false, int? rounding = null) {
+	public static Vector3 QuaternionToEuler(Quaternion q) {
 		Vector3 res = Vector3.Zero;
 
 		res.X = MathF.Atan2(
@@ -18,18 +19,6 @@ public static class MathHelper {
 			2 * (q.W * q.Z + q.X * q.Y),
 			1 - 2 * (q.Y * q.Y + q.Z * q.Z));
 
-		if (degrees) {
-			res.X = RadToDeg(res.X);
-			res.Y = RadToDeg(res.Y);
-			res.Z = RadToDeg(res.Z);
-		}
-
-		if (rounding != null) {
-			res.X = MathF.Round(res.X, Math.Clamp(rounding.Value, 0, 6));
-			res.Y = MathF.Round(res.Y, Math.Clamp(rounding.Value, 0, 6));
-			res.Z = MathF.Round(res.Z, Math.Clamp(rounding.Value, 0, 6));
-		}
-
 		return res;
 	}
 	/// <summary>
@@ -38,7 +27,7 @@ public static class MathHelper {
 	/// <param name="u">Vector to deconstruct</param>
 	/// <param name="degrees">Return result in degrees</param>
 	/// <returns>Vector3 containing angles.</returns>
-	public static Vector3 VectorAngles(Vector3 u, bool degrees = false) {
+	public static Vector3 VectorAngles(Vector3 u) {
 		Vector3 len = new() {
 			X = MathF.Max(MathF.Sqrt(u.X * u.X + u.Z * u.Z), float.Epsilon),
 			Y = MathF.Max(MathF.Sqrt(u.Y * u.Y + u.Z * u.Z), float.Epsilon),
@@ -51,7 +40,7 @@ public static class MathHelper {
 		Vector3 o = new() {
 			X = MathF.Acos(u.X / len.X),    // XZ-plane maps to rotation around Y axis, yaw = cos(x) || sin(z)
 			Y = MathF.Acos(u.Z / len.Y),    // YZ-plane maps to rotation around X axis, pitch = cos(z) || sin(y)
-			Z = MathF.Acos(u.X / len.Z)     // XY-plane mapts to rotation around Z axis, roll = cos(x) || sin(y)
+			Z = MathF.Acos(u.X / len.Z)     // XY-plane maps to rotation around Z axis, roll = cos(x) || sin(y)
 		};
 
 		// Adjust for quad
@@ -64,13 +53,6 @@ public static class MathHelper {
 			o.X *= -1.0f;
 		}
 
-		// Conversion
-		if (degrees) {
-			o.X *= 180 / MathF.PI;
-			o.Y *= 180 / MathF.PI;
-			o.Z *= 180 / MathF.PI;
-		}
-
 		return o;
 	}
 	public static Vector3 RotateWithDriftCorrection(Vector3 childOriginPos, Quaternion newOrientation) {
@@ -79,8 +61,8 @@ public static class MathHelper {
 		u.Y = MathF.Round(u.Y, 6);
 		u.Z = MathF.Round(u.Z, 6);
 		if (u.Length() != childOriginPos.Length())
-			return u+u*(childOriginPos.Length()-u.Length());
-		else return u;
+			u += u*(childOriginPos.Length()-u.Length());
+		return u;
 	}
 
 	// Radian conversion
