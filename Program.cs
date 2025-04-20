@@ -3,11 +3,20 @@ using BoneUtils.Entity.Skeleton;
 using Raylib_cs;
 using System.Numerics;
 using System.Diagnostics;
+using BoneUtils.Helpers;
+using BoneUtils.RayLib;
 
-//SkeletonEntityTests bt = new();
+//SkeletonEntityTransformTests bt = new();
 //bt.Entity_TranslateSpine();
 //bt.Entity_RotateSpine();
 //bt.Entity_WorldTranslateVectors();
+
+//SkeletonEntityConstructionTests st = new();
+//st.BoneNode_CanConstruct();
+//st.Entity_CanConstruct();
+//st.Entity_CanConstruct();
+//st.Entity_CanConstructComplex();
+
 //return;
 
 RayLibVisualTest rlvt = new();

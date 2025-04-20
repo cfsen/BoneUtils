@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Numerics;
 
-namespace BoneUtils.Tests;
+namespace BoneUtils.Helpers;
 public abstract class DebugHelpers {
 	internal void DbgOutEx(Exception ex) {
 		var caller = new StackTrace()?.GetFrame(1)?.GetMethod()?.Name ?? "Unknown (DebugOutput() was called without an exception occuring)";

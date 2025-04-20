@@ -5,7 +5,7 @@ using System.Numerics;
 namespace BoneUtils.Tests;
 
 [TestClass]
-public class SkeletonEntityOpsTests :MockDataBuilder {
+public class SkeletonEntityConstructionTests :MockDataBuilder {
 	[TestMethod]
 	public void BoneNode_CanConstruct() {
 		try {

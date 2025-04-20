@@ -3,7 +3,7 @@ using Raylib_cs;
 using System.Numerics;
 using System.Reflection.Metadata;
 
-namespace BoneUtils.Tests.RayLibDemos;
+namespace BoneUtils.RayLib.RayLibDemos;
 public class DemoSimpleSpine :DemoBase {
 
 	private SkeletonEntity Spine;
@@ -11,8 +11,8 @@ public class DemoSimpleSpine :DemoBase {
 	private Quaternion q = Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f);
 
 	public DemoSimpleSpine(SkeletonEntityOps skeops) {
-		this.SkelOps = skeops;
-		this.Spine = ConstructSkeleton();
+		SkelOps = skeops;
+		Spine = ConstructSkeleton();
 	}
 
 	public override void DrawHelpOverlay() {

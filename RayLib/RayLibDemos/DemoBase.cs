@@ -1,7 +1,8 @@
 ﻿using BoneUtils.Entity.Skeleton;
+using BoneUtils.Tests;
 using Raylib_cs;
 
-namespace BoneUtils.Tests.RayLibDemos;
+namespace BoneUtils.RayLib.RayLibDemos;
 public abstract class DemoBase :MockDataBuilder, IDemo{
 	public virtual void Draw() { }
 	public virtual void HandleDemoInput() { }

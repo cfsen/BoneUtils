@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace BoneUtils.Tests;
 [TestClass]
-public class SkeletonEntityTests :MockDataBuilder {
+public class SkeletonEntityTransformTests :MockDataBuilder {
 	[TestMethod]
 	public void Entity_WorldTranslateVectors() {
 		SkeletonEntity en = Mock_Spine();

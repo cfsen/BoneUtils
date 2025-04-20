@@ -1,8 +1,9 @@
 ﻿using BoneUtils.Entity.Skeleton;
-using BoneUtils.Tests.RayLibDemos;
+using BoneUtils.RayLib.RayLibDemos;
+using BoneUtils.Tests;
 using Raylib_cs;
 
-namespace BoneUtils.Tests;
+namespace BoneUtils.RayLib;
 public class RayLibVisualTest :MockDataBuilder{
 	private SkeletonEntityOps SkelOps;
 	private int DemoSelector = 0;
@@ -10,7 +11,7 @@ public class RayLibVisualTest :MockDataBuilder{
 	private bool EnableHelpOverlay = true;
 
 	public RayLibVisualTest() {
-		this.SkelOps = new();
+		SkelOps = new();
 		InitDemos();
 	}
 
