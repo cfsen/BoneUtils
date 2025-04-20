@@ -12,16 +12,19 @@ public class DemoBoilerplate :DemoBase {
 		SkelOps = skeops;
 		Spine = ConstructSkeleton();
 	}
-	public override void DrawHelpOverlay() {
-		Raylib.DrawText("Helpful hints here!", 10, 50, 20, Color.Red);
-	}
 	public override void Draw() {
 		//foreach(var bone in Spine.Bones.Values)
 		//	Raylib.DrawSphere(Spine.BoneWorldPosition(bone), 0.25f, Color.Red);
 	}
+	public override void DrawHelpOverlay() {
+		Raylib.DrawText("Helpful hints here!", 10, 50, 20, Color.Red);
+	}
 	public override void HandleDemoInput() {
 		//if(Raylib.IsKeyPressed(KeyboardKey.One))
 		//	Spin("Root", q);
+	}
+	public override void Update(float deltaTime) {
+		
 	}
 	private void Spin(string node, Quaternion q) {
 		Spine.Bones[node].Rotate(q);

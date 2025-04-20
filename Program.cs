@@ -6,16 +6,18 @@ using System.Diagnostics;
 using BoneUtils.Helpers;
 using BoneUtils.RayLib;
 
-//SkeletonEntityTransformTests bt = new();
-//bt.Entity_TranslateSpine();
-//bt.Entity_RotateSpine();
-//bt.Entity_WorldTranslateVectors();
+SkeletonEntityTransformTests bt = new();
+bt.Entity_TranslateSpine();
+bt.Entity_RotateSpine();
+bt.Entity_WorldTranslateVectors();
 
-//SkeletonEntityConstructionTests st = new();
-//st.BoneNode_CanConstruct();
-//st.Entity_CanConstruct();
-//st.Entity_CanConstruct();
-//st.Entity_CanConstructComplex();
+SkeletonEntityConstructionTests st = new();
+st.BoneNode_CanConstruct();
+st.Entity_CanConstruct();
+st.Entity_CanConstructComplex();
+st.Entity_FailCircularTreeTest();
+st.Entity_ConstructMockSpine();
+st.Entity_ConstructEntity01();
 
 //return;
 
@@ -31,8 +33,14 @@ Camera3D camera = new Camera3D {
     FovY = 60.0f,
     Projection = CameraProjection.Perspective
 };
-
+float deltaTime = 0.0f;
 while (!Raylib.WindowShouldClose()) {
+	rlvt.HandleInput();
+	rlvt.ActiveDemo.HandleDemoInput();
+
+	deltaTime = Raylib.GetFrameTime();
+	rlvt.ActiveDemo.Update(deltaTime);
+
     Raylib.BeginDrawing();
     Raylib.ClearBackground(Color.Black);
 
@@ -41,13 +49,12 @@ while (!Raylib.WindowShouldClose()) {
     Raylib.EndMode3D();
 
 	Raylib.DrawFPS(10, 10);
+	//Raylib.DrawText($"dt: {deltaTime}", 100, 10, 15, Color.Green);
 	rlvt.DrawHelp();
 	rlvt.DrawHelpOverlay();
 
-	rlvt.HandleInput();
-	rlvt.ActiveDemo.HandleDemoInput();
-
     Raylib.EndDrawing();
+
 }
 
 Raylib.CloseWindow();
