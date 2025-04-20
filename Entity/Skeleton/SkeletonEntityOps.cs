@@ -4,24 +4,18 @@ namespace BoneUtils.Entity.Skeleton;
 public class SkeletonEntityOps {
 	public bool ValidateBoneNodeTree(SkeletonEntity sken) {
 		// DFS validation of skeleton
-		var seen = new Dictionary<string, BoneNode> {
-			{ "Root", sken.RootNode }
-		};
+		var seen = new HashSet<BoneNode>();
 
 		return Recurse(sken.RootNode, seen, 0, 100);
 
-		bool Recurse(BoneNode bn, Dictionary<string, BoneNode> seen, int depth, int maxDepth) {
-			if(depth+1 > maxDepth) return false;
+		bool Recurse(BoneNode bn, HashSet<BoneNode> seen, int depth, int maxDepth) {
+			if(depth > maxDepth) return false;
 
-			depth++;
+			if(!seen.Add(bn))
+				return false;
 
 			foreach(var bone in bn.Children) {
-				if(seen.ContainsKey(bone.Key))
-					return false;
-				else
-					seen.Add(bone.Key, bone.Value);
-
-				if(!Recurse(bone.Value, seen, depth, maxDepth))
+				if(!Recurse(bone.Value, seen, depth+1, maxDepth)) 
 					return false;
 			}
 			return true;

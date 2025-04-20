@@ -85,4 +85,48 @@ public class SkeletonEntityConstructionTests :MockDataBuilder {
 			throw;
 		}
 	}
+	[TestMethod]
+	public void Entity_FailCircularTreeTest() {
+		try {
+			var sken = Mock_FailCircularTree();
+			var skeops = new SkeletonEntityOps();
+			sken.Bones["SpineB"].Children.Add("SpineA", sken.Bones["SpineA"]);
+
+			Assert.IsFalse(skeops.ValidateBoneNodeTree(sken), "BoneNode tree is circular and should not be valid.");
+
+			DbgOutOk("Entity_FailCircularTreeTest");
+		}
+		catch(Exception ex) {
+			DbgOutEx(ex);
+			//throw;
+		}
+	}
+	[TestMethod]
+	public void Entity_ConstructMockSpine() {
+		try {
+			var sken = Mock_Spine();
+			var skeops = new SkeletonEntityOps();
+
+			Assert.IsTrue(skeops.ValidateBoneNodeTree(sken), "BoneNode tree is not circular and should be valid.");
+
+			DbgOutOk("Entity_ConstructMockSpine");
+		}
+		catch (Exception ex) {
+			DbgOutEx(ex);
+		}
+	}
+	[TestMethod]
+	public void Entity_ConstructEntity01() {
+		try {
+			var sken = Mock_TestEntity01();
+			var skeops = new SkeletonEntityOps();
+
+			Assert.IsTrue(skeops.ValidateBoneNodeTree(sken), "BoneNode tree is not circular and should be valid.");
+
+			DbgOutOk("Entity_ConstructEntity01");
+		}
+		catch (Exception ex) {
+			DbgOutEx(ex);
+		}
+	}
 }
