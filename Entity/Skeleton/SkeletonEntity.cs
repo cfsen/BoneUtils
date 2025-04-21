@@ -8,6 +8,8 @@ public class SkeletonEntity {
 
 	public BoneNode RootNode;
 	public Dictionary<string, BoneNode> Bones = [];
+	public int RenderBoneCount = 0;
+	public List<BoneNode> RenderBones = [];
 	public int? BoneDepth;
 
 	public SkeletonEntity(string name, BoneNode root, Dictionary<string, BoneNode>? bones = null) {

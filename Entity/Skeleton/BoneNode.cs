@@ -7,8 +7,12 @@ public class BoneNode {
 	public string Name;
 	public BoneNode? ParentBone;
 	public SkeletonEntity? ParentEntity;
+
 	public int? TreeDepth;
 	public Dictionary<string, BoneNode> Children = [];
+	public List<BoneNode> RenderChildren = [];
+	public int RenderChildrenCount = 0;
+
 	public Transform Transform;
 
 	public BoneNode(string name, Transform transform, BoneNode? parent = null, Dictionary<string, BoneNode>? children = null, SkeletonEntity? parentEntity = null) {
