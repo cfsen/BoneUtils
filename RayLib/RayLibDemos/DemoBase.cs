@@ -9,10 +9,13 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 	public virtual void HandleDemoInput() { }
 	public virtual void Update(float deltaTime) { }
 	internal void DrawBoneNodeNetwork(SkeletonEntity sken) {
-		foreach(var bone in sken.Bones.Values) {
-			Raylib.DrawSphere(sken.BoneWorldPosition(bone), 0.20f, Color.Red);
-			if(bone.ParentBone != null)
-				Raylib.DrawLine3D(sken.BoneWorldPosition(bone.ParentBone), sken.BoneWorldPosition(bone), Color.Red);
+		for(var i = 0; i < sken.RenderBoneCount; i++) {
+			Raylib.DrawSphere(sken.BoneWorldPosition(sken.RenderBones[i]), 0.20f, Color.Red);
+			if(sken.RenderBones[i].ParentBone != null)
+				Raylib.DrawLine3D(
+					sken.BoneWorldPosition(sken.RenderBones[i].ParentBone!), 
+					sken.BoneWorldPosition(sken.RenderBones[i]),
+					Color.Red);
 		}
 	}
 }
