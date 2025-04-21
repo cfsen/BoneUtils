@@ -2,7 +2,18 @@
 
 namespace BoneUtils.Entity.Skeleton;
 public class SkeletonEntityOps {
-	public bool ValidateBoneNodeTree(SkeletonEntity sken) {
+	public delegate bool SkeletonEntityMutator(ref SkeletonEntity skeleton);
+
+	public void PreProcessSkeleton(ref SkeletonEntity skeleton, List<SkeletonEntityMutator> preProcessors) {
+		foreach (var preProcessor in preProcessors) 
+			if(!preProcessor(ref skeleton)) 
+				throw new Exception($"SkeletonEntityMutator failed! {preProcessor.ToString}");
+		// Raise exception if mutate fails, for the time being.
+	}
+
+	// Mutators
+
+	public bool ValidateBoneNodeTree(ref SkeletonEntity sken) {
 		// DFS validation of skeleton
 		var seen = new HashSet<BoneNode>();
 
@@ -21,9 +32,10 @@ public class SkeletonEntityOps {
 			return true;
 		}
 	}
-	public int? LabelDepthBoneNodeTree(SkeletonEntity sken, int depthLimit = 100) {
+	public bool LabelDepthBoneNodeTree(ref SkeletonEntity sken) {
 		// BFS for setting BoneNode depth
 		var queue = new Queue<(BoneNode node, int depth)>();
+		int depthLimit = 100;
 
 		queue.Enqueue((sken.RootNode, 0));
 		int maxDepth = 0;
@@ -34,8 +46,7 @@ public class SkeletonEntityOps {
 
 			maxDepth = int.Max(maxDepth, depth);
 			if(maxDepth > depthLimit) 
-				return null;
-
+				return false;
 
 			foreach(var bone in node.Children.Values) {
 				queue.Enqueue((bone, depth+1));
@@ -43,8 +54,28 @@ public class SkeletonEntityOps {
 		}
 
 		sken.BoneDepth = maxDepth;
-		return maxDepth;
+		return true;
 	}
+	public bool BoneNodeTreeBuildRenderLists(ref SkeletonEntity skeleton) {
+		skeleton.RenderBoneCount = skeleton.Bones.Count;
+		skeleton.RenderBones = [.. skeleton.Bones.Values];
+		return Recurse(skeleton.RootNode);
+
+		bool Recurse(BoneNode node, int depth = 0, int maxDepth = 100) {
+			if(depth > maxDepth) return false;
+
+			node.RenderChildrenCount = node.Children.Count;
+			node.RenderChildren = [.. node.Children.Values];
+			
+			foreach(var child in node.Children.Values) {
+				Recurse(child, depth+1, maxDepth);
+			}
+			return true;
+		}
+	}
+
+	// Construction helpers
+
 	public Dictionary<string, BoneNode> ConstructBoneNodeTreeFromList(List<(string, string, Transform)> nodeTemplate, bool addRootNode = true) {
 		Dictionary<string, BoneNode> nodes = [];
 
@@ -65,5 +96,7 @@ public class SkeletonEntityOps {
 
 		return nodes;
 	}
+
+
 
 }
