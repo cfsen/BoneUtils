@@ -37,7 +37,7 @@ public class RayLibVisualTest :MockDataBuilder{
 		//if(Raylib.IsKeyPressed(KeyboardKey.F2))
 	}
 	public void DrawHelp() {
-		Raylib.DrawText("Press F1 for controls.", 290, 10, 20, Color.Yellow);
+		Raylib.DrawText("F1: Show controls | F2: Spine demo | F3: Character demo", 220, 10, 20, Color.Yellow);
 	}
 }
 
