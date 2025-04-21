@@ -23,11 +23,18 @@ public class Transform {
 		get { return matrix; }
 		set { matrix = value; }
 	}
+	public Matrix4x4 InitialState { get; private set; }
+
 	public Transform(Vector3? scale = null, Quaternion? rotation = null, Vector3? position = null) {
 		this.scale = scale ?? Vector3.One;
 		this.rotation = rotation ?? Quaternion.Identity;
 		this.position = position ?? Vector3.Zero;
+
+		// Outlining: setting up default behavior for SetTransform();
+		RebuildMatrix();
+		this.InitialState = this.matrix;
 	}
+
 	public void BatchRotatePropagation(Vector3 position, Quaternion rotation) {
 		this.rotation = Quaternion.Normalize(this.rotation * rotation);
 		Position = position;
@@ -42,5 +49,10 @@ public class Transform {
 		matrix = Matrix4x4.CreateScale(scale);
 		matrix *= Matrix4x4.CreateFromQuaternion(rotation);
 		matrix *= Matrix4x4.CreateTranslation(position);
+	}
+
+	public void SetTransform(Matrix4x4 xfmHandlerOutput) {
+		Matrix4x4.Decompose(xfmHandlerOutput, out this.scale, out this.rotation, out this.position);
+		this.matrix = xfmHandlerOutput;
 	}
 }
