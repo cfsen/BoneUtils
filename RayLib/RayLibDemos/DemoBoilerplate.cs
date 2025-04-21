@@ -31,11 +31,11 @@ public class DemoBoilerplate :DemoBase {
 	}
 	private SkeletonEntity ConstructSkeleton() { 
 		var sken = Mock_Spine();
-
-		if(!SkelOps.ValidateBoneNodeTree(sken)) 
-			throw new FormatException("BoneNode tree is invalid: check for duplicates or circular relationships.");
-		if(SkelOps.LabelDepthBoneNodeTree(sken) == null)
-			throw new Exception("BoneNode tree is too deep.");
+		SkelOps.PreProcessSkeleton(ref sken, [
+			SkelOps.ValidateBoneNodeTree,
+			SkelOps.LabelDepthBoneNodeTree,
+			SkelOps.BoneNodeTreeBuildRenderLists
+			]);
 
 		return sken;
 	}

@@ -12,7 +12,6 @@ public class DemoCharacter :DemoBase {
 	private bool IsWaving = false;
 	private Quaternion qNegZ = Quaternion.CreateFromYawPitchRoll(0.0f, MathHelper.DegToRad(-2), 0.0f);
 	private Quaternion qPosZ = Quaternion.CreateFromYawPitchRoll(0.0f, MathHelper.DegToRad(2), 0.0f);
-	private Quaternion qSpin = Quaternion.CreateFromYawPitchRoll(MathHelper.DegToRad(1), 0, 0);
 	private bool WaveDirection = false;
 
 	public DemoCharacter(SkeletonEntityOps skeops) {
@@ -44,10 +43,11 @@ public class DemoCharacter :DemoBase {
 		var sken = Mock_TestEntity01();
 		sken.WorldPosition = new Vector3(-6, 0, 0);
 
-		if(!SkelOps.ValidateBoneNodeTree(sken)) 
-			throw new FormatException("BoneNode tree is invalid: check for duplicates or circular relationships.");
-		if(SkelOps.LabelDepthBoneNodeTree(sken) == null)
-			throw new Exception("BoneNode tree is too deep.");
+		SkelOps.PreProcessSkeleton(ref sken, [
+			SkelOps.ValidateBoneNodeTree,
+			SkelOps.LabelDepthBoneNodeTree,
+			SkelOps.BoneNodeTreeBuildRenderLists
+			]);
 
 		return sken;
 	}

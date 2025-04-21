@@ -47,11 +47,11 @@ public class DemoSimpleSpine :DemoBase {
 	}
 	private SkeletonEntity ConstructSkeleton() { 
 		var spine = Mock_Spine();
-
-		if(!SkelOps.ValidateBoneNodeTree(spine)) 
-			throw new FormatException("BoneNode tree is invalid: check for duplicates or circular relationships.");
-		if(SkelOps.LabelDepthBoneNodeTree(spine) == null)
-			throw new Exception("BoneNode tree is too deep.");
+		SkelOps.PreProcessSkeleton(ref spine, [
+			SkelOps.ValidateBoneNodeTree,
+			SkelOps.LabelDepthBoneNodeTree,
+			SkelOps.BoneNodeTreeBuildRenderLists
+			]);
 
 		return spine;
 	}
