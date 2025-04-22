@@ -1,6 +1,8 @@
 ﻿using BoneUtils.Entity.Skeleton;
+using BoneUtils.Helpers;
 using BoneUtils.Tests;
 using Raylib_cs;
+using System.Numerics;
 
 namespace BoneUtils.RayLib.RayLibDemos;
 public abstract class DemoBase :MockDataBuilder, IDemo{
@@ -23,6 +25,18 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 		foreach(var dbgLine in dbgLines) {
 			Raylib.DrawText(dbgLine, 10, 100+i*18, 16, Color.White);
 			i++;
+		}
+	}
+	internal void DrawQuaternionOrientation(SkeletonEntity sken) {
+		Vector3 pos = Vector3.Zero;
+		Vector3 ang = Vector3.Zero;
+		for(var i = 0; i < sken.RenderBoneCount; i++) {
+			pos = sken.BoneWorldPosition(sken.RenderBones[i]);
+			ang = MathHelper.QuaternionToEuler(sken.RenderBones[i].Transform.Rotation);
+
+			Raylib.DrawCircle3D(pos, 0.30f, Vector3.UnitX, MathHelper.RadToDeg(ang.X), Color.Orange);
+			Raylib.DrawCircle3D(pos, 0.30f, Vector3.UnitY, MathHelper.RadToDeg(ang.Y), Color.Green);
+			Raylib.DrawCircle3D(pos, 0.30f, Vector3.UnitZ, MathHelper.RadToDeg(ang.Z), Color.Blue);
 		}
 	}
 }
