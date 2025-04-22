@@ -18,4 +18,11 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 					Color.Red);
 		}
 	}
+	internal void DrawDebug(List<string> dbgLines) {
+		int i = 0;
+		foreach(var dbgLine in dbgLines) {
+			Raylib.DrawText(dbgLine, 10, 100+i*18, 16, Color.White);
+			i++;
+		}
+	}
 }
