@@ -2,24 +2,24 @@
 using System.Numerics;
 
 namespace BoneUtils.Helpers;
+/*
+	Quaternion to euler ported from C++ snippet found on wikipedia:
+	https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Quaternion_to_Euler_angles_(in_3-2-1_sequence)_conversion
+*/
 public static class MathHelper {
 	public static Vector3 QuaternionToEuler(Quaternion q) {
-		Vector3 res = Vector3.Zero;
-
-		res.X = MathF.Atan2(
-			2 * (q.W * q.X + q.Y * q.Z),
-			1 - 2 * (q.X * q.X + q.Y * q.Y));
-
-		res.Y = 2 * MathF.Atan2(
-			MathF.Sqrt(1 + 2 * (q.W * q.Y - q.X * q.Z)),
-			MathF.Sqrt(1 - 2 * (q.W * q.Y - q.X * q.Z))
-			) - MathF.PI / 2;
-
-		res.Z = MathF.Atan2(
-			2 * (q.W * q.Z + q.X * q.Y),
-			1 - 2 * (q.Y * q.Y + q.Z * q.Z));
-
-		return res;
+		return new Vector3 {
+			X = MathF.Atan2(
+				2 * (q.W * q.X + q.Y * q.Z),
+				1 - 2 * (q.X * q.X + q.Y * q.Y)),
+			Y = 2 * MathF.Atan2(
+				MathF.Sqrt(1 + 2 * (q.W * q.Y - q.X * q.Z)),
+				MathF.Sqrt(1 - 2 * (q.W * q.Y - q.X * q.Z))
+				) - MathF.PI / 2,
+			Z = MathF.Atan2(
+				2 * (q.W * q.Z + q.X * q.Y),
+				1 - 2 * (q.Y * q.Y + q.Z * q.Z)),
+		};
 	}
 	/// <summary>
 	/// Determines angles of a Vector3 in its component R2 planes.
