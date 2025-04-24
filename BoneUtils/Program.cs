@@ -1,25 +1,10 @@
-﻿using BoneUtils.Tests;
+﻿using BoneUtils.Mockups;
 using BoneUtils.Entity.Skeleton;
 using Raylib_cs;
 using System.Numerics;
 using System.Diagnostics;
 using BoneUtils.Helpers;
 using BoneUtils.RayLib;
-
-SkeletonEntityTransformTests bt = new();
-bt.Entity_TranslateSpine();
-bt.Entity_RotateSpine();
-bt.Entity_WorldTranslateVectors();
-
-SkeletonEntityConstructionTests st = new();
-st.BoneNode_CanConstruct();
-st.Entity_CanConstruct();
-st.Entity_CanConstructComplex();
-st.Entity_FailCircularTreeTest();
-st.Entity_ConstructMockSpine();
-st.Entity_ConstructEntity01();
-
-//return;
 
 RayLibVisualTest rlvt = new();
 

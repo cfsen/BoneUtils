@@ -4,10 +4,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
 
-namespace BoneUtils.Tests;
+namespace BoneUtils.Mockups;
 public abstract class MockDataBuilder :DebugHelpers {
-	internal BoneNode Mock_BoneNode(string name = "Default") => new(name, new Transform());
-	internal Dictionary<string, BoneNode> Mock_BoneNodeTree() {
+	public BoneNode Mock_BoneNode(string name = "Default") => new(name, new Transform());
+	public Dictionary<string, BoneNode> Mock_BoneNodeTree() {
 		List<(string, string, Transform)> nodeTemplate = []; // parent, child
 		nodeTemplate.Add(("Root", "SpineA", new Transform()));
 		nodeTemplate.Add(("SpineA", "SpineB", new Transform()));
@@ -18,7 +18,7 @@ public abstract class MockDataBuilder :DebugHelpers {
 
 		return ConstructBoneDictFromList(nodeTemplate);
 	}
-	internal SkeletonEntity Mock_Spine() {
+	public SkeletonEntity Mock_Spine() {
 		List<(string, string, Transform)> nodeTemplate = []; // parent, child
 		nodeTemplate.Add(NewNode("Root", "SpineA",			(0,1,0),			(0,1,0)		));
 		nodeTemplate.Add(NewNode("SpineA", "SpineB",		(0,2,0),			(0,1,0)		));
@@ -27,7 +27,7 @@ public abstract class MockDataBuilder :DebugHelpers {
 		var nodes = ConstructBoneDictFromList(nodeTemplate);
 		return new SkeletonEntity("TestEntity01",nodes["Root"],nodes);
 	}
-	internal SkeletonEntity Mock_TestEntity01() {
+	public SkeletonEntity Mock_TestEntity01() {
 		List<(string,string,Transform)> nodeTemplate = []; // parent,child,unit vector for orientation
 		nodeTemplate.Add(NewNode("Root", "SpineA",			(0,0,0),			(0,1,0)		));
 		nodeTemplate.Add(NewNode("SpineA", "SpineB",		(0,1,0),			(0,1,0)		));
@@ -51,7 +51,7 @@ public abstract class MockDataBuilder :DebugHelpers {
 		var nodes = ConstructBoneDictFromList(nodeTemplate);
 		return new SkeletonEntity("TestEntity01", nodes["Root"], nodes);
 	}
-	internal SkeletonEntity Mock_FailCircularTree() {
+	public SkeletonEntity Mock_FailCircularTree() {
 		List<(string,string,Transform)> nodeTemplate = []; // parent,child,unit vector for orientation
 		nodeTemplate.Add(NewNode("Root", "SpineA",			(0,0,0),			(0,1,0)		));
 		nodeTemplate.Add(NewNode("SpineA", "SpineB",		(0,1,0),			(0,1,0)		));

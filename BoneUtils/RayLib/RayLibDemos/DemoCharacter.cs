@@ -24,6 +24,7 @@ public class DemoCharacter :DemoBase {
 	}
 	public override void Draw() {
 		DrawBoneNodeNetwork(Character);
+		DrawQuaternionOrientation(Character);
 	}
 	public override void HandleDemoInput() {
 		if (Raylib.IsKeyPressed(KeyboardKey.One))

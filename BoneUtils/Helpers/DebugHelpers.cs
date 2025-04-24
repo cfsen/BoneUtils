@@ -6,9 +6,13 @@ namespace BoneUtils.Helpers;
 public abstract class DebugHelpers {
 	internal void DbgOutEx(Exception ex) {
 		var caller = new StackTrace()?.GetFrame(1)?.GetMethod()?.Name ?? "Unknown (DebugOutput() was called without an exception occuring)";
-		Debug.WriteLine($"Exception in method: {caller}");
-		Debug.WriteLine($"Exception Message: {ex.Message}");
-		Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+		Debug.WriteLine("\r---------------");
+		Debug.WriteLine($"Exception in method: \t{caller}\r");
+		Debug.WriteLine($"Exception Message: \t\t{ex.Message}\r");
+		Debug.WriteLine($"\rStack Trace: \r{ex.StackTrace}\r");
+		Debug.WriteLine("---------------\r");
+
+		throw ex;
 	}
 	internal void DbgOutOk(string msg) {
 		Debug.WriteLine($"Test passed: {msg}");

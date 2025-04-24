@@ -1,6 +1,6 @@
 ﻿using BoneUtils.Entity.Skeleton;
 using BoneUtils.Helpers;
-using BoneUtils.Tests;
+using BoneUtils.Mockups;
 using Raylib_cs;
 using System.Numerics;
 
@@ -28,8 +28,10 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 		}
 	}
 	internal void DrawQuaternionOrientation(SkeletonEntity sken) {
+		// TODO improve visual clarity
 		Vector3 pos = Vector3.Zero;
 		Vector3 ang = Vector3.Zero;
+		List<Vector3> directionals = [];
 		for(var i = 0; i < sken.RenderBoneCount; i++) {
 			pos = sken.BoneWorldPosition(sken.RenderBones[i]);
 			ang = MathHelper.QuaternionToEuler(sken.RenderBones[i].Transform.Rotation);

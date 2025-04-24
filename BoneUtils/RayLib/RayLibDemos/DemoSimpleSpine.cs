@@ -20,6 +20,7 @@ public class DemoSimpleSpine :DemoBase {
 
 	public override void Draw() {
 		DrawBoneNodeNetwork(Spine);
+		DrawQuaternionOrientation(Spine);
 	}
 	public override void DrawHelpOverlay() {
 		Raylib.DrawText("Press 1,2,3,4 to rotate the root, SpineA, SpineB, SpineC bones.", 10, 50, 20, Color.Red);

@@ -1,6 +1,6 @@
 ﻿using BoneUtils.Entity.Skeleton;
 using BoneUtils.RayLib.RayLibDemos;
-using BoneUtils.Tests;
+using BoneUtils.Mockups;
 using Raylib_cs;
 
 namespace BoneUtils.RayLib;
