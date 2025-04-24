@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -67,6 +68,8 @@ public struct Quat :IEquatable<Quat> {
 			Z= u.Z * uInv * MathF.Sin(angle*0.5f)
 		};
 	}
+	public static Quat Identity() 
+		=> new() { W = 1, X = 0, Y = 0, Z = 0 };
 
 	// Functions
 
@@ -91,8 +94,30 @@ public struct Quat :IEquatable<Quat> {
 		=> new() { W = q.W, X = q.X, Y = q.Y, Z = q.Z };
 	public static Quaternion ToQuaternion(Quat q) 
 		=> new() { W = q.W, X = q.X, Y = q.Y, Z=q.Z };
+	public static Matrix4x4 ToMatrix(Quat q) {
+		// https://www.mathworks.com/help/nav/ref/quaternion.rotmat.html
+		return new() {
+			M11 = 2*(q.W*q.W + q.X*q.X) - 1, 	M12 = 2*(q.X*q.Y + q.W*q.Z), 	M13 = 2*(q.X*q.Z - q.W*q.Y), 	M14 = 0,
+			M21 = 2*(q.X*q.Y - q.W*q.Z),		M22 = 2*(q.W*q.W + q.Y*q.Y)-1,	M23 = 2*(q.Y*q.Z + q.W*q.X),	M24 = 0,
+			M31 = 2*(q.X*q.Z + q.W*q.Y),		M32 = 2*(q.Y*q.Z - q.W*q.X),	M33 = 2*(q.W*q.W + q.Z*q.Z)-1,	M34 = 0,
+			M41 = 0,							M42 = 0,						M43 = 0,						M44 = 1 
+		};
+	}
+	public static Quat FromMatrix4x4(Matrix4x4 m) {
+		throw new NotImplementedException();
+	}
+
+	// Instance methods
+
+	public Matrix4x4 ToMatrix() => ToMatrix(this);
+	public Quat Conjugate() => Conjugate(this);
+	public float NormSquared() => NormSquared(this);
+	public float EuclidianNorm() => EuclidianNorm(this);
+	public Quat Normalize() => Normalize(this);
+	public Quat Inverse() => Inverse(this);
 
 	// Native integration
+	
 	public bool Equals(Quat other) 
 		=> this == other;
 	public override bool Equals(object? obj) {
