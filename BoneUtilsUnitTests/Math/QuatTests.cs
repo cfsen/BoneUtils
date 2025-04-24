@@ -134,6 +134,15 @@ public class QuatTests {
 		Assert.AreEqual(qnative_ToQuat.Z, q.Z, "ToQuat failed, Z not identical");
 
 	}
+	/// <summary>
+	/// Tests conversion to the native Matrix4x4 type
+	/// - Quat.ToMatrix4x4
+	/// </summary>
+	[TestMethod]
+	public void Quat_CanConvertToMatrix4x4() {
+		Quat q = Quat.Identity();
+		Assert.IsTrue(q.ToMatrix() == Matrix4x4.Identity, "ToMatrix failed to produce a Matrix4x4.Identity");
+	}
 
 // Functions
 
