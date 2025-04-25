@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 
 namespace BoneUtils.Math;
 /*
@@ -50,6 +44,16 @@ public struct Quat :IEquatable<Quat> {
 		return (r.W != q.W) || (r.X != q.X) || (r.Y != q.Y) || (r.Z != q.Z); 
 	}
 
+	// Constructor
+
+	public Quat(float W = 1, float X = 0, float Y = 0, float Z = 0) {
+		this.W = W;
+		this.X = X;
+		this.Y = Y;
+		this.Z = Z;
+	}
+	public Quat(Quaternion q) => this = FromQuaternion(q);
+
 	// Initializers
 
 	/// <summary>
@@ -87,6 +91,10 @@ public struct Quat :IEquatable<Quat> {
 		=> Conjugate(q)/NormSquared(q);
 	public static float Dot(Quat q1, Quat q2) 
 		=> q1.W*q2.W + q1.X*q2.X + q1.Y*q2.Y + q1.Z*q2.Z;
+	public static Vector3 RotateVector(Quat q, Vector3 v) {
+		Quat u = q.Normalize() * new Quat(0, v.X, v.Y, v.Z) * q.Inverse();
+		return new(){ X=u.X, Y=u.Y, Z=u.Z };
+	}
 
 	// Native type conversion
 
@@ -106,15 +114,27 @@ public struct Quat :IEquatable<Quat> {
 	public static Quat FromMatrix4x4(Matrix4x4 m) {
 		throw new NotImplementedException();
 	}
+	public static Vector3 ToVector3(Quat q)
+		=> new(){ X=q.X, Y=q.Y, Z=q.Z }; 
 
 	// Instance methods
 
-	public Matrix4x4 ToMatrix() => ToMatrix(this);
-	public Quat Conjugate() => Conjugate(this);
-	public float NormSquared() => NormSquared(this);
-	public float EuclidianNorm() => EuclidianNorm(this);
-	public Quat Normalize() => Normalize(this);
-	public Quat Inverse() => Inverse(this);
+	public Matrix4x4 ToMatrix() 
+		=> ToMatrix(this);
+	public Vector3 ToVector3() 
+		=> ToVector3(this);
+	public Quaternion ToQuaternion() 
+		=> ToQuaternion(this);
+	public Quat Conjugate() 
+		=> Conjugate(this);
+	public float NormSquared() 
+		=> NormSquared(this);
+	public float EuclidianNorm() 
+		=> EuclidianNorm(this);
+	public Quat Normalize() 
+		=> Normalize(this);
+	public Quat Inverse() 
+		=> Inverse(this);
 
 	// Native integration
 	
