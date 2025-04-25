@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
+﻿using BoneUtils.Math;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using BoneUtils.Helpers;
-using BoneUtils.Math;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 
 namespace BoneUtilsUnitTests.MathTests;
+
+/// <summary.>
+/// Tests for the Quat struct
+/// </summary>
 [TestClass]
 public class QuatTests {
 
@@ -57,11 +51,11 @@ public class QuatTests {
 		var sum_q4q4	= q4+q4;
 		var diff_q4q4	= q4-q4;
 
-		Assert.IsTrue(sum_q1q2	== expect_sum_q1q2, "q1+q2 returned unexpected value.");
-		Assert.IsTrue(diff_q1q2 == expect_diff_q1q2, "q1-q2 returned unexpected value.");
-		Assert.IsTrue(sum_q3q3	== expect_sum_q3q3, "q3+q3 returned unexpected value.");
-		Assert.IsTrue(sum_q4q4	== expect_sum_q4q4, "q4+q4 returned unexpected value.");
-		Assert.IsTrue(diff_q4q4 == expect_diff_q4q4, "q4-q4 returned unexpected value.");
+		Assert.AreEqual(expect_sum_q1q2, sum_q1q2);
+		Assert.AreEqual(expect_diff_q1q2, diff_q1q2);
+		Assert.AreEqual(expect_sum_q3q3, sum_q3q3);
+		Assert.AreEqual(expect_sum_q4q4, sum_q4q4);
+		Assert.AreEqual(expect_diff_q4q4, diff_q4q4);
 	}
 	/// <summary>
 	/// Test quaternion multiplication and behavior
@@ -81,20 +75,24 @@ public class QuatTests {
 		Quat expect_identity	= new(){ W=1, X=0, Y=0, Z=0 }; 
 		Quat expect_cyclic		= new(){ W=-1, X=0, Y=0, Z=0 };
 
-		Assert.IsTrue(q1*q2 == expect_q1q2, "q1*q2 returned unexpected orientation.");
-		Assert.IsTrue(q1*q2*q2 == expect_q1q2q2, "q1*q2*q2 returned unexpected orientation.");
-		Assert.IsTrue(q1*q2*q2*q2 == expect_q1q2q2q2, "q1*q2*q2*q2 returned unexpected orientation.");
+		Assert.AreEqual(expect_q1q2, q1*q2);
+		Assert.AreEqual(expect_q1q2q2, q1*q2*q2);
+		Assert.AreEqual(expect_q1q2q2q2, q1*q2*q2*q2);
 
-		Assert.IsTrue(q1*q2*q3 == expect_identity, "q1*q2*q3 should return identity.");
-		Assert.IsTrue(q1*identity == q1, "q1*identity should return q1.");
-		Assert.IsTrue(identity*q1 == q1, "q1*identity should return q1.");
+		Assert.AreEqual(expect_identity, q1*q2*q3, "q1*q2*q3 should return identity");
+		Assert.AreEqual(q1, q1*identity, "q1*identity should return q1");
+		Assert.AreEqual(q1, identity*q1, "identity*q1 should return q1");
 
-		Assert.IsTrue(q1*q1 == expect_cyclic, "cyclic property failed, should return W=-1");
-		Assert.IsTrue(q2*q2 == expect_cyclic, "cyclic property failed, should return W=-1");
-		Assert.IsTrue(q3*q3 == expect_cyclic, "cyclic property failed, should return W=-1");
+		Assert.AreEqual(expect_cyclic, q1*q1, "Cyclic property failed, should return W=-1");
+		Assert.AreEqual(expect_cyclic, q2*q2, "Cyclic property failed, should return W=-1");
+		Assert.AreEqual(expect_cyclic, q3*q3, "Cyclic property failed, should return W=-1");
 
-		Assert.IsFalse(q1*q2 == q2*q1, "Quaternion multiplication should not be commutative.");
+		Assert.AreNotEqual(q1*q2, q2*q1, "Quaternion multiplication should not be commutative.");
 	}
+	/// <summary>
+	/// Tests basic quat by quat division
+	/// - Divison (/, Quat by Quat)
+	/// </summary>
 	[TestMethod]
 	public void Quat_DivisionTest() {
 		Quat q1 = new(){ W=0, X=1, Y=0, Z=0 };
@@ -102,17 +100,52 @@ public class QuatTests {
 		Quat q3 = new(){ W=0, X=0, Y=0, Z=1 };
 		Quat identity = new(){ W=1, X=0, Y=0, Z=0 };
 
-		Assert.IsTrue(q1/q1 == identity, "q1/q1 should return identity");
-		Assert.IsTrue(q2/q2 == identity, "q2/q2 should return identity");
-		Assert.IsTrue(q3/q3 == identity, "q3/q3 should return identity");
+		Assert.AreEqual(identity, q1/q1);
+		Assert.AreEqual(identity, q2/q2);
+		Assert.AreEqual(identity, q3/q3);
+	}
+	/// <summary>
+	/// Tests division by scalar
+	/// - Division (/, Quat by float)
+	/// </summary>
+	[TestMethod]
+	public void Quat_ScalarDivisionTest() {
+		Quat q = new(){ W=2, X=2, Y=2, Z=2 };
+		float scalar = 2.0f;
+
+		Quat expect_scalarDiv = new(){ W=1, X=1, Y=1, Z=1 };
+
+		Assert.AreEqual(expect_scalarDiv, (q / scalar));
+	}
+
+// Constructors
+
+	[TestMethod]
+	public void Quat_CanConstructFromQuaternion() {
+		Quaternion native = new(){ W=1, X=2, Y=3, Z=4 };
+		Quat q = new(native);
+
+		Assert.AreEqual(native.W, q.W);
+		Assert.AreEqual(native.X, q.X);
+		Assert.AreEqual(native.Y, q.Y);
+		Assert.AreEqual(native.Z, q.Z);
+	}
+	[TestMethod]
+	public void Quat_CanConstructFromArguments() {
+		Quat q = new(1,2,3,4);
+
+		Assert.AreEqual(1, q.W);
+		Assert.AreEqual(2, q.X);
+		Assert.AreEqual(3, q.Y);
+		Assert.AreEqual(4, q.Z);
 	}
 
 // Native type conversion
 
 	/// <summary>
 	/// Test native Quaternion type conversion 
-	/// - Quat.FromQuaternion
-	/// - Quat.ToQuaternion
+	/// - FromQuaternion
+	/// - ToQuaternion
 	/// </summary>
 	[TestMethod]
 	public void Quat_CanConvertNative() {
@@ -136,19 +169,57 @@ public class QuatTests {
 	}
 	/// <summary>
 	/// Tests conversion to the native Matrix4x4 type
-	/// - Quat.ToMatrix4x4
+	/// - ToMatrix4x4
 	/// </summary>
 	[TestMethod]
 	public void Quat_CanConvertToMatrix4x4() {
 		Quat q = Quat.Identity();
-		Assert.IsTrue(q.ToMatrix() == Matrix4x4.Identity, "ToMatrix failed to produce a Matrix4x4.Identity");
+
+		Assert.AreEqual(Matrix4x4.Identity, q.ToMatrix());
 	}
 
 // Functions
 
+	/// <summary>
+	/// Tests quaternion conjugation 
+	/// - Conjugate
+	/// </summary>
 	[TestMethod]
 	public void Quat_CanConjugate() {
 		Quat q = new(){ W = 1, X = 1, Y = 1, Z = 1 };
 		Quat q_conjugated = new(){ W = 1, X = -1, Y = -1, Z = -1 };
+
+		Assert.AreEqual(q_conjugated, q.Conjugate());
 	}
+	/// <summary>
+	/// Tests rotating a vector by quaternions
+	/// - RotateVector
+	/// </summary>
+	[TestMethod]
+	public void Quat_CanRotateVector() {
+		Vector3 v = new(1,0,0);
+		Quat qAroundX = new(0,1,0,0);
+		Quat qAroundY = new(0,0,1,0);
+		Quat qAroundZ = new(0,0,0,1);
+		Quat qHalfAroundZ = Quat.Normalize(new(0.5f,0,0,0.5f));
+
+		Vector3 resAroundX = Quat.RotateVector(qAroundX, v);
+		Vector3 resAroundY = Quat.RotateVector(qAroundY, v);
+		Vector3 resAroundZ = Quat.RotateVector(qAroundZ, v);
+		Vector3 resHalfAroundZ = Quat.RotateVector(qHalfAroundZ, v);
+
+		Vector3 expected_aroundX = new(1,0,0);
+		Vector3 expected_aroundY = new(-1,0,0);
+		Vector3 expected_aroundZ = new(-1,0,0);
+		Vector3 expected_halfAroundZ = new(0,-1,0);
+
+		Assert.AreEqual(expected_aroundX, resAroundX);
+		Assert.AreEqual(expected_aroundY, resAroundY);
+		Assert.AreEqual(expected_aroundZ, resAroundZ);
+
+		Assert.AreEqual(expected_halfAroundZ.X, resHalfAroundZ.X, 1E-6);
+		Assert.AreEqual(expected_halfAroundZ.Y, resHalfAroundZ.Y, 1E-6);
+		Assert.AreEqual(expected_halfAroundZ.Z, resHalfAroundZ.Z, 1E-6);
+	}
+
 }
