@@ -1,10 +1,9 @@
 ﻿using BoneUtils.Entity.Skeleton;
 using BoneUtils.RayLib.RayLibDemos;
-using BoneUtils.Mockups;
 using Raylib_cs;
 
 namespace BoneUtils.RayLib;
-public class RayLibVisualTest :MockDataBuilder{
+public class RayLibVisualTest {
 	private SkeletonEntityOps SkelOps;
 	private int DemoSelector = 0;
 	private List<IDemo> Demos = [];
@@ -16,15 +15,15 @@ public class RayLibVisualTest :MockDataBuilder{
 	}
 
 	public IDemo ActiveDemo => Demos[DemoSelector];
-	public void DrawDemo() => ActiveDemo.Draw();
+	public void DrawDemo3D() => ActiveDemo.Draw3D();
 
 	private void InitDemos() {
 		Demos.Add(new DemoSimpleSpine(SkelOps));
 		Demos.Add(new DemoCharacter(SkelOps));
 	}
-	public void DrawHelpOverlay() {
+	public void DrawDemo2D() {
 		if(EnableHelpOverlay) {
-			ActiveDemo.DrawHelpOverlay();
+			ActiveDemo.Draw2D();
 		}
 	}
 	public void HandleInput() {
