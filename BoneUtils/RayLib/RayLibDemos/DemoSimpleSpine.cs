@@ -1,5 +1,6 @@
 ﻿using BoneUtils.Entity.Skeleton;
 using BoneUtils.Helpers;
+using BoneUtils.Math;
 using Raylib_cs;
 using System.Diagnostics;
 using System.Numerics;
@@ -10,20 +11,22 @@ public class DemoSimpleSpine :DemoBase {
 
 	private SkeletonEntity Spine;
 	private SkeletonEntityOps SkelOps;
-	private Quaternion q = Quaternion.CreateFromYawPitchRoll(0.0f, MathF.PI/2, 0.0f);
-	private Quaternion qAnimate = Quaternion.CreateFromYawPitchRoll(MathHelper.DegToRad(0.5f), MathHelper.DegToRad(0.5f), 0.0f);
-
+	private Quat q = Quat.Normalize(Quat.Create(MathF.PI/2, Vector3.UnitX));
+	private Quat qAnimate = Quat.Normalize(Quat.Create(MathHelper.DegToRad(0.2f), Vector3.UnitX));
+	private Quat qAnimate2 = Quat.Normalize(Quat.Create(MathHelper.DegToRad(0.2f), Vector3.UnitY));
+ 
 	public DemoSimpleSpine(SkeletonEntityOps skeops) {
 		SkelOps = skeops;
 		Spine = ConstructSkeleton();
 	}
 
-	public override void Draw() {
-		DrawBoneNodeNetwork(Spine);
+	public override void Draw3D() {
+		DrawBoneNodeNetwork(Spine, true);
 		DrawQuaternionOrientation(Spine);
 	}
-	public override void DrawHelpOverlay() {
+	public override void Draw2D() {
 		Raylib.DrawText("Press 1,2,3,4 to rotate the root, SpineA, SpineB, SpineC bones.", 10, 50, 20, Color.Red);
+		DrawQuatDebug(Spine.RootNode);
 	}
 	public override void HandleDemoInput() {
 		if(Raylib.IsKeyPressed(KeyboardKey.One))
@@ -38,12 +41,13 @@ public class DemoSimpleSpine :DemoBase {
 	public override void Update(float deltaTime) {
 		AnimateRotation();
 	}
-	private void Spin(string node, Quaternion q) {
+	private void Spin(string node, Quat q) {
 		Spine.Bones[node].Rotate(q);
 	}
 	private void AnimateRotation() {
 		foreach(var bone in Spine.Bones.Values) {
 			bone.Rotate(qAnimate);
+			bone.Rotate(qAnimate2);
 		}
 	}
 	private SkeletonEntity ConstructSkeleton() { 
@@ -53,6 +57,8 @@ public class DemoSimpleSpine :DemoBase {
 			SkelOps.LabelDepthBoneNodeTree,
 			SkelOps.BoneNodeTreeBuildRenderLists
 			]);
+		//Quat offset = Quat.Create(MathF.PI-MathF.PI/4, Vector3.UnitX);
+		//spine.RootNode.Rotate(offset);
 
 		return spine;
 	}

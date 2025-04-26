@@ -1,4 +1,5 @@
 ﻿using BoneUtils.Entity.Skeleton;
+using BoneUtils.Math;
 using Raylib_cs;
 using System.Numerics;
 
@@ -12,11 +13,11 @@ public class DemoBoilerplate :DemoBase {
 		SkelOps = skeops;
 		Spine = ConstructSkeleton();
 	}
-	public override void Draw() {
+	public override void Draw3D() {
 		//foreach(var bone in Spine.Bones.Values)
 		//	Raylib.DrawSphere(Spine.BoneWorldPosition(bone), 0.25f, Color.Red);
 	}
-	public override void DrawHelpOverlay() {
+	public override void Draw2D() {
 		Raylib.DrawText("Helpful hints here!", 10, 50, 20, Color.Red);
 	}
 	public override void HandleDemoInput() {
@@ -26,8 +27,8 @@ public class DemoBoilerplate :DemoBase {
 	public override void Update(float deltaTime) {
 		
 	}
-	private void Spin(string node, Quaternion q) {
-		Spine.Bones[node].Rotate(q);
+	private void Spin(string node, Quat q) {
+		Spine.Bones[node].Rotate(q); // TODO Quat
 	}
 	private SkeletonEntity ConstructSkeleton() { 
 		var sken = Mock_Spine();

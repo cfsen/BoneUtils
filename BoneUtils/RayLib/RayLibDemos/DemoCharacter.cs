@@ -1,5 +1,6 @@
 ﻿using BoneUtils.Entity.Skeleton;
 using BoneUtils.Helpers;
+using BoneUtils.Math;
 using Raylib_cs;
 using System.Numerics;
 
@@ -10,19 +11,19 @@ public class DemoCharacter :DemoBase {
 	private SkeletonEntityOps SkelOps;
 
 	private bool IsWaving = false;
-	private Quaternion qNegZ = Quaternion.CreateFromYawPitchRoll(0.0f, MathHelper.DegToRad(-2), 0.0f);
-	private Quaternion qPosZ = Quaternion.CreateFromYawPitchRoll(0.0f, MathHelper.DegToRad(2), 0.0f);
+	private Quat qNegZ = new Quat(Quaternion.CreateFromYawPitchRoll(0.0f, MathHelper.DegToRad(-2), 0.0f)); // TODO Quat
+	private Quat qPosZ = new Quat(Quaternion.CreateFromYawPitchRoll(0.0f, MathHelper.DegToRad(2), 0.0f)); // TODO Quat
 	private bool WaveDirection = false;
 
 	public DemoCharacter(SkeletonEntityOps skeops) {
 		SkelOps = skeops;
 		Character = ConstructSkeleton();
-		Character.RootNode.Rotate(Quaternion.CreateFromYawPitchRoll(MathF.PI/2, 0.0f, 0.0f));
+		Character.RootNode.Rotate(new Quat(Quaternion.CreateFromYawPitchRoll(MathF.PI/2, 0.0f, 0.0f))); // TODO Quat
 	}
-	public override void DrawHelpOverlay() {
+	public override void Draw2D() {
 		Raylib.DrawText("Press 1 to wave :)", 10, 50, 20, Color.Red);
 	}
-	public override void Draw() {
+	public override void Draw3D() {
 		DrawBoneNodeNetwork(Character);
 		DrawQuaternionOrientation(Character);
 	}
@@ -32,8 +33,9 @@ public class DemoCharacter :DemoBase {
 	}
 	public override void Update(float deltaTime) {
 		if (IsWaving) {
-			if(MathHelper.QuaternionToEuler(Character.Bones["L_Shoulder"].Transform.Rotation).X > MathF.PI/2
-			|| MathHelper.QuaternionToEuler(Character.Bones["L_Shoulder"].Transform.Rotation).X < -MathF.PI/2)
+			// TODO Quat
+			if(MathHelper.QuaternionToEuler(Character.Bones["L_Shoulder"].Transform.Rotation.ToQuaternion()).X > MathF.PI/2
+			|| MathHelper.QuaternionToEuler(Character.Bones["L_Shoulder"].Transform.Rotation.ToQuaternion()).X < -MathF.PI/2)
 				WaveDirection = !WaveDirection;
 				
 			Character.Bones["L_Shoulder"].Rotate(WaveDirection ? qNegZ : qPosZ);
