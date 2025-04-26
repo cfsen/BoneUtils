@@ -1,4 +1,5 @@
 ﻿using BoneUtils.Helpers;
+using BoneUtils.Math;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ public static class XfmHandlerFallbacks {
 	/// <param name="position">Position of node. Rotate() handles translating into local space.</param>
 	/// <param name="newOrientation">New orientation, multiplicative with current orientation.</param>
 	/// <returns></returns>
-	public static Vector3 BoneNodeRotateFallback(BoneNode node, Vector3 position, Quaternion newOrientation) 
+	public static Vector3 BoneNodeRotateFallback(BoneNode node, Vector3 position, Quat newOrientation) 
 		=> MathHelper.RotateWithDriftCorrection(position, newOrientation);
 
 	/// <summary>
@@ -33,7 +34,7 @@ public static class XfmHandlerFallbacks {
 			if(BoneNode.Name == "Shoulder") ... do stuff to the shoulder
 			else if(BoneNode.Name == "Elbow") ... do stuff to the elbow
 
-		Return a Matrix4x4 for the Transform object associated with node.
+		 Must return a Matrix4x4 for the Transform object associated with node.
 		*/
 	}
 }

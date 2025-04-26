@@ -1,4 +1,5 @@
 ﻿using BoneUtils.Helpers;
+using BoneUtils.Math;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -21,7 +22,7 @@ public class BoneNode {
 		Transform = transform;
 		Children = children ?? [];
 	}
-	public delegate Vector3 RotateXfmHandler(BoneNode node, Vector3 nodePosition, Quaternion newOrientation); 
+	public delegate Vector3 RotateXfmHandler(BoneNode node, Vector3 nodePosition, Quat newOrientation); 
 	public delegate Matrix4x4 SetXfmHandler(BoneNode node, List<(BoneNode, Transform)>? Transforms = null);
 	public bool Branching => Children.Count > 1;
 	public bool HasChildren => Children.Count > 0;
@@ -30,7 +31,7 @@ public class BoneNode {
 		foreach (var child in Children.Values) 
 			child.Translate(offset);
 	}
-	public void Rotate(Quaternion rotation, RotateXfmHandler? xfmHandler = null, Vector3? origin = null) {
+	public void Rotate(Quat rotation, RotateXfmHandler? xfmHandler = null, Vector3? origin = null) {
 		origin ??= Transform.Position;
 		xfmHandler ??= XfmHandlerFallbacks.BoneNodeRotateFallback;
 

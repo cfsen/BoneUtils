@@ -1,13 +1,14 @@
-﻿using System.Numerics;
+﻿using BoneUtils.Math;
+using System.Numerics;
 
 namespace BoneUtils.Entity.Skeleton;
 public class Transform {
-	private Quaternion rotation;
+	private Quat rotation;
 	private Vector3 position;
 	private Vector3 scale;
 	private Matrix4x4 matrix;
 
-	public Quaternion Rotation {
+	public Quat Rotation {
 		get => rotation;
 		set => Set(ref rotation, value);
 	}
@@ -25,9 +26,9 @@ public class Transform {
 	}
 	public Matrix4x4 InitialState { get; private set; }
 
-	public Transform(Vector3? scale = null, Quaternion? rotation = null, Vector3? position = null) {
+	public Transform(Vector3? scale = null, Quat? rotation = null, Vector3? position = null) {
 		this.scale = scale ?? Vector3.One;
-		this.rotation = rotation ?? Quaternion.Identity;
+		this.rotation = rotation ?? Quat.Identity();
 		this.position = position ?? Vector3.Zero;
 
 		// Outlining: setting up default behavior for SetTransform();
@@ -35,8 +36,9 @@ public class Transform {
 		this.InitialState = this.matrix;
 	}
 
-	public void BatchRotatePropagation(Vector3 position, Quaternion rotation) {
-		this.rotation = Quaternion.Normalize(this.rotation * rotation);
+	public void BatchRotatePropagation(Vector3 position, Quat rotation) {
+		this.rotation = Quat.Normalize(rotation * this.rotation);
+		//this.rotation = Quat.Normalize(this.rotation * rotation);
 		Position = position;
 	}
 	private void Set<T>(ref T field, T value) {
@@ -47,12 +49,15 @@ public class Transform {
 	}
 	private void RebuildMatrix() {
 		matrix = Matrix4x4.CreateScale(scale);
-		matrix *= Matrix4x4.CreateFromQuaternion(rotation);
+		//matrix *= Matrix4x4.CreateFromQuaternion(rotation);
+		matrix *= rotation.ToMatrix();
 		matrix *= Matrix4x4.CreateTranslation(position);
 	}
 
 	public void SetTransform(Matrix4x4 xfmHandlerOutput) {
-		Matrix4x4.Decompose(xfmHandlerOutput, out this.scale, out this.rotation, out this.position);
+		Quaternion q = Quaternion.Identity;
+		Matrix4x4.Decompose(xfmHandlerOutput, out this.scale, out q, out this.position);
+		this.rotation = Quat.FromQuaternion(q); // TODO Quat
 		this.matrix = xfmHandlerOutput;
 	}
 }

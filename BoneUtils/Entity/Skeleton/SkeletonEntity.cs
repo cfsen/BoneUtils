@@ -21,10 +21,10 @@ public class SkeletonEntity {
 	public Vector3 BoneWorldPosition(BoneNode bone) {
 		return bone.Transform.Position + WorldPosition;
 	}
-	public Matrix4x4 BoneWorldMatrix(BoneNode bone) {
+	public Matrix4x4 BoneWorldMatrix(BoneNode bone) { // TODO unit test
 		var m = Matrix4x4.CreateScale(bone.Transform.Scale)
 			* Matrix4x4.CreateFromQuaternion(WorldOrientation)
-			* Matrix4x4.CreateFromQuaternion(bone.Transform.Rotation)
+			* bone.Transform.Rotation.ToMatrix()
 			* Matrix4x4.CreateTranslation(WorldPosition)
 			* Matrix4x4.CreateTranslation(bone.Transform.Position);
 		return m;
