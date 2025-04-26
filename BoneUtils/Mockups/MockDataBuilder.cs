@@ -1,5 +1,6 @@
 ﻿using BoneUtils.Entity.Skeleton;
 using BoneUtils.Helpers;
+using BoneUtils.Math;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
@@ -94,7 +95,9 @@ public abstract class MockDataBuilder :DebugHelpers {
 	/// A tuple compatible with <see cref="ConstructBoneDictFromList(System.Collections.Generic.List{System.ValueTuple{string,string,Transform}})"/>
 	/// </returns>
 	private (string, string, Transform) NewNode(string parent, string name, (float, float, float) position, (int, int, int) facing) {
-		Quaternion q = Quaternion.CreateFromYawPitchRoll(MathF.PI/2*facing.Item1, MathF.PI/2*facing.Item2, MathF.PI/2*facing.Item3);
+		// TODO Quat
+		Quaternion qn = Quaternion.CreateFromYawPitchRoll(MathF.PI/2*facing.Item1, MathF.PI/2*facing.Item2, MathF.PI/2*facing.Item3);
+		Quat q = new(qn);
 		return (parent, name, new Transform(
 			position: new Vector3(position.Item1, position.Item2, position.Item3), 
 			rotation: q)
