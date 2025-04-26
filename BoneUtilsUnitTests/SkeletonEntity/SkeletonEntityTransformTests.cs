@@ -1,4 +1,5 @@
 ﻿using BoneUtils.Entity.Skeleton;
+using BoneUtils.Math;
 using BoneUtils.Mockups;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Numerics;
@@ -33,14 +34,14 @@ public class SkeletonEntityTransformTests :MockDataBuilder {
 	public void Entity_RotateSpine() {
 		SkeletonEntity en = Mock_Spine();
 
-		Quaternion q = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathF.PI/2);
+		Quat q = Quat.Create(MathF.PI/2, Vector3.UnitZ);
 		en.RootNode.Rotate(q);
 
 		// Expected normalized and corrected results from BoneNodes
-		Quaternion q_root = new Quaternion { X = 0, Y = 0, Z = 0.7071068f, W = 0.7071068f };
-		Quaternion q_nodes = new Quaternion { X = 0.5f, Y = -0.5F, Z = 0.5f, W = 0.5f };
+		Quat q_root = new(X: 0, Y: 0, Z: 0.7071068f, W: 0.7071068f);
+		Quat q_nodes = new(X: 0.5f, Y: 0.5F, Z: 0.5f, W: 0.5f);
 		Vector3 p_root = Vector3.Zero;
-		Vector3 p_nodes = new(-1, 0, 0);
+		Vector3 p_nodes = new(1, 0, 0);
 
 		Assert.AreEqual(p_root, en.Bones["Root"].Transform.Position, "Root: Position moved, should remain in place.");
 		Assert.AreEqual(q_root, en.Bones["Root"].Transform.Rotation, "Root: Unexpected orientation.");

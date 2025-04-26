@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BoneUtils.Mockups;
 using System.Numerics;
+using BoneUtils.Math;
 
 namespace BoneUtilsUnitTests.SkeletonEntityTests;
 
@@ -13,7 +14,7 @@ public class SkeletonEntityConstructionTests :MockDataBuilder {
 		Assert.IsInstanceOfType<BoneNode>(node);
 		Assert.IsInstanceOfType<Transform>(node.Transform);
 		Assert.IsTrue(node.Transform.Position == Vector3.Zero);
-		Assert.IsTrue(node.Transform.Rotation == Quaternion.Identity);
+		Assert.IsTrue(node.Transform.Rotation == Quat.Identity());
 		Assert.IsTrue(node.Transform.Scale == Vector3.One);
 	}
 	[TestMethod]
