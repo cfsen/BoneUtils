@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using BoneUtils.Math;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace BoneUtils.Helpers;
@@ -55,14 +56,51 @@ public static class MathHelper {
 
 		return o;
 	}
-	public static Vector3 RotateWithDriftCorrection(Vector3 childOriginPos, Quaternion newOrientation) {
-		Vector3 u = Vector3.Transform(childOriginPos, newOrientation);
+	public static Vector3 RotateWithDriftCorrection(Vector3 childPosition, Quat newOrientation) {
+		Vector3 u = Quat.RotateVector(newOrientation, childPosition);
+		return FPCorrection(u, childPosition.Length());
+	}
+	public static Vector3 RotateWithDriftCorrection(Vector3 childPosition, Quaternion newOrientation) {
+		Vector3 u = Vector3.Transform(childPosition, newOrientation);
+		return FPCorrection(u, childPosition.Length());
+	}
+	public static Vector3 FPCorrection(Vector3 u, float length) {
 		u.X = MathF.Round(u.X, 6);
 		u.Y = MathF.Round(u.Y, 6);
 		u.Z = MathF.Round(u.Z, 6);
-		if (u.Length() != childOriginPos.Length())
-			u += u*(childOriginPos.Length()-u.Length());
+		if (u.Length() != length)
+			u += u*(length-u.Length());
 		return u;
+	}
+	/// <summary>
+	/// Create a list of Vector3 that indicate the orientation of a quaternion
+	/// </summary>
+	/// <param name="q">The quaternion to generate indicators for</param>
+	/// <param name="origin">Position of the quaternion in world space</param>
+	/// <param name="length">Length of indicating vectors (distance from position)</param>
+	public static Dictionary<string, Vector3> CreateLocalDirectionVectors(Quat q, Vector3 origin, float length = 0.5f) {
+		/*
+		Create unit vectors in world space for each axis
+		1,0,0 - 0,1,0 - 0,0,1
+		then apply rotation to each one using the quat associated with the bonenode
+		assuming Z is the axis that faces forward:
+			- rotate the X-indicating vector by 90deg around the Y axis
+			- rotate the Y-indicating vector by 90deg around the X axis
+		then translate it into position
+		 */
+		//Vector3 x = FPCorrection(Quat.RotateVector(Quat.Create(MathF.PI/2, Vector3.UnitY)*q, Vector3.UnitZ), length);
+		//Vector3 y = FPCorrection(Quat.RotateVector(Quat.Create(MathF.PI/2, Vector3.UnitX)*q, Vector3.UnitZ), length);
+		//Vector3 z = FPCorrection(Quat.RotateVector(Quat.Create(0, Vector3.UnitZ)*q, Vector3.UnitZ), length);
+
+		Vector3 x = FPCorrection(Quat.RotateVector(q, Vector3.UnitX), length) + origin;
+		Vector3 y = FPCorrection(Quat.RotateVector(q, Vector3.UnitY), length) + origin;
+		Vector3 z = FPCorrection(Quat.RotateVector(q, Vector3.UnitZ), length) + origin;
+
+		//x += origin;
+		//y += origin; 
+		//z += origin;
+		
+		return new Dictionary<string, Vector3> { ["X"] = x, ["Y"] = y, ["Z"] = z };
 	}
 
 	// Radian conversion
