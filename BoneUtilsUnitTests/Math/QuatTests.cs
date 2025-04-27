@@ -222,4 +222,41 @@ public class QuatTests {
 		Assert.AreEqual(expected_halfAroundZ.Z, resHalfAroundZ.Z, 1E-6);
 	}
 
+	// Slerp tests
+
+    [TestMethod]
+    public void Quat_Slerp_SameQuaternion_ReturnsSameQuaternion() {
+        var q = new Quat { W = 1, X = 0, Y = 0, Z = 0 }; // Identity quat
+        var result = Quat.Slerp(q, q, 0.5f);
+
+        Assert.AreEqual(q, result, "Slerping identical quaternions should return the same quaternion.");
+    }
+    [TestMethod]
+    public void Quat_Slerp_ScalarZero_ReturnsFirstQuaternion() {
+        var q0 = new Quat { W = 1, X = 0, Y = 0, Z = 0 };
+        var q1 = new Quat { W = 0, X = 1, Y = 0, Z = 0 };
+
+        var result = Quat.Slerp(q0, q1, 0.0f);
+
+        Assert.AreEqual(q0, result, "Slerp at t=0 should return the first quaternion.");
+    }
+    [TestMethod]
+    public void Quat_Slerp_ScalarOne_ReturnsSecondQuaternion() {
+        var q0 = new Quat { W = 1, X = 0, Y = 0, Z = 0 };
+        var q1 = new Quat { W = 0, X = 1, Y = 0, Z = 0 };
+
+        var result = Quat.Slerp(q0, q1, 1.0f);
+
+        Assert.AreEqual(q1, result, "Slerp at t=1 should return the second quaternion.");
+    }
+	[TestMethod]
+	public void Quat_Slerp_ScalarHalf_ReturnsHalfway() {
+		var q0 = new Quat { W = 0, X = 1, Y = 0, Z = 0 };
+        var q1 = new Quat { W = 0, X = 0, Y = 1, Z = 0 };
+
+		var result = Quat.Slerp(q0, q1, 0.5f);
+		var expect = new Quat { W = 0, X = 0.70710677f, Y = 0.70710677f, Z = 0 };
+
+		Assert.AreEqual(expect, result);
+	}
 }
