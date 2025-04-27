@@ -39,7 +39,7 @@ public class SkeletonEntityTransformTests :MockDataBuilder {
 
 		// Expected normalized and corrected results from BoneNodes
 		Quat q_root = new(X: 0, Y: 0, Z: 0.7071068f, W: 0.7071068f);
-		Quat q_nodes = new(X: 0.5f, Y: 0.5F, Z: 0.5f, W: 0.5f);
+		Quat q_nodes = new(X: 0.5f, Y: -0.5f, Z: 0.5f, W: 0.5f);
 		Vector3 p_root = Vector3.Zero;
 		Vector3 p_nodes = new(1, 0, 0);
 
