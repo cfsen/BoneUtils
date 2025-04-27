@@ -8,6 +8,8 @@ public class Transform {
 	private Vector3 scale;
 	private Matrix4x4 matrix;
 
+	private bool updateMatrix = false;
+
 	public Quat Rotation {
 		get => rotation;
 		set => Set(ref rotation, value);
@@ -21,8 +23,8 @@ public class Transform {
 		set => Set(ref scale, value);
 	}
 	public Matrix4x4 Matrix {
-		get { return matrix; }
-		set { matrix = value; }
+		get => this.GetMatrix(); 
+		set => this.matrix = value;
 	}
 	public Matrix4x4 InitialState { get; private set; }
 
@@ -31,33 +33,36 @@ public class Transform {
 		this.rotation = rotation ?? Quat.Identity();
 		this.position = position ?? Vector3.Zero;
 
-		// Outlining: setting up default behavior for SetTransform();
 		RebuildMatrix();
 		this.InitialState = this.matrix;
 	}
 
-	public void BatchRotatePropagation(Vector3 position, Quat rotation) {
+	public void SetPositionAndRotation(Vector3 position, Quat rotation) {
 		this.rotation = Quat.Normalize(rotation * this.rotation);
-		//this.rotation = Quat.Normalize(this.rotation * rotation);
-		Position = position;
+		this.Position = position; // Use setter to flag matrix for rebuild
 	}
 	private void Set<T>(ref T field, T value) {
 		if (!EqualityComparer<T>.Default.Equals(field, value)) {
 			field = value;
-			RebuildMatrix();
+			updateMatrix = true;
 		}
 	}
-	private void RebuildMatrix() {
-		matrix = Matrix4x4.CreateScale(scale);
-		//matrix *= Matrix4x4.CreateFromQuaternion(rotation);
-		matrix *= rotation.ToMatrix();
-		matrix *= Matrix4x4.CreateTranslation(position);
-	}
-
 	public void SetTransform(Matrix4x4 xfmHandlerOutput) {
 		Quaternion q = Quaternion.Identity;
 		Matrix4x4.Decompose(xfmHandlerOutput, out this.scale, out q, out this.position);
 		this.rotation = Quat.FromQuaternion(q); // TODO Quat
 		this.matrix = xfmHandlerOutput;
+	}
+	public Matrix4x4 GetMatrix(){
+		if(updateMatrix) RebuildMatrix();
+		return this.matrix;
+	}
+
+	// Helpers
+
+	private void RebuildMatrix() {
+		matrix = Matrix4x4.CreateScale(scale);
+		matrix *= rotation.ToMatrix();
+		matrix *= Matrix4x4.CreateTranslation(position);
 	}
 }

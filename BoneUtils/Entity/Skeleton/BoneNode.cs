@@ -35,7 +35,7 @@ public class BoneNode {
 		origin ??= Transform.Position;
 		xfmHandler ??= XfmHandlerFallbacks.BoneNodeRotateFallback;
 
-		Transform.BatchRotatePropagation(xfmHandler(this, Transform.Position-origin.Value, rotation) + origin.Value, rotation);
+		Transform.SetPositionAndRotation(xfmHandler(this, Transform.Position-origin.Value, rotation) + origin.Value, rotation);
 
 		foreach (var child in Children.Values)
 			child.Rotate(rotation, xfmHandler, origin);
