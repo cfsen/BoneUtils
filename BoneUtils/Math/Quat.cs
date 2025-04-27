@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace BoneUtils.Math;
 /*
@@ -8,6 +9,7 @@ namespace BoneUtils.Math;
 	Left-handed
 */
 
+[StructLayout(LayoutKind.Sequential)]
 public struct Quat :IEquatable<Quat> {
 	public float X, Y, Z, W;
 
@@ -25,6 +27,12 @@ public struct Quat :IEquatable<Quat> {
 			Z = r.W*q.Z - r.X*q.Y + r.Y*q.X + r.Z*q.W
 		};
 	}
+	public static Quat operator *(Quat r, float s) {
+		return new() {
+			W = r.W*s, X = r.X*s, Y = r.Y*s, Z = r.Z*s
+		};
+	}
+	public static Quat operator *(float s, Quat r) => r * s;
 	public static Quat operator /(Quat r, Quat q) {
 		float d = NormSquared(r);
 		return new() {
@@ -95,6 +103,17 @@ public struct Quat :IEquatable<Quat> {
 		Quat u = q.Normalize() * new Quat(0, v.X, v.Y, v.Z) * q.Inverse();
 		return new(){ X=u.X, Y=u.Y, Z=u.Z };
 	}
+	public static Quat Slerp(Quat q0, Quat q1, float u) {
+		// https://splines.readthedocs.io/en/latest/rotation/slerp.html
+		// TODO benchmark for performance vs allocating theta
+
+		if(MathF.Sin(MathF.Acos(Quat.Dot(q0,q1))) < float.Epsilon) // Quats are nearly identical
+			return q0;
+
+		return 
+			(q0 * MathF.Sin((1-u) * MathF.Acos(Quat.Dot(q0, q1))) + q1 * MathF.Sin(u * MathF.Acos(Quat.Dot(q0, q1))))
+			/ MathF.Max(float.Epsilon, MathF.Sin(MathF.Acos(Quat.Dot(q0, q1))));
+	}
 
 	// Native type conversion
 
@@ -112,6 +131,7 @@ public struct Quat :IEquatable<Quat> {
 		};
 	}
 	public static Quat FromMatrix4x4(Matrix4x4 m) {
+		// https://www.ljll.fr/~frey/papers/scientific%20visualisation/Shoemake%20K.,%20Quaternions.pdf
 		throw new NotImplementedException();
 	}
 	public static Vector3 ToVector3(Quat q)
