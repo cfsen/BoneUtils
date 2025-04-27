@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace BoneUtils.Math;
@@ -19,6 +20,7 @@ public struct Quat :IEquatable<Quat> {
 		=> new() {W=r.W+q.W, X=r.X+q.X, Y=r.Y+q.Y, Z=r.Z+q.Z};
 	public static Quat operator -(Quat r, Quat q)
 		=> new() {W=r.W-q.W, X=r.X-q.X, Y=r.Y-q.Y, Z=r.Z-q.Z};
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static Quat operator *(Quat r, Quat q) {
 		return new() {
 			W = r.W*q.W - r.X*q.X - r.Y*q.Y - r.Z*q.Z,
