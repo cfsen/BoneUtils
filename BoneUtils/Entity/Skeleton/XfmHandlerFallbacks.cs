@@ -2,6 +2,7 @@
 using BoneUtils.Math;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -24,10 +25,11 @@ public static class XfmHandlerFallbacks {
 	/// </summary>
 	/// <param name="node">Node about to rotate</param>
 	/// <param name="position">Position of node. Rotate() handles translating into local space.</param>
-	/// <param name="newOrientation">New orientation, multiplicative with current orientation.</param>
+	/// <param name="rotation">New orientation, multiplicative with current orientation.</param>
+	/// <param name="origin">Origin of rotation (pivot point)</param>
 	/// <returns></returns>
-	public static Vector3 BoneNodeRotateFallback(BoneNode node, Vector3 position, Quat newOrientation) 
-		=> MathHelper.RotateWithDriftCorrection(position, newOrientation);
+	public static Vector3 BoneNodeRotateFallback(BoneNode node, Vector3 position, Quat rotation, Vector3 origin) 
+		=> MathHelper.RotateWithDriftCorrection(position, rotation, origin);
 
 	/// <summary>
 	/// Fallback delegate for BoneNode.SetTransform()

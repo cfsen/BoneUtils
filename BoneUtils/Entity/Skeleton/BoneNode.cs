@@ -22,7 +22,7 @@ public class BoneNode {
 		Transform = transform;
 		Children = children ?? [];
 	}
-	public delegate Vector3 RotateXfmHandler(BoneNode node, Vector3 nodePosition, Quat newOrientation); 
+	public delegate Vector3 RotateXfmHandler(BoneNode node, Vector3 nodePosition, Quat newOrientation, Vector3 origin); 
 	public delegate Matrix4x4 SetXfmHandler(BoneNode node, List<(BoneNode, Transform)>? Transforms = null);
 	public bool Branching => Children.Count > 1;
 	public bool HasChildren => Children.Count > 0;
@@ -35,7 +35,7 @@ public class BoneNode {
 		origin ??= Transform.Position;
 		xfmHandler ??= XfmHandlerFallbacks.BoneNodeRotateFallback;
 
-		Transform.SetPositionAndRotation(xfmHandler(this, Transform.Position-origin.Value, rotation) + origin.Value, rotation);
+		Transform.SetPositionAndRotation(xfmHandler(this, Transform.Position, rotation, origin.Value), rotation);
 
 		foreach (var child in Children.Values)
 			child.Rotate(rotation, xfmHandler, origin);

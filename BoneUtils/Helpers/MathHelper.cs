@@ -71,9 +71,9 @@ public static class MathHelper {
 
 		return o;
 	}
-	public static Vector3 RotateWithDriftCorrection(Vector3 childPosition, Quat newOrientation) {
-		Vector3 u = Quat.RotateVector(newOrientation, childPosition);
-		return FPCorrection(u, childPosition.Length());
+	public static Vector3 RotateWithDriftCorrection(Vector3 position, Quat rotation, Vector3 origin) {
+		Vector3 u = Quat.RotateVector(rotation, position-origin);
+		return FPCorrection(u, (position-origin).Length())+origin;
 	}
 	[Obsolete("Moving off the native Quaternion type. Use Quat instead.")]
 	public static Vector3 RotateWithDriftCorrection(Vector3 childPosition, Quaternion newOrientation) {
