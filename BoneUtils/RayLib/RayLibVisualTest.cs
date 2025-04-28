@@ -18,6 +18,7 @@ public class RayLibVisualTest {
 	public void DrawDemo3D() => ActiveDemo.Draw3D();
 
 	private void InitDemos() {
+		Demos.Add(new DemoWave(SkelOps));
 		Demos.Add(new DemoSimpleSpine(SkelOps));
 		Demos.Add(new DemoCharacter(SkelOps));
 	}
@@ -33,10 +34,11 @@ public class RayLibVisualTest {
 			DemoSelector = 0;
 		if(Raylib.IsKeyPressed(KeyboardKey.F3))
 			DemoSelector = 1;
-		//if(Raylib.IsKeyPressed(KeyboardKey.F2))
+		if(Raylib.IsKeyPressed(KeyboardKey.F4))
+			DemoSelector = 2;
 	}
 	public void DrawHelp() {
-		Raylib.DrawText("F1: Show controls | F2: Spine demo | F3: Character demo", 220, 10, 20, Color.Yellow);
+		Raylib.DrawText("F1: Show controls | Demos: F2, F3, F4", 220, 10, 20, Color.Yellow);
 	}
 }
 
