@@ -36,15 +36,22 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 	}
 	internal void DrawQuaternionOrientation(SkeletonEntity sken) {
 		Dictionary<string,Vector3> indicator = [];
-		// TODO translation into world space
+
+		Vector3 originBone = Vector3.Zero;
+		Vector3 worldXfm = Vector3.Zero;
 		for(var i = 0; i < sken.RenderBoneCount; i++) {
+			originBone = sken.RenderBones[i].Transform.Position;
+			worldXfm = sken.WorldPosition;
+
 			indicator = MathHelper.CreateLocalDirectionVectors(
 				sken.RenderBones[i].Transform.Rotation, 
-				sken.RenderBones[i].Transform.Position);
+				originBone);
 
-			Raylib.DrawLine3D(sken.RenderBones[i].Transform.Position, indicator["X"], Color.Orange);
-			Raylib.DrawLine3D(sken.RenderBones[i].Transform.Position, indicator["Y"], Color.Green);
-			Raylib.DrawLine3D(sken.RenderBones[i].Transform.Position, indicator["Z"], Color.Blue);
+			originBone += worldXfm;
+
+			Raylib.DrawLine3D(originBone, worldXfm+indicator["X"], Color.Orange);
+			Raylib.DrawLine3D(originBone, worldXfm+indicator["Y"], Color.Green);
+			Raylib.DrawLine3D(originBone, worldXfm+indicator["Z"], Color.Blue);
 		}
 	}
 
