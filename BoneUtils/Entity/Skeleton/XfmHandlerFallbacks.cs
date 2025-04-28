@@ -8,6 +8,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BoneUtils.Entity.Skeleton;
+/*
+These are fallback transform handlers (default behavior) for BoneNode.Rotate and BoneNode.SetTransform.
+
+Both Rotate and SetTransform propagates throughout a BoneNode's children, applying these to each node.
+
+They are context aware via the node passed to them, and custom handlers can use this to apply different
+transforms to individual nodes in the tree.
+
+See RayLibDemos/DemoWave.cs for a basic example.
+*/
 public static class XfmHandlerFallbacks {
 	/// <summary>
 	/// Fallback delegate for BoneNode.Rotate()
@@ -27,14 +37,5 @@ public static class XfmHandlerFallbacks {
 	/// <returns></returns>
 	public static Matrix4x4 BoneNodeSetTransformFallback(BoneNode node, List<(BoneNode, Transform)>? Transforms) {
 		return node.Transform.InitialState;
-		/* 
-		This is where contextual logic for propagated transforms could be added.
-
-		SetTransform() walks the tree through children (using names as a human readable example):
-			if(BoneNode.Name == "Shoulder") ... do stuff to the shoulder
-			else if(BoneNode.Name == "Elbow") ... do stuff to the elbow
-
-		 Must return a Matrix4x4 for the Transform object associated with node.
-		*/
 	}
 }
