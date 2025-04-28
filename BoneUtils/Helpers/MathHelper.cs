@@ -8,7 +8,22 @@ namespace BoneUtils.Helpers;
 	https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Quaternion_to_Euler_angles_(in_3-2-1_sequence)_conversion
 */
 public static class MathHelper {
+	[Obsolete("Moving off the native Quaternion type. Use Quat instead.")]
 	public static Vector3 QuaternionToEuler(Quaternion q) {
+		return new Vector3 {
+			X = MathF.Atan2(
+				2 * (q.W * q.X + q.Y * q.Z),
+				1 - 2 * (q.X * q.X + q.Y * q.Y)),
+			Y = 2 * MathF.Atan2(
+				MathF.Sqrt(1 + 2 * (q.W * q.Y - q.X * q.Z)),
+				MathF.Sqrt(1 - 2 * (q.W * q.Y - q.X * q.Z))
+				) - MathF.PI / 2,
+			Z = MathF.Atan2(
+				2 * (q.W * q.Z + q.X * q.Y),
+				1 - 2 * (q.Y * q.Y + q.Z * q.Z)),
+		};
+	}
+	public static Vector3 QuatToEuler(Quat q) {
 		return new Vector3 {
 			X = MathF.Atan2(
 				2 * (q.W * q.X + q.Y * q.Z),
@@ -60,6 +75,7 @@ public static class MathHelper {
 		Vector3 u = Quat.RotateVector(newOrientation, childPosition);
 		return FPCorrection(u, childPosition.Length());
 	}
+	[Obsolete("Moving off the native Quaternion type. Use Quat instead.")]
 	public static Vector3 RotateWithDriftCorrection(Vector3 childPosition, Quaternion newOrientation) {
 		Vector3 u = Vector3.Transform(childPosition, newOrientation);
 		return FPCorrection(u, childPosition.Length());
@@ -83,23 +99,13 @@ public static class MathHelper {
 		Create unit vectors in world space for each axis
 		1,0,0 - 0,1,0 - 0,0,1
 		then apply rotation to each one using the quat associated with the bonenode
-		assuming Z is the axis that faces forward:
-			- rotate the X-indicating vector by 90deg around the Y axis
-			- rotate the Y-indicating vector by 90deg around the X axis
 		then translate it into position
 		 */
-		//Vector3 x = FPCorrection(Quat.RotateVector(Quat.Create(MathF.PI/2, Vector3.UnitY)*q, Vector3.UnitZ), length);
-		//Vector3 y = FPCorrection(Quat.RotateVector(Quat.Create(MathF.PI/2, Vector3.UnitX)*q, Vector3.UnitZ), length);
-		//Vector3 z = FPCorrection(Quat.RotateVector(Quat.Create(0, Vector3.UnitZ)*q, Vector3.UnitZ), length);
 
 		Vector3 x = FPCorrection(Quat.RotateVector(q, Vector3.UnitX), length) + origin;
 		Vector3 y = FPCorrection(Quat.RotateVector(q, Vector3.UnitY), length) + origin;
 		Vector3 z = FPCorrection(Quat.RotateVector(q, Vector3.UnitZ), length) + origin;
 
-		//x += origin;
-		//y += origin; 
-		//z += origin;
-		
 		return new Dictionary<string, Vector3> { ["X"] = x, ["Y"] = y, ["Z"] = z };
 	}
 
