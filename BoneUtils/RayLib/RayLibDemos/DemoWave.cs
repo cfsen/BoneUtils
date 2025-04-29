@@ -61,7 +61,9 @@ public class DemoWave :DemoBase {
 	// xfmHandler example
 	// WIP disclaimer: this is a proof of concept/prototype
 
-	// set up a controlling function with arbitrary logic
+	// TODO origin handling is a bit clunky to deal with, consider offering a dedicated handler for this
+
+	// 1. set up a controlling function with arbitrary logic
 	public void WaveXfmController(float deltaTime) {
 		if(MathHelper.QuatToEuler(WaveMid.RootNode.Transform.Rotation).X > MathF.PI/2+MathF.PI/8 && WaveDir) {
 			WaveDir = false;
@@ -77,37 +79,36 @@ public class DemoWave :DemoBase {
 			q = Quat.Create(MathHelper.DegToRad(-0.2f), Vector3.UnitX);
 
 		q.Normalize();
-		WaveMid.RootNode.Rotate(q, WaveXfmHandlerMid); // pass the custom xfm handler to Rotate()
+		WaveMid.RootNode.Rotate(q, WaveXfmHandlerMid); // 2. pass the custom xfm handler to Rotate()
 		WaveTop.RootNode.Rotate(q, WaveXfmHandlerBotTop);
 		WaveBot.RootNode.Rotate(q, WaveXfmHandlerBotTop);
 	}
-	// this will then be ran on each individual node in the rootnodes tree.
+	// 3. the following function will then be ran on each individual node in the rootnodes tree.
 	public Vector3 WaveXfmHandlerMid(BoneNode node, Vector3 pos, Quat q, Vector3 origin) {
 		Quat localQuat;
 		if(node.Name == "Root" || node.Name == "SpineB") {
 			// arbitrarily apply any transform logic
 			localQuat = q.Conjugate();
-			origin = pos;
 		}
 		else {
 			localQuat = q;
 		}
+		origin = node.ParentBone?.Transform.Position ?? node.Transform.Position;
 		pos = MathHelper.RotateWithDriftCorrection(pos, localQuat, origin);
 		return pos; // finally return the new position of the node
 	}
-	// add as many as needed, with or without their own controlling logic
+	// 4. add as many as needed, with or without their own controlling logic
 	public Vector3 WaveXfmHandlerBotTop(BoneNode node, Vector3 pos, Quat q, Vector3 origin) {
 		Quat localQuat;
 		if(node.Name == "SpineA" || node.Name == "SpineC") {
-			// arbitrarily apply any transform logic
 			localQuat = q.Conjugate();
-			origin = pos;
 		}
 		else {
 			localQuat = q;
 		}
+		origin = node.ParentBone?.Transform.Position ?? node.Transform.Position;
 		pos = MathHelper.RotateWithDriftCorrection(pos, localQuat, origin);
-		return pos; // finally return the new position of the node
+		return pos; // return the new node position
 	}
 
 }
