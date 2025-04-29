@@ -11,17 +11,16 @@ public class DemoCharacter :DemoBase {
 	private SkeletonEntityOps SkelOps;
 
 	private bool IsWaving = false;
-	private Quat qNegZ = new Quat(Quaternion.CreateFromYawPitchRoll(0.0f, MathHelper.DegToRad(-2), 0.0f)); // TODO Quat
-	private Quat qPosZ = new Quat(Quaternion.CreateFromYawPitchRoll(0.0f, MathHelper.DegToRad(2), 0.0f)); // TODO Quat
+	private Quat qNegZ = Quat.Create(MathHelper.DegToRad(-2), Vector3.UnitX);
+	private Quat qPosZ = Quat.Create(MathHelper.DegToRad(2), Vector3.UnitX);
 	private bool WaveDirection = false;
 
 	public DemoCharacter(SkeletonEntityOps skeops) {
 		SkelOps = skeops;
 		Character = ConstructSkeleton();
-		Character.RootNode.Rotate(new Quat(Quaternion.CreateFromYawPitchRoll(MathF.PI/2, 0.0f, 0.0f))); // TODO Quat
 	}
 	public override void Draw2D() {
-		Raylib.DrawText("Press 1 to wave :)", 10, 50, 20, Color.Red);
+		Raylib.DrawText("Press 1 to wave :) | R to reset", 10, 50, 20, Color.Red);
 	}
 	public override void Draw3D() {
 		DrawBoneNodeNetwork(Character);
@@ -30,12 +29,16 @@ public class DemoCharacter :DemoBase {
 	public override void HandleDemoInput() {
 		if (Raylib.IsKeyPressed(KeyboardKey.One))
 			IsWaving = !IsWaving;
+		if (Raylib.IsKeyPressed(KeyboardKey.R)) {
+			Character.ResetTransforms();
+			// flip skeleton to face camera, since this isn't part of saved composition state
+			Character.RootNode.Rotate(Quat.Create(MathF.PI/2, Vector3.UnitY));
+		}
 	}
 	public override void Update(float deltaTime) {
 		if (IsWaving) {
-			// TODO Quat
-			if(MathHelper.QuaternionToEuler(Character.Bones["L_Shoulder"].Transform.Rotation.ToQuaternion()).X > MathF.PI/2
-			|| MathHelper.QuaternionToEuler(Character.Bones["L_Shoulder"].Transform.Rotation.ToQuaternion()).X < -MathF.PI/2)
+			if(MathHelper.QuatToEuler(Character.Bones["L_Shoulder"].Transform.Rotation).X > MathF.PI/2
+			|| MathHelper.QuatToEuler(Character.Bones["L_Shoulder"].Transform.Rotation).X < -MathF.PI/2)
 				WaveDirection = !WaveDirection;
 				
 			Character.Bones["L_Shoulder"].Rotate(WaveDirection ? qNegZ : qPosZ);
@@ -51,6 +54,8 @@ public class DemoCharacter :DemoBase {
 			SkelOps.LabelDepthBoneNodeTree,
 			SkelOps.BoneNodeTreeBuildRenderLists
 			]);
+
+		sken.RootNode.Rotate(Quat.Create(MathF.PI/2, Vector3.UnitY));
 
 		return sken;
 	}
