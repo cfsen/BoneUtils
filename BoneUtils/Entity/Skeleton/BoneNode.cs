@@ -22,10 +22,13 @@ public class BoneNode {
 		Transform = transform;
 		Children = children ?? [];
 	}
+
 	public delegate Vector3 RotateXfmHandler(BoneNode node, Vector3 nodePosition, Quat newOrientation, Vector3 origin); 
 	public delegate Matrix4x4 SetXfmHandler(BoneNode node, List<(BoneNode, Transform)>? Transforms = null);
+
 	public bool Branching => Children.Count > 1;
 	public bool HasChildren => Children.Count > 0;
+
 	public void Translate(Vector3 offset) {
 		Transform.Position += offset;
 		foreach (var child in Children.Values) 
@@ -47,5 +50,14 @@ public class BoneNode {
 
 		foreach (var child in Children.Values) 
 			child.SetTransform(xfmHandler);
+	}
+	public void Reset(bool propagate = true) {
+		Transform.SetTransform(Transform.InitialState);
+
+		Debug.WriteLine($"Reset: {Name}");
+
+		if(propagate)
+			foreach (var child in Children.Values)
+				child.Reset();
 	}
 }
