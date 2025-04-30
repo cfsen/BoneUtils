@@ -28,6 +28,18 @@ public abstract class MockDataBuilder :DebugHelpers {
 		var nodes = ConstructBoneDictFromList(nodeTemplate);
 		return new SkeletonEntity("TestEntity01",nodes["Root"],nodes);
 	}
+	public SkeletonEntity Mock_Wave() {
+		List<(string, string, Transform)> nodeTemplate = []; // parent, child
+		nodeTemplate.Add(NewNode("Root", "SpineA",			(0,1,0),			(0,1,0)		));
+		nodeTemplate.Add(NewNode("SpineA", "SpineB",		(0,2,0),			(0,1,0)		));
+		nodeTemplate.Add(NewNode("SpineB", "SpineC",		(0,3,0),			(0,1,0)		));
+		nodeTemplate.Add(NewNode("SpineC", "SpineD",		(0,4,0),			(0,1,0)		));
+		nodeTemplate.Add(NewNode("SpineD", "SpineE",		(0,5,0),			(0,1,0)		));
+		nodeTemplate.Add(NewNode("SpineE", "SpineF",		(0,6,0),			(0,1,0)		));
+
+		var nodes = ConstructBoneDictFromList(nodeTemplate);
+		return new SkeletonEntity("TestEntity01",nodes["Root"],nodes);
+	}
 	public SkeletonEntity Mock_TestEntity01() {
 		List<(string,string,Transform)> nodeTemplate = []; // parent,child,unit vector for orientation
 		nodeTemplate.Add(NewNode("Root", "SpineA",			(0,0,0),			(0,1,0)		));
