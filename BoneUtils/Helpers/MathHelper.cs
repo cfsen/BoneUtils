@@ -71,6 +71,17 @@ public static class MathHelper {
 
 		return o;
 	}
+	public static Vector3 ClampToLength(Vector3 position, float clampLength) {
+		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(clampLength);
+
+		float length = position.Length();
+		if(length == clampLength)
+			return position;
+		if(length == 0)
+			length = 1;
+
+		return position*(clampLength/length);
+	}
 	public static Vector3 RotateWithDriftCorrection(Vector3 position, Quat rotation, Vector3 origin) {
 		Vector3 u = Quat.RotateVector(rotation, position-origin);
 		return FPCorrection(u, (position-origin).Length())+origin;

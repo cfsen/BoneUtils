@@ -15,6 +15,7 @@ public class BoneNode {
 	public int RenderChildrenCount = 0;
 
 	public Transform Transform;
+	public ParentRelativePosition? ParentRelativePosition;
 
 	public BoneNode(string name, Transform transform, BoneNode? parent = null, Dictionary<string, BoneNode>? children = null, SkeletonEntity? parentEntity = null) {
 		Name = name;
@@ -60,4 +61,9 @@ public class BoneNode {
 			foreach (var child in Children.Values)
 				child.Reset();
 	}
+}
+public struct ParentRelativePosition {
+	public Quat ParentOrientation; // Orientation of the parent node
+	public Vector3 NodePosition; // Position of the node in the parents local space
+	public float Distance;
 }

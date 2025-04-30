@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using BoneUtils.Math;
+using System.Numerics;
 
 namespace BoneUtils.Entity.Skeleton;
 public class SkeletonEntityOps {
@@ -72,6 +73,37 @@ public class SkeletonEntityOps {
 			}
 			return true;
 		}
+	}
+	public bool BoneNodeTreeCalculateConstraints(ref SkeletonEntity skeleton) {
+		var queue = new Queue<BoneNode>();
+		int runLimit = 500, runs = 0;
+
+		queue.Enqueue(skeleton.RootNode);
+		Vector3 parentPosition = skeleton.RootNode.Transform.Position;
+		Quat parentOrientation = skeleton.RootNode.Transform.Rotation;
+
+		while(queue.Count > 0) {
+			if(runs > runLimit)
+				return false;
+			var node = queue.Dequeue();
+
+			Vector3 relativePosition = node.Transform.Position - parentPosition;
+			node.ParentRelativePosition = new ParentRelativePosition {
+				ParentOrientation = parentOrientation,
+				NodePosition = relativePosition,
+				Distance = relativePosition.Length()
+			};
+
+			// Update parentOrientation before queueing children
+			parentOrientation = node.Transform.Rotation;
+			parentPosition = node.Transform.Position;
+
+			foreach(var child in node.Children.Values) {
+				queue.Enqueue(child);
+			}
+			runs++;
+		}
+		return true;
 	}
 
 	// Construction helpers
