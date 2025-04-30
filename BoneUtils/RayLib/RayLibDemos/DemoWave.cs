@@ -39,11 +39,12 @@ public class DemoWave :DemoBase {
 		WaveXfmController(deltaTime);
 	}
 	private SkeletonEntity ConstructSkeleton(int i) { 
-		var sken = Mock_Spine();
+		var sken = Mock_Wave();
 		SkelOps.PreProcessSkeleton(ref sken, [
 			SkelOps.ValidateBoneNodeTree,
 			SkelOps.LabelDepthBoneNodeTree,
-			SkelOps.BoneNodeTreeBuildRenderLists
+			SkelOps.BoneNodeTreeBuildRenderLists,
+			SkelOps.BoneNodeTreeCalculateConstraints
 			]);
 
 		Quat rot = Quat.Create(MathF.PI/2, Vector3.UnitX);
@@ -59,48 +60,54 @@ public class DemoWave :DemoBase {
 	}
 
 	// xfmHandler example
-	// WIP disclaimer: this is a proof of concept/prototype
+	// Proof of concept/prototype (WIP)
 
-	// TODO origin handling is a bit clunky to deal with, consider offering a dedicated handler for this
-
-	// 1. set up a controlling function with arbitrary logic
+	// 1. Controller and delegate dispatcher
 	public void WaveXfmController(float deltaTime) {
+		// Set up conditions for rotation. This will oscillate between +- 30 degrees of the X axis. 
 		if(MathHelper.QuatToEuler(WaveMid.RootNode.Transform.Rotation).X > MathF.PI/2+MathF.PI/8 && WaveDir) {
 			WaveDir = false;
 		}
 		else if(MathHelper.QuatToEuler(WaveMid.RootNode.Transform.Rotation).X < MathF.PI/2-MathF.PI/8 && !WaveDir) {
 			WaveDir = true;
 		}
-	
+
+		// Create the quat for the rotations
 		Quat q;
 		if(WaveDir)
 			q = Quat.Create(MathHelper.DegToRad(0.2f), Vector3.UnitX);
 		else
 			q = Quat.Create(MathHelper.DegToRad(-0.2f), Vector3.UnitX);
-
 		q.Normalize();
-		WaveMid.RootNode.Rotate(q, WaveXfmHandlerMid); // 2. pass the custom xfm handler to Rotate()
+
+		// Pass the delegates to nodes, Rotate() handles propagation to children from any node in the tree.
+		WaveMid.RootNode.Rotate(q, WaveXfmHandlerMid);
 		WaveTop.RootNode.Rotate(q, WaveXfmHandlerBotTop);
 		WaveBot.RootNode.Rotate(q, WaveXfmHandlerBotTop);
 	}
-	// 3. the following function will then be ran on each individual node in the rootnodes tree.
+	// 2a. Transform handler
 	public Vector3 WaveXfmHandlerMid(BoneNode node, Vector3 pos, Quat q, Vector3 origin) {
 		Quat localQuat;
-		if(node.Name == "Root" || node.Name == "SpineB") {
-			// arbitrarily apply any transform logic
+		// Filtering by name enables controlling which transforms are applied to specific nodes in the (partial) tree.
+		if(node.Name == "Root" || node.Name == "SpineB" || node.Name == "SpineD" || node.Name == "SpineF") { 
+			// Conjugating the passed quaternion will produce a rotation that rotates oppositely for these nodes.
 			localQuat = q.Conjugate();
 		}
 		else {
 			localQuat = q;
 		}
-		origin = node.ParentBone?.Transform.Position ?? node.Transform.Position;
-		pos = MathHelper.RotateWithDriftCorrection(pos, localQuat, origin);
-		return pos; // finally return the new position of the node
+
+		// Finalize transforms that will be applied throughout the (partial) tree
+		// This example uses the default transform handler, then clamps the length of the vector.
+		origin = node.ParentBone?.Transform.Position ?? node.Transform.Position; // Set pivot point of rotation to parent node
+		pos = MathHelper.RotateWithDriftCorrection(pos, localQuat, origin); // Default transform handler for rotation
+		pos = MathHelper.ClampToLength(pos-origin, 1.0f)+origin; // Clamp the rotation to avoid stretching or compressing
+		return pos; // Finally return the new position of the node, which will be set in Transform by BoneNode
 	}
-	// 4. add as many as needed, with or without their own controlling logic
+	// 2b. Additional transform handler
 	public Vector3 WaveXfmHandlerBotTop(BoneNode node, Vector3 pos, Quat q, Vector3 origin) {
 		Quat localQuat;
-		if(node.Name == "SpineA" || node.Name == "SpineC") {
+		if(node.Name == "SpineA" || node.Name == "SpineC" || node.Name == "SpineE") {
 			localQuat = q.Conjugate();
 		}
 		else {
@@ -108,7 +115,8 @@ public class DemoWave :DemoBase {
 		}
 		origin = node.ParentBone?.Transform.Position ?? node.Transform.Position;
 		pos = MathHelper.RotateWithDriftCorrection(pos, localQuat, origin);
-		return pos; // return the new node position
+		pos = MathHelper.ClampToLength(pos-origin, 1.0f)+origin;
+		return pos; 
 	}
 
 }
