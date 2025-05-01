@@ -22,7 +22,6 @@ public class BoneNodeXfmBuffer {
 	}
 	public bool Begin() {
 		if(Active || Complete) return false;
-		Reset();
 		Active = true;
 		return true;
 	}
@@ -32,6 +31,7 @@ public class BoneNodeXfmBuffer {
 	public bool AccumulateScale(Vector3 Scale) => Accumulator(Scale, XfmType.Scale);
 	private bool Accumulator(object xfm, XfmType type) {
 		if(type == XfmType.None) return false;
+		if(!Active) return false;
 
 		switch (type) {
 			case XfmType.Translate:
