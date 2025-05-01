@@ -20,6 +20,8 @@ public class BoneNode {
 
 	public delegate Vector3 RotateXfmHandler(BoneNode node, Vector3 nodePosition, Quat newOrientation, Vector3 origin); 
 	public delegate Matrix4x4 SetXfmHandler(BoneNode node, List<(BoneNode, Transform)>? Transforms = null);
+	public delegate bool PrepareXfmBuffer(BoneNode node);
+	public delegate bool ApplyXfmBuffer(BoneNode node);
 
 	public bool Branching => Children.Count > 1;
 	public bool HasChildren => Children.Count > 0;
@@ -34,30 +36,23 @@ public class BoneNode {
 	}
 
 
+	public bool PrepareTransformBuffer(PrepareXfmBuffer? handler = null) {
+		if(TransformBuffer.Active) return false;
+		handler ??= XfmHandlerFallbacks.BoneNodePrepareXfmBufferFallback;
+
+		return handler(this);
+	}
+	public void DiscardTransformBuffer() => TransformBuffer.Reset();
+	public bool ApplyTransformBuffer(ApplyXfmBuffer? handler = null) {
+		if(!TransformBuffer.Complete) return false;
+		handler ??= XfmHandlerFallbacks.BoneNodeApplyXfmBufferFallback;
+
+		return handler(this);
+	}
 	public void Translate(Vector3 offset) {
 		Transform.Position += offset;
 		foreach (var child in Children.Values) 
 			child.Translate(offset);
-	}
-	public bool PrepareTransformBuffer() {
-		if(TransformBuffer.Active) return false;
-		
-		TransformBuffer.Translation = Transform.Position;
-		TransformBuffer.Rotation = Transform.Rotation;
-		TransformBuffer.Scale = Transform.Scale;
-
-		return true;
-	}
-	public bool ApplyTransformBuffer() {
-		if(!TransformBuffer.Complete) return false;
-
-		Transform.Position = TransformBuffer.Translation;
-		Transform.Rotation = TransformBuffer.Rotation;
-		Transform.Scale = TransformBuffer.Scale;
-
-		TransformBuffer.Reset();
-
-		return true;
 	}
 	public void Rotate(Quat rotation, RotateXfmHandler? xfmHandler = null, Vector3? origin = null) {
 		origin ??= Transform.Position;

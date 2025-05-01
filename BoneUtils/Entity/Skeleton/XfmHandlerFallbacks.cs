@@ -22,6 +22,7 @@ See RayLibDemos/DemoWave.cs for a basic example.
 public static class XfmHandlerFallbacks {
 	/// <summary>
 	/// Fallback delegate for BoneNode.Rotate()
+	/// This is the default behavior used when no custom handler is provided.
 	/// </summary>
 	/// <param name="node">Node about to rotate</param>
 	/// <param name="position">Position of node. Rotate() handles translating into local space.</param>
@@ -33,11 +34,55 @@ public static class XfmHandlerFallbacks {
 
 	/// <summary>
 	/// Fallback delegate for BoneNode.SetTransform()
+	/// This is the default behavior used when no custom handler is provided.
 	/// </summary>
-	/// <param name="node">Noe to transform.</param>
+	/// <param name="node">Node to transform.</param>
 	/// <param name="Transforms">List of tuples for contextual logic and target transform.</param>
 	/// <returns></returns>
 	public static Matrix4x4 BoneNodeSetTransformFallback(BoneNode node, List<(BoneNode, Transform)>? Transforms) {
 		return node.Transform.InitialState;
+	}
+
+	/// <summary>
+	/// Fallback delegate for BoneNode.PrepareTransformBuffer()
+	/// This is the default behavior used when no custom handler is provided.
+	/// </summary>
+	/// <param name="node">Node encapsulating transform buffer</param>
+	/// <returns>True</returns>
+	public static bool BoneNodePrepareXfmBufferFallback(BoneNode node) {
+		XfmBufferSet(ref node);
+
+		return true; // Always returns true, allowing for custom handlers to return false if necessary
+	}
+
+	/// <summary>
+	/// Fallback delegate for BoneNode.ApplyTransformBuffer()
+	/// This is the default behavior used when no custom handler is provided.
+	/// </summary>
+	/// <param name="node">Node encapsulating transform buffer</param>
+	/// <returns>True</returns>
+	public static bool BoneNodeApplyXfmBufferFallback(BoneNode node) {
+		XfmBufferSet(ref node, false);
+
+		node.TransformBuffer.Reset();
+
+		return true;
+	}
+
+
+	// Helpers
+	// TODO move these out
+
+	private static void XfmBufferSet(ref BoneNode node, bool toBuffer = true) {
+		if(toBuffer) {
+			node.TransformBuffer.Translation = node.Transform.Position;
+			node.TransformBuffer.Rotation	 = node.Transform.Rotation;
+			node.TransformBuffer.Scale		 = node.Transform.Scale;
+		}
+		else {
+			node.Transform.Position	= node.TransformBuffer.Translation;
+			node.Transform.Rotation	= node.TransformBuffer.Rotation;
+			node.Transform.Scale	= node.TransformBuffer.Scale;
+		}
 	}
 }
