@@ -3,22 +3,35 @@ using System.Numerics;
 
 namespace BoneUtils.Entity.Skeleton;
 public class SkeletonEntityOps {
+	// (!) DFS and BFS limits have been set high to accomodate HelixDemo
+	// For any real world integration, adjust to your usecase.
+	public int DFSLimit = 10000;
+	public int BFSLimit = 10000;
+
 	public delegate bool SkeletonEntityMutator(ref SkeletonEntity skeleton);
 
 	public void PreProcessSkeleton(ref SkeletonEntity skeleton, List<SkeletonEntityMutator> preProcessors) {
 		foreach (var preProcessor in preProcessors) 
 			if(!preProcessor(ref skeleton)) 
-				throw new Exception($"SkeletonEntityMutator failed! {preProcessor.ToString}");
-		// Raise exception if mutate fails, for the time being.
+				throw new Exception($"SkeletonEntityMutator failed! {nameof(preProcessor)}");
+				// Raise exception if mutate fails, for the time being.
 	}
 
 	// Mutators
 
+	/// <summary>
+	/// Checks node tree in Skeleton for circularity. 
+	/// Run this early to validate the skeleton!
+	/// </summary>
+	/// <param name="sken">Skeleton containing nodes</param>
+	/// <returns>false if skeleton has no nodes, or contains circular links in the node tree, or DFS depth is reached (n > 100)</returns>
 	public bool ValidateBoneNodeTree(ref SkeletonEntity sken) {
+		if(sken.Bones.Count == 0) return false;
+
 		// DFS validation of skeleton
 		var seen = new HashSet<BoneNode>();
 
-		return Recurse(sken.RootNode, seen, 0, 100);
+		return Recurse(sken.RootNode, seen, 0, DFSLimit);
 
 		bool Recurse(BoneNode bn, HashSet<BoneNode> seen, int depth, int maxDepth) {
 			if(depth > maxDepth) return false;
@@ -33,12 +46,20 @@ public class SkeletonEntityOps {
 			return true;
 		}
 	}
-	public bool LabelDepthBoneNodeTree(ref SkeletonEntity sken) {
+
+	/// <summary>
+	/// Sets the BoneNode.TreeDepth property for each node in the skeleton.
+	/// </summary>
+	/// <param name="skeleton">Skeleton containing nodes</param>
+	/// <returns>false if the skeleton has no nodes or DFS depth is reached (n > 100)</returns>
+	public bool LabelDepthBoneNodeTree(ref SkeletonEntity skeleton) {
+		if(skeleton.Bones.Count == 0) return false;
+
 		// BFS for setting BoneNode depth
 		var queue = new Queue<(BoneNode node, int depth)>();
-		int depthLimit = 100;
+		int depthLimit = BFSLimit;
 
-		queue.Enqueue((sken.RootNode, 0));
+		queue.Enqueue((skeleton.RootNode, 0));
 		int maxDepth = 0;
 
 		while(queue.Count > 0) {
@@ -54,13 +75,25 @@ public class SkeletonEntityOps {
 			}
 		}
 
-		sken.BoneDepth = maxDepth;
+		skeleton.BoneDepth = maxDepth;
 		return true;
 	}
+
+	/// <summary>
+	/// Builds a list of Bones to supplement dictionary access. 
+	/// Places a complete list of node references in SkeletonEntity.RenderBones, 
+	/// and the count in SkeletonEntity.RenderBoneCount.
+	/// Also builds local lists for each BoneNode and their direct leaf nodes, placed
+	/// in BoneNode.RenderChildren and RenderChildrenCount.
+	/// </summary>
+	/// <param name="skeleton">Skeleton containing nodes</param>
+	/// <returns>false if skeleton has no nodes or DFS depth is reached (n > 100)</returns>
 	public bool BoneNodeTreeBuildRenderLists(ref SkeletonEntity skeleton) {
+		if(skeleton.Bones.Count == 0) return false;
+
 		skeleton.RenderBoneCount = skeleton.Bones.Count;
 		skeleton.RenderBones = [.. skeleton.Bones.Values];
-		return Recurse(skeleton.RootNode);
+		return Recurse(skeleton.RootNode, 0, DFSLimit);
 
 		bool Recurse(BoneNode node, int depth = 0, int maxDepth = 100) {
 			if(depth > maxDepth) return false;
@@ -74,9 +107,18 @@ public class SkeletonEntityOps {
 			return true;
 		}
 	}
+
+	/// <summary>
+	/// Calculates the R3 parent-child distances between nodes in the tree,
+	/// storing them in Bonenode.ParentRelativePosition.
+	/// </summary>
+	/// <param name="skeleton">Skeleton containing nodes.</param>
+	/// <returns>false if skeleton has no nodes or BFS run limit is reached (n > 500).</returns>
 	public bool BoneNodeTreeCalculateConstraints(ref SkeletonEntity skeleton) {
+		if(skeleton.Bones.Count == 0) return false;
+
 		var queue = new Queue<BoneNode>();
-		int runLimit = 500, runs = 0;
+		int runLimit = BFSLimit, runs = 0;
 
 		queue.Enqueue(skeleton.RootNode);
 		Vector3 parentPosition = skeleton.RootNode.Transform.Position;
@@ -106,8 +148,31 @@ public class SkeletonEntityOps {
 		return true;
 	}
 
+	/// <summary>
+	/// Links each BoneNode to its SkeletonEntity owner.
+	/// </summary>
+	/// <param name="skeleton">Skeleton containing nodes to link.</param>
+	/// <returns>false if there are no bones to link.</returns>
+	public bool BoneNodeTreeSetParentEntity(ref SkeletonEntity skeleton) {
+		if(skeleton.Bones.Count == 0) return false;
+
+		foreach(BoneNode node in skeleton.Bones.Values) 
+			node.ParentEntity = skeleton;
+		return true;
+	}
+
 	// Construction helpers
 
+	/// <summary>
+	/// Takes a list of tuples and constructrs a BoneNode tree for SkeletonEntity.
+	/// </summary>
+	/// <param name="nodeTemplate">List of tuples where the strings are names of nodes to be created.
+	/// 1st string: Name of parent node.
+	/// 2nd string. Unique name of node to be created.
+	/// Transform: Transform of node to be created.
+	/// </param>
+	/// <param name="addRootNode">Adds a RootNode without a parent.</param>
+	/// <returns>Dictionary ready to use for SkeletonEntity.Bones</returns>
 	public Dictionary<string, BoneNode> ConstructBoneNodeTreeFromList(List<(string, string, Transform)> nodeTemplate, bool addRootNode = true) {
 		Dictionary<string, BoneNode> nodes = [];
 
@@ -128,7 +193,4 @@ public class SkeletonEntityOps {
 
 		return nodes;
 	}
-
-
-
 }
