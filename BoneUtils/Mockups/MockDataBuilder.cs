@@ -64,6 +64,33 @@ public abstract class MockDataBuilder :DebugHelpers {
 		var nodes = ConstructBoneDictFromList(nodeTemplate);
 		return new SkeletonEntity("TestEntity01", nodes["Root"], nodes);
 	}
+	public SkeletonEntity Mock_Helix() {
+		List<(string,string,Transform)> nodeTemplate = [];
+
+		nodeTemplate.Add(NewNode("Root", "HelixA0", (1,0,0), (1,0,0) ));
+		nodeTemplate.Add(NewNode("Root", "HelixB0", (-1,0,0), (1,0,0) ));
+
+		Vector3 helixa = Vector3.Zero;
+		Vector3 helixb = Vector3.Zero;
+		float radius = 1.0f;
+		float stretch = 0.2f;
+
+		for(int i = 1; i < 2049; i++) {
+			helixa.X = radius*MathF.Cos(i*MathF.PI/8);
+			helixa.Y = radius*MathF.Sin(i*MathF.PI/8);
+			helixa.Z = i*stretch;
+
+			helixb.X = radius*MathF.Cos(i*MathF.PI/8+MathF.PI);
+			helixb.Y = radius*MathF.Sin(i*MathF.PI/8+MathF.PI);
+			helixb.Z = i*stretch;
+
+			nodeTemplate.Add(NewNode($"HelixA{i-1}", $"HelixA{i}", (helixa.X, helixa.Y, helixa.Z), (1,0,0) ));
+			nodeTemplate.Add(NewNode($"HelixB{i-1}", $"HelixB{i}", (helixb.X, helixb.Y, helixb.Z), (1,0,0) ));
+		}
+
+		var nodes = ConstructBoneDictFromList(nodeTemplate);
+		return new SkeletonEntity("Helix", nodes["Root"], nodes);
+	}
 	public SkeletonEntity Mock_FailCircularTree() {
 		List<(string,string,Transform)> nodeTemplate = []; // parent,child,unit vector for orientation
 		nodeTemplate.Add(NewNode("Root", "SpineA",			(0,0,0),			(0,1,0)		));
