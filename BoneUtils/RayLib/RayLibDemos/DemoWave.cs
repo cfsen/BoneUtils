@@ -30,10 +30,7 @@ public class DemoWave :DemoBase {
 		DrawQuaternionOrientation(WaveMid);
 	}
 	public override void Draw2D() {
-		Raylib.DrawText("Work in progress.", 10, 50, 20, Color.Red);
-		DrawQuatDebug(WaveMid.RootNode);
-	}
-	public override void HandleDemoInput() {
+		Raylib.DrawText("Behavior injection in rotation propagation.", 10, 50, 20, Color.White);
 	}
 	public override void Update(float deltaTime) {
 		WaveXfmController(deltaTime);
@@ -42,7 +39,6 @@ public class DemoWave :DemoBase {
 		var sken = Mock_Wave();
 		SkelOps.PreProcessSkeleton(ref sken, [
 			SkelOps.ValidateBoneNodeTree,
-			SkelOps.LabelDepthBoneNodeTree,
 			SkelOps.BoneNodeTreeBuildRenderLists,
 			SkelOps.BoneNodeTreeCalculateConstraints
 			]);
@@ -104,7 +100,7 @@ public class DemoWave :DemoBase {
 		pos = MathHelper.ClampToLength(pos-origin, 1.0f)+origin; // Clamp the rotation to avoid stretching or compressing
 		return pos; // Finally return the new position of the node, which will be set in Transform by BoneNode
 	}
-	// 2b. Additional transform handler
+	// 2b. Similar to 2a, but less comment clutter for readability.
 	public Vector3 WaveXfmHandlerBotTop(BoneNode node, Vector3 pos, Quat q, Vector3 origin) {
 		Quat localQuat;
 		if(node.Name == "SpineA" || node.Name == "SpineC" || node.Name == "SpineE") {

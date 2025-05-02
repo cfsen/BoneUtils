@@ -25,8 +25,8 @@ public class DemoSimpleSpine :DemoBase {
 		DrawQuaternionOrientation(Spine);
 	}
 	public override void Draw2D() {
-		Raylib.DrawText("Press 1,2,3,4 to rotate the root, SpineA, SpineB, SpineC bones.", 10, 50, 20, Color.Red);
-		DrawQuatDebug(Spine.RootNode);
+		Raylib.DrawText("Basic rotation propagation.", 10, 50, 20, Color.White);
+		Raylib.DrawText("Press 1,2,3,4 to rotate the root, SpineA, SpineB, SpineC bones.", 10, 75, 20, Color.White);
 	}
 	public override void HandleDemoInput() {
 		if(Raylib.IsKeyPressed(KeyboardKey.One))
@@ -54,12 +54,8 @@ public class DemoSimpleSpine :DemoBase {
 		var spine = Mock_Spine();
 		SkelOps.PreProcessSkeleton(ref spine, [
 			SkelOps.ValidateBoneNodeTree,
-			SkelOps.LabelDepthBoneNodeTree,
 			SkelOps.BoneNodeTreeBuildRenderLists
 			]);
-		//Quat offset = Quat.Create(MathF.PI-MathF.PI/4, Vector3.UnitX);
-		//spine.RootNode.Rotate(offset);
-
 		return spine;
 	}
 }

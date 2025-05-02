@@ -20,7 +20,7 @@ public class DemoCharacter :DemoBase {
 		Character = ConstructSkeleton();
 	}
 	public override void Draw2D() {
-		Raylib.DrawText("Press 1 to wave :) | R to reset", 10, 50, 20, Color.Red);
+		Raylib.DrawText("Press 1 to wave :) | R to reset", 10, 50, 20, Color.White);
 	}
 	public override void Draw3D() {
 		DrawBoneNodeNetwork(Character);
@@ -51,7 +51,6 @@ public class DemoCharacter :DemoBase {
 
 		SkelOps.PreProcessSkeleton(ref sken, [
 			SkelOps.ValidateBoneNodeTree,
-			SkelOps.LabelDepthBoneNodeTree,
 			SkelOps.BoneNodeTreeBuildRenderLists
 			]);
 
