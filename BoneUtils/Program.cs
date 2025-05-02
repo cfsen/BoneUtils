@@ -1,47 +1,25 @@
 ﻿using BoneUtils.RayLib;
 using Raylib_cs;
-using System.Numerics;
 
-RayLibVisualTest rlvt = new();
+RaylibDemoRunner rldr = new();
 
-Raylib.InitWindow(800, 600, "BoneUtils RayLib Demo");
+Raylib.InitWindow(800, 600, "BoneUtils demo");
 Raylib.SetTargetFPS(60);
 
-Camera3D camera = new Camera3D {
-    Position = new Vector3(6.0f, 2.0f, 0.0f),
-    Target = new Vector3(0.0f, 2.0f, 0.0f),
-    Up = new Vector3(0.0f, 1.0f, 0.0f),
-    FovY = 60.0f,
-    Projection = CameraProjection.Perspective
-};
-
-float deltaTime = 0.0f;
-float deltaTimeHigh = 0.0f;
-
 while (!Raylib.WindowShouldClose()) {
-	rlvt.HandleInput();
-	rlvt.ActiveDemo.HandleDemoInput();
-
-	deltaTime = Raylib.GetFrameTime();
-	rlvt.ActiveDemo.Update(deltaTime);
-
-	if(deltaTime > deltaTimeHigh) deltaTimeHigh = deltaTime;
+	rldr.HandleInput();
+	rldr.Update(Raylib.GetFrameTime());
 
     Raylib.BeginDrawing();
-    Raylib.ClearBackground(Color.Black);
+		Raylib.ClearBackground(Color.Black);
 
-    Raylib.BeginMode3D(camera);
-	rlvt.DrawDemo3D();
-    Raylib.EndMode3D();
+		Raylib.BeginMode3D(rldr.Camera);
+			rldr.DrawDemo3D();
+		Raylib.EndMode3D();
 
-	Raylib.DrawFPS(10, 10);
-	Raylib.DrawText($"dt: {deltaTime}", 100, 10, 16, Color.Green);
-	Raylib.DrawText($"high: {deltaTimeHigh}", 100, 26, 16, Color.Green);
-	rlvt.DrawHelp();
-	rlvt.DrawDemo2D();
-
+		rldr.DrawRunner2D();
+		rldr.DrawDemo2D();
     Raylib.EndDrawing();
-
 }
 
 Raylib.CloseWindow();
