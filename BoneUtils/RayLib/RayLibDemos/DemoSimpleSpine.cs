@@ -8,21 +8,23 @@ using System.Reflection.Metadata;
 
 namespace BoneUtils.RayLib.RayLibDemos;
 public class DemoSimpleSpine :DemoBase {
-
+	private RaylibRenderer Renderer;
 	private SkeletonEntity Spine;
 	private SkeletonEntityOps SkelOps;
 	private Quat q = Quat.Normalize(Quat.Create(MathF.PI/2, Vector3.UnitX));
 	private Quat qAnimate = Quat.Normalize(Quat.Create(MathHelper.DegToRad(0.2f), Vector3.UnitX));
 	private Quat qAnimate2 = Quat.Normalize(Quat.Create(MathHelper.DegToRad(0.2f), Vector3.UnitY));
  
-	public DemoSimpleSpine(SkeletonEntityOps skeops) {
+	public DemoSimpleSpine(SkeletonEntityOps skeops, RaylibRenderer renderer) {
 		SkelOps = skeops;
 		Spine = ConstructSkeleton();
+		Renderer = renderer;
 	}
 
 	public override void Draw3D() {
-		DrawBoneNodeNetwork(Spine, true);
-		DrawQuaternionOrientation(Spine);
+		DrawBoneNodeRendered(Spine, Renderer);
+		//DrawBoneNodeNetwork(Spine, true);
+		//DrawQuaternionOrientation(Spine);
 	}
 	public override void Draw2D() {
 		Raylib.DrawText("Basic rotation propagation.", 10, 50, 20, Color.White);

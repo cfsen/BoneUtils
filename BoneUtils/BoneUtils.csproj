@@ -5,12 +5,23 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="lib\**" />
     <EmbeddedResource Remove="lib\**" />
     <None Remove="lib\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="RayLib\Resources\Shaders\lighting.fs" />
+    <None Remove="RayLib\Resources\Shaders\lighting.vs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="RayLib\Resources\Shaders\lighting.fs" />
+    <EmbeddedResource Include="RayLib\Resources\Shaders\lighting.vs" />
   </ItemGroup>
 
   <ItemGroup>

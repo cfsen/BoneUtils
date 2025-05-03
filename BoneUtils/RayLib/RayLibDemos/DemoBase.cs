@@ -15,6 +15,10 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 	public virtual void Update(float deltaTime) { }
 
 	// Skeleton visualizers
+	internal void DrawBoneNodeRendered(SkeletonEntity sken, RaylibRenderer rr) { 
+		for(var i = 0; i < sken.RenderBoneCount; i++)
+			rr.DrawSphere(sken.BoneWorldPosition(sken.RenderBones[i]));
+	}
 
 	internal void DrawBoneNodeNetwork(SkeletonEntity sken, bool drawConnectors = true) {
 		DrawBoneNode(sken);
@@ -59,7 +63,7 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 
 	internal void DrawQuatDebug(BoneNode node) {
 		List<string> dbgLines = [];
-		var euler = MathHelper.QuaternionToEuler(node.Transform.Rotation.ToQuaternion());
+		var euler = MathHelper.QuatToEuler(node.Transform.Rotation);
 
 		dbgLines.Add($"Quat: {node.Name}");
 		dbgLines.Add($"W: {node.Transform.Rotation.W}");
@@ -82,5 +86,9 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 			Raylib.DrawText(dbgLine, 10, 100+i*18, 16, Color.White);
 			i++;
 		}
+	}
+	internal void DrawQuatInfo(BoneNode node, Camera3D camera) { 
+		// needs access to camera
+		//Raylib.GetWorldToScreen(node.Transform.Position)	
 	}
 }

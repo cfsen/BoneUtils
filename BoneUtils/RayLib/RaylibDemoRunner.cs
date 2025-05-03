@@ -8,6 +8,8 @@ public class RaylibDemoRunner {
 	public Camera3D Camera;
 
 	private SkeletonEntityOps SkelOps;
+	public RaylibRenderer RayRender;
+
 	private int DemoSelector = 0;
 	private List<IDemo> Demos = [];
 	private bool EnableOverlay2D = true;
@@ -17,8 +19,8 @@ public class RaylibDemoRunner {
 
 	public RaylibDemoRunner() {
 		SkelOps = new();
-		InitCamera();
-		InitDemos();
+		Camera = InitCamera();
+		RayRender = new(Camera);
 	}
 	
 	// Active demo interfaces
@@ -32,14 +34,14 @@ public class RaylibDemoRunner {
 
 	// Init
 
-	private void InitDemos() {
+	public void InitDemos() {
 		Demos.Add(new DemoHelix(SkelOps));
 		Demos.Add(new DemoWave(SkelOps));
-		Demos.Add(new DemoSimpleSpine(SkelOps));
+		Demos.Add(new DemoSimpleSpine(SkelOps, RayRender));
 		Demos.Add(new DemoCharacter(SkelOps));
 	}
-	private void InitCamera() {
-		Camera = new Camera3D {
+	private Camera3D InitCamera() {
+		return new Camera3D {
 			Position = new Vector3(6.0f, 2.0f, 0.0f),
 			Target = new Vector3(0.0f, 2.0f, 0.0f),
 			Up = new Vector3(0.0f, 1.0f, 0.0f),
