@@ -6,6 +6,7 @@ using System.Numerics;
 
 namespace BoneUtils.RayLib.RayLibDemos;
 public class DemoCharacter :DemoBase {
+	private RaylibRenderer Renderer;
 
 	private SkeletonEntity Character;
 	private SkeletonEntityOps SkelOps;
@@ -15,16 +16,17 @@ public class DemoCharacter :DemoBase {
 	private Quat qPosZ = Quat.Create(MathHelper.DegToRad(2), Vector3.UnitX);
 	private bool WaveDirection = false;
 
-	public DemoCharacter(SkeletonEntityOps skeops) {
+	public DemoCharacter(SkeletonEntityOps skeops, RaylibRenderer renderer) {
 		SkelOps = skeops;
 		Character = ConstructSkeleton();
+		Renderer = renderer;
+		renderMode = RenderMode.Fancy ^ RenderMode.QuatOrientation ^ RenderMode.Connectors;
 	}
 	public override void Draw2D() {
 		Raylib.DrawText("Press 1 to wave :) | R to reset", 10, 50, 20, Color.White);
 	}
 	public override void Draw3D() {
-		DrawBoneNodeNetwork(Character);
-		DrawQuaternionOrientation(Character);
+		Render(Character, Renderer);
 	}
 	public override void HandleDemoInput() {
 		if (Raylib.IsKeyPressed(KeyboardKey.One))

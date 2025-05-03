@@ -38,7 +38,7 @@ public class RaylibDemoRunner {
 		Demos.Add(new DemoHelix(SkelOps));
 		Demos.Add(new DemoWave(SkelOps));
 		Demos.Add(new DemoSimpleSpine(SkelOps, RayRender));
-		Demos.Add(new DemoCharacter(SkelOps));
+		Demos.Add(new DemoCharacter(SkelOps, RayRender));
 	}
 	private Camera3D InitCamera() {
 		return new Camera3D {
