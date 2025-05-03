@@ -6,6 +6,7 @@ using System.Numerics;
 
 namespace BoneUtils.RayLib.RayLibDemos;
 public abstract class DemoBase :MockDataBuilder, IDemo{
+	internal RenderMode renderMode;
 
 	// Interface contracts
 
@@ -13,6 +14,19 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 	public virtual void Draw2D() { }
 	public virtual void HandleDemoInput() { }
 	public virtual void Update(float deltaTime) { }
+
+	// Utility
+
+	internal void Render(SkeletonEntity skeleton, RaylibRenderer? rr = null) {
+		if(renderMode.HasFlag(RenderMode.Basic))
+			DrawBoneNodeNetwork(skeleton, renderMode.HasFlag(RenderMode.Connectors));
+		if(!renderMode.HasFlag(RenderMode.Basic) && renderMode.HasFlag(RenderMode.Connectors))
+			DrawBoneNodeConnectors(skeleton);
+		if(renderMode.HasFlag(RenderMode.QuatOrientation))
+			DrawQuaternionOrientation(skeleton);
+		if(renderMode.HasFlag(RenderMode.Fancy) && rr != null)
+			DrawBoneNodeRendered(skeleton, rr);
+	}
 
 	// Skeleton visualizers
 	internal void DrawBoneNodeRendered(SkeletonEntity sken, RaylibRenderer rr) { 
@@ -53,7 +67,7 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 
 			originBone += worldXfm;
 
-			Raylib.DrawLine3D(originBone, worldXfm+indicator["X"], Color.Orange);
+			Raylib.DrawLine3D(originBone, worldXfm+indicator["X"], Color.Red);
 			Raylib.DrawLine3D(originBone, worldXfm+indicator["Y"], Color.Green);
 			Raylib.DrawLine3D(originBone, worldXfm+indicator["Z"], Color.Blue);
 		}
@@ -90,5 +104,16 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 	internal void DrawQuatInfo(BoneNode node, Camera3D camera) { 
 		// needs access to camera
 		//Raylib.GetWorldToScreen(node.Transform.Position)	
+	}
+
+	// Flags
+
+	[Flags]
+	internal enum RenderMode {
+		None = 0,
+		Basic = 1,
+		Connectors = 2,
+		QuatOrientation = 4,
+		Fancy = 8,
 	}
 }
