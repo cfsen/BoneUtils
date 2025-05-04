@@ -52,24 +52,20 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 					Color.Red);
 		}
 	}
-	internal void DrawQuaternionOrientation(SkeletonEntity sken) {
-		Dictionary<string,Vector3> indicator = [];
+	private Vector3 _originBone = Vector3.Zero;
+	private Vector3 _worldXfm = Vector3.Zero;
+	internal void DrawQuaternionOrientation(SkeletonEntity sken) { 
+		MathHelper.QuatOrientationVectors indicator = new();
+		for (var i = 0; i < sken.RenderBoneCount; i++) {
+			_originBone = sken.RenderBones[i].Transform.Position;
+			_worldXfm = sken.WorldPosition;
+			MathHelper.CreateLocalDirectionVectors(sken.RenderBones[i].Transform.Rotation, _originBone, ref indicator);
 
-		Vector3 originBone = Vector3.Zero;
-		Vector3 worldXfm = Vector3.Zero;
-		for(var i = 0; i < sken.RenderBoneCount; i++) {
-			originBone = sken.RenderBones[i].Transform.Position;
-			worldXfm = sken.WorldPosition;
+			_originBone += _worldXfm;
 
-			indicator = MathHelper.CreateLocalDirectionVectors(
-				sken.RenderBones[i].Transform.Rotation, 
-				originBone);
-
-			originBone += worldXfm;
-
-			Raylib.DrawLine3D(originBone, worldXfm+indicator["X"], Color.Red);
-			Raylib.DrawLine3D(originBone, worldXfm+indicator["Y"], Color.Green);
-			Raylib.DrawLine3D(originBone, worldXfm+indicator["Z"], Color.Blue);
+			Raylib.DrawLine3D(_originBone, _worldXfm+indicator.X, Color.Red);
+			Raylib.DrawLine3D(_originBone, _worldXfm+indicator.Y, Color.Green);
+			Raylib.DrawLine3D(_originBone, _worldXfm+indicator.Z, Color.Blue);
 		}
 	}
 

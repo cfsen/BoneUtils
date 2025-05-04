@@ -104,20 +104,12 @@ public static class MathHelper {
 	/// </summary>
 	/// <param name="q">The quaternion to generate indicators for</param>
 	/// <param name="origin">Position of the quaternion in world space</param>
+	/// <param name="orientation">Points where direction vectors will end</param>
 	/// <param name="length">Length of indicating vectors (distance from position)</param>
-	public static Dictionary<string, Vector3> CreateLocalDirectionVectors(Quat q, Vector3 origin, float length = 0.5f) {
-		/*
-		Create unit vectors in world space for each axis
-		1,0,0 - 0,1,0 - 0,0,1
-		then apply rotation to each one using the quat associated with the bonenode
-		then translate it into position
-		 */
-
-		Vector3 x = FPCorrection(Quat.RotateVector(q, Vector3.UnitX), length) + origin;
-		Vector3 y = FPCorrection(Quat.RotateVector(q, Vector3.UnitY), length) + origin;
-		Vector3 z = FPCorrection(Quat.RotateVector(q, Vector3.UnitZ), length) + origin;
-
-		return new Dictionary<string, Vector3> { ["X"] = x, ["Y"] = y, ["Z"] = z };
+	public static void CreateLocalDirectionVectors(Quat q, Vector3 origin, ref QuatOrientationVectors orientation, float length = 0.5f) { // TODO consider using out for result
+		orientation.X = FPCorrection(Quat.RotateVector(q, Vector3.UnitX), length) + origin;
+		orientation.Y = FPCorrection(Quat.RotateVector(q, Vector3.UnitY), length) + origin;
+		orientation.Z = FPCorrection(Quat.RotateVector(q, Vector3.UnitZ), length) + origin;
 	}
 
 	// Radian conversion
@@ -128,4 +120,11 @@ public static class MathHelper {
 	public static double RadToDeg(double rad) => rad*180.0f/MathF.PI;
 
 
+	// Structs
+
+	public ref struct QuatOrientationVectors(Vector3 x, Vector3 y, Vector3 z) {
+		public Vector3 X = x;
+		public Vector3 Y = y;
+		public Vector3 Z = z;
+	}
 }

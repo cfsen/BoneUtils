@@ -17,6 +17,10 @@ public class RaylibDemoRunner {
 	private float deltaTime = 0.0f;
 	private float deltaTimeHigh = 0.0f;
 
+	private GuiText guiText = new();
+	private string guiDt = string.Empty;
+	private string guiDtHigh = string.Empty;
+
 	public RaylibDemoRunner() {
 		SkelOps = new();
 		Camera = InitCamera();
@@ -74,7 +78,11 @@ public class RaylibDemoRunner {
 
 	public void DeltaTimeTracker(float dt) {
 		deltaTime = dt;
-		if(deltaTime > deltaTimeHigh) deltaTimeHigh = deltaTime;
+		if(deltaTime > deltaTimeHigh) {
+			deltaTimeHigh = deltaTime;
+			guiDtHigh = deltaTimeHigh.ToString(); // can be optimized further
+		}
+		guiDt = dt.ToString();
 	}
 
 	// 2D overlay
@@ -85,12 +93,20 @@ public class RaylibDemoRunner {
 	}
 
 	private void DrawHelp() {
-		Raylib.DrawText("F1: Show help | Demos: F2, F3, F4, F5", 220, 10, 20, Color.Yellow);
+		Raylib.DrawText(guiText.Help, 220, 10, 20, Color.Yellow);
 	}
 	private void DrawFPSTiming() {
 		Raylib.DrawFPS(10, 10);
-		Raylib.DrawText($"dt: {deltaTime}", 100, 10, 16, Color.Green);
-		Raylib.DrawText($"high: {deltaTimeHigh}", 100, 26, 16, Color.Green);
+		Raylib.DrawText(guiText.DeltaTime, 100, 10, 16, Color.Green);
+		Raylib.DrawText(guiText.DeltaTimeHigh, 100, 26, 16, Color.Green);
+		Raylib.DrawText(guiDt, 140, 10, 16, Color.Green); 
+		Raylib.DrawText(guiDtHigh, 140, 26, 16, Color.Green);
+	}
+	private struct GuiText {
+		public string Help = "F1: Show help | Demos: F2, F3, F4, F5";
+		public string DeltaTime = "dt:";
+		public string DeltaTimeHigh ="high:";
+		public GuiText(){}
 	}
 }
 
