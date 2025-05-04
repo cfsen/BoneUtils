@@ -173,7 +173,7 @@ public class QuatTests {
 	/// </summary>
 	[TestMethod]
 	public void Quat_CanConvertToMatrix4x4() {
-		Quat q = Quat.Identity();
+		Quat q = Quat.Identity;
 
 		Assert.AreEqual(Matrix4x4.Identity, q.ToMatrix());
 	}

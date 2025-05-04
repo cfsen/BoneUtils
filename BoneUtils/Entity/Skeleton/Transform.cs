@@ -30,7 +30,7 @@ public class Transform {
 
 	public Transform(Vector3? scale = null, Quat? rotation = null, Vector3? position = null) {
 		this.scale = scale ?? Vector3.One;
-		this.rotation = rotation ?? Quat.Identity();
+		this.rotation = rotation ?? Quat.Identity;
 		this.position = position ?? Vector3.Zero;
 
 		RebuildMatrix();

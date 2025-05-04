@@ -6,13 +6,15 @@ namespace BoneUtils.Math;
 /*
 	This was ported from math.net: 
 	https://github.com/mathnet/mathnet-numerics/blob/master/src/FSharp/Quaternion.fs
-
-	Left-handed
 */
 
 [StructLayout(LayoutKind.Sequential)]
 public struct Quat :IEquatable<Quat> {
 	public float X, Y, Z, W;
+
+	public static Quat Identity {
+		get => new(1,0,0,0); 
+	}
 
 	// Operators
 
@@ -82,8 +84,6 @@ public struct Quat :IEquatable<Quat> {
 			Z= u.Z * uInv * MathF.Sin(angle*0.5f)
 		};
 	}
-	public static Quat Identity() 
-		=> new() { W = 1, X = 0, Y = 0, Z = 0 };
 
 	// Functions
 
@@ -108,6 +108,7 @@ public struct Quat :IEquatable<Quat> {
 	public static Quat Slerp(Quat q0, Quat q1, float u) {
 		// https://splines.readthedocs.io/en/latest/rotation/slerp.html
 		// TODO benchmark for performance vs allocating theta
+		// TODO edge case handling
 
 		if(MathF.Sin(MathF.Acos(Quat.Dot(q0,q1))) < float.Epsilon) // Quats are nearly identical
 			return q0;
@@ -125,6 +126,7 @@ public struct Quat :IEquatable<Quat> {
 		=> new() { W = q.W, X = q.X, Y = q.Y, Z=q.Z };
 	public static Matrix4x4 ToMatrix(Quat q) {
 		// https://www.mathworks.com/help/nav/ref/quaternion.rotmat.html
+		// left-handed
 		return new() {
 			M11 = 2*(q.W*q.W + q.X*q.X) - 1, 	M12 = 2*(q.X*q.Y + q.W*q.Z), 	M13 = 2*(q.X*q.Z - q.W*q.Y), 	M14 = 0,
 			M21 = 2*(q.X*q.Y - q.W*q.Z),		M22 = 2*(q.W*q.W + q.Y*q.Y)-1,	M23 = 2*(q.Y*q.Z + q.W*q.X),	M24 = 0,

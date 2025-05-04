@@ -61,7 +61,7 @@ public class BoneNodeXfmBuffer {
 	public void Reset() {
 		Translation = Vector3.Zero;
 		Scale = Vector3.One;
-		Rotation = Quat.Identity();
+		Rotation = Quat.Identity;
 		Matrix = Matrix4x4.Identity;
 		BufferedXfms = XfmType.None;
 		Active = false;
