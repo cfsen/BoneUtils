@@ -28,7 +28,7 @@ public static class XfmHandlerFallbacks {
 	/// <param name="position">Position of node. Rotate() handles translating into local space.</param>
 	/// <param name="rotation">New orientation, multiplicative with current orientation.</param>
 	/// <param name="origin">Origin of rotation (pivot point)</param>
-	/// <returns></returns>
+	/// <returns>New position for bone</returns>
 	public static Vector3 BoneNodeRotateFallback(BoneNode node, Vector3 position, Quat rotation, Vector3 origin) 
 		=> MathHelper.RotateWithDriftCorrection(position, rotation, origin);
 
@@ -38,7 +38,7 @@ public static class XfmHandlerFallbacks {
 	/// </summary>
 	/// <param name="node">Node to transform.</param>
 	/// <param name="Transforms">List of tuples for contextual logic and target transform.</param>
-	/// <returns></returns>
+	/// <returns>The state stored in Transform.InitialState at compose time.</returns>
 	public static Matrix4x4 BoneNodeSetTransformFallback(BoneNode node, List<(BoneNode, Transform)>? Transforms) {
 		return node.Transform.InitialState;
 	}
