@@ -35,6 +35,7 @@ public class BoneNode {
 		TransformBuffer = new BoneNodeXfmBuffer();
 	}
 
+	// Buffer handlers
 
 	public bool PrepareTransformBuffer(PrepareXfmBuffer? handler = null) {
 		if(TransformBuffer.Active) return false;
@@ -49,6 +50,9 @@ public class BoneNode {
 
 		return handler(this);
 	}
+
+	// Basic transforms
+
 	public void Translate(Vector3 offset) {
 		Transform.Position += offset;
 		foreach (var child in Children.Values) 
@@ -63,18 +67,21 @@ public class BoneNode {
 		foreach (var child in Children.Values)
 			child.Rotate(rotation, xfmHandler, origin);
 	}
-	public void SetTransform(SetXfmHandler? xfmHandler) {
+	public void SetTransform(SetXfmHandler? xfmHandler, bool recurse = true) {
 		xfmHandler ??= XfmHandlerFallbacks.BoneNodeSetTransformFallback;
 
 		Transform.SetTransform(xfmHandler(this));
 
+		if(!recurse) return;
+
 		foreach (var child in Children.Values) 
 			child.SetTransform(xfmHandler);
 	}
+
+	// Utility
+
 	public void Reset(bool propagate = true) {
 		Transform.SetTransform(Transform.InitialState);
-
-		Debug.WriteLine($"Reset: {Name}");
 
 		if(propagate)
 			foreach (var child in Children.Values)
