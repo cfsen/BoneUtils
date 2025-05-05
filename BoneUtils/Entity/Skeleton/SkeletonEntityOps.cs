@@ -11,10 +11,13 @@ public class SkeletonEntityOps {
 	public delegate bool SkeletonEntityMutator(ref SkeletonEntity skeleton);
 
 	public void PreProcessSkeleton(ref SkeletonEntity skeleton, List<SkeletonEntityMutator> preProcessors) {
-		foreach (var preProcessor in preProcessors) 
-			if(!preProcessor(ref skeleton)) 
-				throw new Exception($"SkeletonEntityMutator failed! {nameof(preProcessor)}");
+		foreach (var preProcessor in preProcessors) {
 				// Raise exception if mutate fails, for the time being.
+			if(!preProcessor(ref skeleton)) 
+				throw new Exception($"SkeletonEntityMutator failed! {preProcessor.Method.Name}");
+			else
+				skeleton.Mutators.Add(preProcessor.Method.Name);
+		}
 	}
 
 	// Mutators
@@ -53,7 +56,7 @@ public class SkeletonEntityOps {
 	/// <param name="skeleton">Skeleton containing nodes</param>
 	/// <returns>false if the skeleton has no nodes or DFS depth is reached (n > 100)</returns>
 	public bool LabelDepthBoneNodeTree(ref SkeletonEntity skeleton) {
-		if(skeleton.Bones.Count == 0) return false;
+		if(!skeleton.Mutators.Contains(nameof(ValidateBoneNodeTree))) return false;
 
 		// BFS for setting BoneNode depth
 		var queue = new Queue<(BoneNode node, int depth)>();
@@ -89,7 +92,7 @@ public class SkeletonEntityOps {
 	/// <param name="skeleton">Skeleton containing nodes</param>
 	/// <returns>false if skeleton has no nodes or DFS depth is reached (n > 100)</returns>
 	public bool BoneNodeTreeBuildRenderLists(ref SkeletonEntity skeleton) {
-		if(skeleton.Bones.Count == 0) return false;
+		if(!skeleton.Mutators.Contains(nameof(ValidateBoneNodeTree))) return false;
 
 		skeleton.RenderBoneCount = skeleton.Bones.Count;
 		skeleton.RenderBones = [.. skeleton.Bones.Values];
@@ -115,7 +118,7 @@ public class SkeletonEntityOps {
 	/// <param name="skeleton">Skeleton containing nodes.</param>
 	/// <returns>false if skeleton has no nodes or BFS run limit is reached (n > 500).</returns>
 	public bool BoneNodeTreeCalculateConstraints(ref SkeletonEntity skeleton) {
-		if(skeleton.Bones.Count == 0) return false;
+		if(!skeleton.Mutators.Contains(nameof(ValidateBoneNodeTree))) return false;
 
 		var queue = new Queue<BoneNode>();
 		int runLimit = BFSLimit, runs = 0;
