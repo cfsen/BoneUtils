@@ -1,18 +1,19 @@
+﻿using BoneUtils.Entity.Skeleton.Animation;
 ﻿using System.ComponentModel;
 using System.Numerics;
 
 namespace BoneUtils.Entity.Skeleton;
 public class SkeletonEntity {
 	public string Name; // TODO move to owner of skeleton (eg. GameEntity)
-
+	public SkeletonAnimator? Animator; // Set with SkeletonEntityOps mutator
 	public List<string> Mutators = new();
 	public Vector3 WorldPosition;
-
 	public BoneNode RootNode;
 	public Dictionary<string, BoneNode> Bones = [];
 	public int RenderBoneCount = 0;
 	public List<BoneNode> RenderBones = [];
 	public int? BoneDepth;
+
 
 	public SkeletonEntity(string name, BoneNode root, Dictionary<string, BoneNode>? bones = null) {
 		Name = name;
