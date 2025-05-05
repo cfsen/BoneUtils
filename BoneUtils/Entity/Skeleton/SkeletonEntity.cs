@@ -4,6 +4,8 @@ using System.Numerics;
 namespace BoneUtils.Entity.Skeleton;
 public class SkeletonEntity {
 	public string Name; // TODO move to owner of skeleton (eg. GameEntity)
+
+	public List<string> Mutators = new();
 	public Vector3 WorldPosition;
 
 	public BoneNode RootNode;
