@@ -1,4 +1,5 @@
-﻿using BoneUtils.Math;
+﻿using BoneUtils.Entity.Skeleton.Animation;
+using BoneUtils.Math;
 using System.Numerics;
 
 namespace BoneUtils.Entity.Skeleton;
@@ -12,12 +13,12 @@ public class SkeletonEntityOps {
 
 	public void PreProcessSkeleton(ref SkeletonEntity skeleton, List<SkeletonEntityMutator> preProcessors) {
 		foreach (var preProcessor in preProcessors) {
-				// Raise exception if mutate fails, for the time being.
+			// Raise exception if mutate fails, for the time being.
 			if(!preProcessor(ref skeleton)) 
 				throw new Exception($"SkeletonEntityMutator failed! {preProcessor.Method.Name}");
 			else
 				skeleton.Mutators.Add(preProcessor.Method.Name);
-	}
+		}
 	}
 
 	// Mutators
@@ -161,6 +162,13 @@ public class SkeletonEntityOps {
 
 		foreach(BoneNode node in skeleton.Bones.Values) 
 			node.ParentEntity = skeleton;
+		return true;
+	}
+
+	public bool AddSkeletonAnimator(ref SkeletonEntity skeleton) {
+		if (!skeleton.Mutators.Contains(nameof(BoneNodeTreeCalculateConstraints))) return false;
+
+		skeleton.Animator = new SkeletonAnimator{ Skeleton=skeleton };
 		return true;
 	}
 
