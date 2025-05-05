@@ -16,6 +16,8 @@ public class SkeletonAnimator {
 	public bool Running = false;
 	private float runtime = 0;
 
+	public int LoadedAnimations => animationCount;
+
 	// Animation loading/unloading
 
 	public void Load(SkeletonAnimation animation) {
