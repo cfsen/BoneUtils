@@ -21,6 +21,7 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		// Describe a translation animation
 		Vector3 translation = new(2, 0, 0);
 		var (xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation);
+		builder.XfmType = AnimationXfmType.Static;
 
 		// Create keyframes
 		var frame0 = builder.CreateKeyframe(sken.RootNode, xfm0, 0.0f);
@@ -52,6 +53,6 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 
 		// Container check
 		Assert.AreEqual(3.0f, animation.TotalDuration, "Animation duration should be set.");
-		Assert.AreEqual(AnimationType.Relative, animation.Type, "Animation type should be Relative.");
+		Assert.AreEqual(AnimationXfmType.Static, animation.Type, "Animation type should be Relative.");
 	}
 }

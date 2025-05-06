@@ -13,6 +13,9 @@ namespace BoneUtilsUnitTests.AnimationTests;
 [TestClass]
 [TestCategory("Animation tests")]
 public class Animation_Tests :MockAnimationBuilder{
+	/// <summary>
+	/// Checks if a static 2 frame translation animation can be played and looped.
+	/// </summary>
 	[TestMethod]
 	public void Animator_Play_RootNode_Translation() {
 		var (sken, anim) = Mock_Skeleton_With_AnimationContainer_RootNode_Translation();
@@ -44,6 +47,6 @@ public class Animation_Tests :MockAnimationBuilder{
 
 		// Advance timeline by 1s, t=1.0
 		sken.Animator.Play(0.00001f);
-		Assert.AreEqual(origin, sken.RootNode.Transform.Position, "At t=3.0+0.00001s, skeleton should be at its initial position");
+		Assert.AreEqual(origin, sken.RootNode.Transform.Position, "At t=3.0+0.00001s, skeleton should be back at its initial position");
 	}
 }

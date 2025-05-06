@@ -45,6 +45,9 @@ public abstract class MockAnimationBuilder :MockDataBuilder {
 		var (sken, ops) = SetupSkeletonWithAnimator(Mock_Spine);
 		AnimationBuilder builder = new();
 
+		// Set transform type
+		builder.XfmType = AnimationXfmType.Static;
+
 		// Describe a translation animation
 		Vector3 translation = new(2, 0, 0);
 		var (xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation);
@@ -129,7 +132,7 @@ public abstract class MockAnimationBuilder :MockDataBuilder {
 			Keyframes = [f0, f1],
 			FrameBlends = [blend_f0f1],
 			TotalDuration = 3.0f,
-			Type = AnimationType.Relative,
+			Type = AnimationXfmType.Relative,
 		};
 
 		return animationGroup;
