@@ -33,6 +33,7 @@ public class Animator_Tests :MockAnimationBuilder{
 		Assert.IsFalse(sken.Animator.Running, "Skeleton should be inactive.");
 		Assert.AreEqual(0, sken.Animator.LoadedAnimations, "Skeleton should have no loaded animations.");
 	}
+
 	/// <summary>
 	/// Checks AnimationContainer compositon without AnimationBuilder
 	/// </summary>
@@ -51,6 +52,18 @@ public class Animator_Tests :MockAnimationBuilder{
 		sken.Animator.Load(animation);
 
 		// Validate animation load
+		Assert.AreEqual(1, sken.Animator.LoadedAnimations, "The created animation should be loaded.");
+	}
+
+	/// <summary>
+	/// Checks loading up an animation
+	/// </summary>
+	[TestMethod]
+	public void Animator_LoadAnimation() {
+		var (sken, animContainer) = Mock_Skeleton_With_AnimationContainer_RootNode_Translation();
+		SkeletonAnimation animation = new(animContainer);
+		sken.Animator!.Load(animation);
+		
 		Assert.AreEqual(1, sken.Animator.LoadedAnimations, "The created animation should be loaded.");
 	}
 }

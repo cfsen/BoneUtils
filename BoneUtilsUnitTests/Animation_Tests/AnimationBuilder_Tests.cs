@@ -50,5 +50,8 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		Assert.AreEqual(sken.RootNode.Transform.Rotation, frame1.TransformState.Rotation, "Cloned transform should not change rotation.");
 		Assert.AreEqual(sken.RootNode.Transform.Scale, frame1.TransformState.Scale, "Cloned transform should not change scale.");
 
+		// Container check
+		Assert.AreEqual(3.0f, animation.TotalDuration, "Animation duration should be set.");
+		Assert.AreEqual(AnimationType.Relative, animation.Type, "Animation type should be Relative.");
 	}
 }
