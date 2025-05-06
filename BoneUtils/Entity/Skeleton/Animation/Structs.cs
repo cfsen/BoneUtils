@@ -15,13 +15,14 @@ public struct AnimationContainer {
 	public required List<AnimationKeyframe> Keyframes; 
 	public required List<AnimationBlend> FrameBlends;
 	public required float TotalDuration; // Complete duration of animation, in seconds
-	public required AnimationType Type; // should transforms be treated as absolute, or relative to current position (canned anim. vs. procedural)
+	public required AnimationXfmType Type; // should transforms be treated as absolute, or relative to current position (canned anim. vs. procedural)
 }
 
 /// <summary>
 /// Defines the animation method for BonesAnimation.
 /// </summary>
-public enum AnimationType {
+public enum AnimationXfmType {
+	None,
 	Static, // Should animate in world space
 	Relative, // Should animate in skeleton local space
 	Custom // prep for IoC 
