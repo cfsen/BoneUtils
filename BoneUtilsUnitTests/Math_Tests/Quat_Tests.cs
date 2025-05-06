@@ -1,13 +1,14 @@
 ﻿using BoneUtils.Math;
 using System.Numerics;
 
-namespace BoneUtilsUnitTests.MathTests;
+namespace Tests.Math_Tests;
 
 /// <summary.>
 /// Tests for the Quat struct
 /// </summary>
 [TestClass]
-public class QuatTests {
+[TestCategory("Math")]
+public class Quat_Tests {
 
 // Operators
 

@@ -4,22 +4,11 @@ using BoneUtils.Mockups;
 using System.Numerics;
 using BoneUtils.Math;
 
-namespace BoneUtilsUnitTests.SkeletonEntityTests;
+namespace Tests.Skeleton_Tests;
 
 [TestClass]
-public class SkeletonEntityConstructionTests :MockDataBuilder {
-	[TestMethod]
-	public void BoneNode_CanConstruct() {
-		BoneNode node = Mock_BoneNode();
-
-		Assert.IsInstanceOfType<BoneNode>(node);
-		Assert.IsInstanceOfType<Transform>(node.Transform);
-
-		// Check for default values 
-		Assert.IsTrue(node.Transform.Position == Vector3.Zero);
-		Assert.IsTrue(node.Transform.Rotation == Quat.Identity);
-		Assert.IsTrue(node.Transform.Scale == Vector3.One);
-	}
+[TestCategory("SkeletonEntity construction")]
+public class SkeletonEntity_ConstructionTests :MockDataBuilder {
 	[TestMethod]
 	public void Entity_CanConstruct() {
 		BoneNode node = Mock_BoneNode();

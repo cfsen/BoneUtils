@@ -4,9 +4,10 @@ using BoneUtils.Mockups;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Numerics;
 
-namespace BoneUtilsUnitTests.SkeletonEntityTransformTests;
+namespace Tests.Skeleton_Tests;
 [TestClass]
-public class SkeletonEntityTransformTests :MockDataBuilder {
+[TestCategory("SkeletonEntity transforms")]
+public class SkeletonEntity_TransformTests :MockDataBuilder {
 	[TestMethod]
 	public void Entity_WorldTranslateVectors() {
 		SkeletonEntity en = Mock_Spine();

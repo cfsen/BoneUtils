@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35828.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoneUtils", "BoneUtils\BoneUtils.csproj", "{4B7371F4-0886-A786-7137-48EA30B6D571}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoneUtilsUnitTests", "BoneUtilsUnitTests\BoneUtilsUnitTests.csproj", "{CA4A505C-1809-2B95-A151-035EF9B3AA7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "BoneUtilsUnitTests\Tests.csproj", "{CA4A505C-1809-2B95-A151-035EF9B3AA7B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoneUtilsBenchmark", "BoneUtilsBenchmark\BoneUtilsBenchmark.csproj", "{82400E2A-D761-4EFF-A898-CE4AE58BF792}"
 EndProject

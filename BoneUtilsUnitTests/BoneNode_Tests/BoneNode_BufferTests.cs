@@ -8,9 +8,10 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoneUtilsUnitTests.BoneNodeTests;
+namespace Tests.BoneNode_Tests;
 [TestClass]
-public class BoneNodeTests :MockDataBuilder{
+[TestCategory("BoneNode transform buffering")]
+public class BoneNode_BufferTests :MockDataBuilder{
 	[TestMethod]
 	public void BoneNode_TransformBuffer() {
 		SkeletonEntity sk = Mock_Spine();
