@@ -22,17 +22,18 @@ public struct AnimationContainer {
 /// Defines the animation method for BonesAnimation.
 /// </summary>
 public enum AnimationType {
-	Static,
-	Relative,
+	Static, // Should animate in world space
+	Relative, // Should animate in skeleton local space
 	Custom // prep for IoC 
 }
 
 /// <summary>
-/// Defines a keyframe in an animation, containing the bone, transformation state, and time position.
+/// Defines a keyframe in an animation, containing a reference to a BoneNode, 
+/// immutable snapshot of transformation state, and timeline position.
 /// </summary>
 public readonly struct AnimationKeyframe {
-	public readonly required BoneNode Bone { get; init; }
-	public readonly required TransformSnapshot TransformState { get; init; }
+	public readonly required BoneNode Bone { get; init; } // Reference, can mutate!
+	public readonly required TransformSnapshot TransformState { get; init; } // Immutable
 	public readonly required float TimelinePosition { get; init; } // Relative to TotalDuration, 0 = at the beginning of the animation, = Duration at the end
 }
 
@@ -53,6 +54,7 @@ public readonly struct AnimationBlend {
 	public readonly required float TimeFactor { get; init; } 
 
 	// how long should this take to complete
+	// TODO this is redundant, timeline is defined by keyframes
 	public readonly required float Time { get; init; } 
 }
 

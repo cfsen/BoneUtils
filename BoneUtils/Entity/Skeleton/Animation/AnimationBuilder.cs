@@ -5,16 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BoneUtils.Entity.Skeleton.Animation; 
+/* 
+ * TODO: Reevaluate this approach.
+ * Using mutable classes for keyframe/blend staging and export to structs later is cleaner.
+ */
 public class AnimationBuilder {
-	public AnimationContainer BonesAnimation;
+
+	private List<AnimationKeyframe> Keyframes = [];
+	private List<AnimationBlend> FrameBlends = [];
+	private float TotalDuration = 0;
+	private AnimationType Type = AnimationType.Relative;
 
 	public AnimationBuilder() {
-		BonesAnimation = new AnimationContainer{
-			Keyframes = [],
-			FrameBlends = [],
-			TotalDuration = 0,
-			Type = AnimationType.Static,
-		};
 	}
 
 	// Sequence builders
@@ -22,26 +24,26 @@ public class AnimationBuilder {
 	// Primary method for adding a pair of keyframes with a blend
 	// setting AnimationBlend is intended for advanced use
 	public bool AddSequence(AnimationKeyframe origin, AnimationKeyframe target, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
-		int originIndex = BonesAnimation.Keyframes.Count;
+		int originIndex = Keyframes.Count;
 		int targetIndex = originIndex + 1;
 
 		// Add keyframes
-		BonesAnimation.Keyframes.Add(origin);
-		BonesAnimation.Keyframes.Add(target);
+		Keyframes.Add(origin);
+		Keyframes.Add(target);
 
 		AnimationBlend? blend;
 		if(originToTarget == null) {
 			blend = CreateBlendSegment(blendType, originIndex, targetIndex);
 			if(blend == null) {
 				// Failed to create blend, clean up inserted keyframes
-				BonesAnimation.Keyframes.RemoveAt(targetIndex);
-				BonesAnimation.Keyframes.RemoveAt(originIndex);
+				Keyframes.RemoveAt(targetIndex);
+				Keyframes.RemoveAt(originIndex);
 				return false;
 			}
 		}
 		else
 			blend = originToTarget;
-		BonesAnimation.FrameBlends.Add(blend.Value);
+		FrameBlends.Add(blend.Value);
 
 		return true;
 	}
@@ -61,7 +63,7 @@ public class AnimationBuilder {
 		if(!CheckKeyframeExists(originIndex) || !CheckKeyframeExists(targetIndex))
 			return null;
 		
-		var blendTime = BonesAnimation.Keyframes[targetIndex].TimelinePosition - BonesAnimation.Keyframes[originIndex].TimelinePosition;
+		var blendTime = Keyframes[targetIndex].TimelinePosition - Keyframes[originIndex].TimelinePosition;
 		if(blendTime <= 0) 
 			return null;
 
@@ -82,7 +84,7 @@ public class AnimationBuilder {
 		if(!CheckKeyframeExists(keyframeIndex)) return false;
 
 		if (!CheckKeyframeHasBlends(keyframeIndex)) {
-			BonesAnimation.Keyframes.RemoveAt(keyframeIndex);
+			Keyframes.RemoveAt(keyframeIndex);
 			return true;
 		}
 
@@ -92,17 +94,17 @@ public class AnimationBuilder {
 			return false; // TODO failure at this time indicates state corruption, maybe throw instead of returning false
 
 		// Reconstruct blendframes and remove keyframe
-		BonesAnimation.FrameBlends.RemoveRange(deleteFrom.Value, 
-			BonesAnimation.FrameBlends.Count - deleteFrom.Value);
-		BonesAnimation.FrameBlends.AddRange(blendList);
-		BonesAnimation.Keyframes.RemoveAt(keyframeIndex);
+		FrameBlends.RemoveRange(deleteFrom.Value, 
+			FrameBlends.Count - deleteFrom.Value);
+		FrameBlends.AddRange(blendList);
+		Keyframes.RemoveAt(keyframeIndex);
 		return true;
 	}
 	private (bool hasBlends, int? delFromIdx, List<AnimationBlend>? rebuiltFrames) RebuildBlendFrames(int keyframeIndex) {
 		// Find index of associated blendframe
 		int? assocBlendsFromIndex = null;
-		for(int i = 0; i < BonesAnimation.FrameBlends.Count; i++) {
-			if(BonesAnimation.FrameBlends[i].OriginIndex == keyframeIndex) { 
+		for(int i = 0; i < FrameBlends.Count; i++) {
+			if(FrameBlends[i].OriginIndex == keyframeIndex) { 
 				// Edge case: indices must be unique, finding another indicates state corruption
 				if(assocBlendsFromIndex != null)
 					return (false, null, null); 
@@ -117,13 +119,13 @@ public class AnimationBuilder {
 		// Rebuild following blend frames
 		List<AnimationBlend> blendList = [];
 		AnimationBlend? tmp = null;
-		for(int i = 0; i < BonesAnimation.FrameBlends.Count; i++) {
-			if(BonesAnimation.FrameBlends[i].OriginIndex > keyframeIndex) {
+		for(int i = 0; i < FrameBlends.Count; i++) {
+			if(FrameBlends[i].OriginIndex > keyframeIndex) {
 				// Any frame after the deleted index, need to have both their origin and target index reduced
 				tmp = CreateBlendSegment(
-					BonesAnimation.FrameBlends[i].BlendType, 
-					BonesAnimation.FrameBlends[i].OriginIndex-1, 
-					BonesAnimation.FrameBlends[i].TargetIndex-1
+					FrameBlends[i].BlendType, 
+					FrameBlends[i].OriginIndex-1, 
+					FrameBlends[i].TargetIndex-1
 					);
 
 				if(tmp == null) return (false, null, null); 
@@ -136,16 +138,47 @@ public class AnimationBuilder {
 	}
 
 	// Export
+	private float CalculateDuration() {
+		return Keyframes.Last().TimelinePosition;
+	}
+	public AnimationContainer Export() {
 
-	public AnimationContainer Export() => BonesAnimation;
+		return new AnimationContainer {
+			Keyframes = this.Keyframes,
+			FrameBlends = this.FrameBlends,
+			TotalDuration = CalculateDuration(),
+			Type = this.Type
+		};
+	}
 
 	// State checkers
 
 	private bool CheckKeyframeHasBlends(int i) 
-		=> BonesAnimation.FrameBlends.Any(x => x.OriginIndex == i || x.TargetIndex == i);
+		=> FrameBlends.Any(x => x.OriginIndex == i || x.TargetIndex == i);
 	private bool CheckKeyframeExists(int i) 
-		=> (i >= 0 && BonesAnimation.Keyframes.Count > i);
-	public bool Verify() {
-		return false;
+		=> (i >= 0 && Keyframes.Count > i);
+	public (bool valid, string msg) Verify() {
+		if(Keyframes.Count < 2) 
+			return (false, "AnimationContainer must have at least 2 keyframes.");
+
+		if(FrameBlends.Count < Keyframes.Count - 1)
+			return (false, "Missing blend frames, count should be Keyframes.Count-1");
+		else if(FrameBlends.Count >= Keyframes.Count)
+			return (false, "Too many blend frames, count should be Keyframes.Count-1");
+
+		// Check if first keyframe is at the timeline beginning
+		if(Keyframes.First().TimelinePosition != 0.0f) return (false, "First keyframe must start at 0.0");
+
+		// Check that keyframes are an ordered list
+		float timelinePos = 0.0f;
+		for(int i = 1; i < Keyframes.Count; i++) {
+			if(Keyframes[i].TimelinePosition > timelinePos) {
+				timelinePos = Keyframes[i].TimelinePosition;
+				continue;
+			}
+			else return (false, "Keyframes must be an ordered list by timeline.");
+		}
+
+		return (true, "AnimationContainer verified");
 	}
 }

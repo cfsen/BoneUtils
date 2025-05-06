@@ -32,8 +32,12 @@ public class SkeletonAnimation {
 			throw new Exception("Animations must have at least two keyframes."); // TODO find appropriate built in exception
 	}
 	public (bool valid, BoneNode? node, TransformSnapshot? state) GetKeyframe(float runTime) { 
-		if(runTime > TotalDuration && !Loop) return (false, null, null); 
-		if(Loop && runTime > TotalDuration) runTime %= TotalDuration; // Wrap time around if looping
+		if(runTime > TotalDuration && !Loop) 
+			return (false, null, null); 
+
+		if(Loop && runTime > TotalDuration) 
+			runTime %= TotalDuration; // Wrap time around if looping
+
 
 		// Fetch frames
 		var (valid, origin, target) = CheckLastFrames(runTime);
@@ -47,6 +51,10 @@ public class SkeletonAnimation {
 		// TODO blend and return current state
 
 		// Just return whichever frame is closer for now
+		if(Keyframes[target].TimelinePosition == runTime)
+			return (true, Keyframes[target].Bone, Keyframes[target].TransformState);
+		if(Keyframes[origin].TimelinePosition == runTime)
+			return (true, Keyframes[origin].Bone, Keyframes[origin].TransformState);
 		if(runTime-Keyframes[origin].TimelinePosition >= Keyframes[target].TimelinePosition-runTime)
 			return (true, Keyframes[target].Bone, Keyframes[target].TransformState);
 		return (true, Keyframes[origin].Bone, Keyframes[origin].TransformState);
