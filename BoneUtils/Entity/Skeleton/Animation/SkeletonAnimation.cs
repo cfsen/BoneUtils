@@ -9,8 +9,8 @@ namespace BoneUtils.Entity.Skeleton.Animation;
 public class SkeletonAnimation {
 	// Animation owner 
 
-	public required BonesAnimation Animation;
-	public required List<BoneAnimationKeyframe> Keyframes;
+	public AnimationContainer Animation;
+	public List<AnimationKeyframe> Keyframes;
 
 	public float TotalDuration; // seconds
 	public bool Loop = true;
@@ -23,7 +23,7 @@ public class SkeletonAnimation {
 	private int LastOrigin = -1;
 	private int LastTarget = -1;
 
-	public SkeletonAnimation(BonesAnimation animationContainer) {
+	public SkeletonAnimation(AnimationContainer animationContainer) {
 		Animation = animationContainer;
 		Keyframes = animationContainer.Keyframes;
 		TotalDuration = animationContainer.TotalDuration;
@@ -31,7 +31,7 @@ public class SkeletonAnimation {
 		if(KeyframeCount < 2)
 			throw new Exception("Animations must have at least two keyframes."); // TODO find appropriate built in exception
 	}
-	public (bool valid, BoneNode? node, Transform? state) GetKeyframe(float runTime) { 
+	public (bool valid, BoneNode? node, TransformSnapshot? state) GetKeyframe(float runTime) { 
 		if(runTime > TotalDuration && !Loop) return (false, null, null); 
 		if(Loop && runTime > TotalDuration) runTime %= TotalDuration; // Wrap time around if looping
 

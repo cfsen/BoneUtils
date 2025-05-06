@@ -42,11 +42,13 @@ public class SkeletonAnimator {
 		runtime += deltaTime;
 		bool valid;
 		BoneNode? node;
-		Transform? xfm;
+		TransformSnapshot? xfm;
 		for(int i = 0; i < animationCount; i++) {
 			(valid, node, xfm) = animations[i].GetKeyframe(runtime);
 			if (valid) {
-				node!.Transform = xfm!;
+				node!.Transform.Position = xfm!.Value.Position;
+				node!.Transform.Rotation = xfm!.Value.Rotation;
+				node!.Transform.Scale = xfm!.Value.Scale;
 			}
 		}
 	}
