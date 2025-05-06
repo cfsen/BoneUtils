@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace BoneUtils.Mockups; 
 public abstract class MockAnimationBuilder :MockDataBuilder {
 
-	// Composition helpers
+	// SkeletonEntity helpers
 
 	public (SkeletonEntity sken, SkeletonEntityOps ops) SetupSkeletonWithAnimator(Func<SkeletonEntity> mockupGenerator) {
 		SkeletonEntity mockup = mockupGenerator();
@@ -21,14 +21,65 @@ public abstract class MockAnimationBuilder :MockDataBuilder {
 		return (mockup, ops);
 	}
 
+	/// <summary>
+	/// Sets up a skeleton ready for animations
+	/// </summary>
+	/// <param name="sken">SkeletonEntity to add animator to</param>
+	/// <param name="ops">SkeletonEntityOps for mutating skeleton</param>
 	public void SetupSkeletonAnimator(ref SkeletonEntity sken, ref SkeletonEntityOps ops) {
-		// Intended intialization
+		// Intended intialization for animated skeletons
 		ops.PreProcessSkeleton(ref sken, [ 
 			ops.ValidateBoneNodeTree, 
 			ops.BoneNodeTreeCalculateConstraints,
 			ops.AddSkeletonAnimator 
 			]);
 	}
+
+	// Helpers: AnimationBuilder
+
+	/// <summary>
+	/// Performs the same setup as AB_CreateBasicAnimation
+	/// </summary>
+	/// <returns>SkeletonEntity, AnimationContainer</returns>
+	public (SkeletonEntity, AnimationContainer) Mock_Skeleton_With_AnimationContainer_RootNode_Translation() {
+		var (sken, ops) = SetupSkeletonWithAnimator(Mock_Spine);
+		AnimationBuilder builder = new();
+
+		// Describe a translation animation
+		Vector3 translation = new(2, 0, 0);
+		var (xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation);
+
+		// Create keyframes
+		var frame0 = builder.CreateKeyframe(sken.RootNode, xfm0, 0.0f);
+		var frame1 = builder.CreateKeyframe(sken.RootNode, xfm1, 3.0f);
+		var blend0 = builder.AddSequence(frame0, frame1, AnimationBlendType.Linear);
+
+		// Export animation
+		AnimationContainer animation = builder.Export();
+
+		return (sken, animation);
+	}
+
+	// Helpers: Keyframe
+
+	/// <summary>
+	/// Creates a pair of keyframe for a basic translation animation 
+	/// </summary>
+	/// <param name="node">Node to animate</param>
+	/// <param name="translation">Translation target</param>
+	/// <returns>Keyframes for origin and target transforms</returns>
+	public (TransformSnapshot, TransformSnapshot) CreateKeyframePair_BoneNode_Translation(BoneNode node, Vector3 translation) {
+		// Describe a translation animation
+		TransformSnapshot xfm0 = node.Transform;
+		TransformSnapshot xfm1 = new Transform { 
+			Position = node.Transform.Position+translation, 
+			Rotation = node.Transform.Rotation,
+			Scale = node.Transform.Scale
+			};
+		return (xfm0, xfm1);
+	}
+
+	// Data structure hardcoded mockups
 
 	/// <summary>
 	/// Manually constructed animation for testing the structure. 

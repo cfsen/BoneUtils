@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 namespace BoneUtilsUnitTests.AnimationTests;
 [TestClass]
 [TestCategory("Animator operations")]
-public class AnimationTests :MockAnimationBuilder{
+public class Animator_Tests :MockAnimationBuilder{
 	/// <summary>
 	/// Checks if Animator can attach to SkeletonEntity
 	/// </summary>
 	[TestMethod]
-	public void PrepareSkeleton() {
+	public void Animator_AttachTo_Skeleton() {
 		SkeletonEntity sken = Mock_Spine();
 		SkeletonEntityOps ops = new();
 
@@ -37,7 +37,7 @@ public class AnimationTests :MockAnimationBuilder{
 	/// Checks AnimationContainer compositon without AnimationBuilder
 	/// </summary>
 	[TestMethod]
-	public void LoadAnimation() {
+	public void Animator_LoadAnimation_NoBuilder() {
 		var (sken, ops) = SetupSkeletonWithAnimator(Mock_Spine);
 
 		// Check if animator is attached
