@@ -35,9 +35,14 @@ public class SkeletonAnimation {
 		if(runTime > TotalDuration && !Loop) 
 			return (false, null, null); 
 
-		if(Loop && runTime > TotalDuration) 
+		// If xfmtype is static, transforms are set directly, this will loop without reversing 
+		if(Loop && runTime > TotalDuration && Animation.Type == AnimationXfmType.Static) 
 			runTime %= TotalDuration; // Wrap time around if looping
 
+		// If xfmtype is relative, transforms are set and propagated by bonenode translate/rotate
+		// TODO this prevents relative animations from looping until dedicated logic can be implemented
+		if(Loop && runTime > TotalDuration && Animation.Type == AnimationXfmType.Relative)
+			return (false, null, null);
 
 		// Fetch frames
 		var (valid, origin, target) = CheckLastFrames(runTime);
