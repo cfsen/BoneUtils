@@ -11,13 +11,10 @@ namespace BoneUtils.Entity.Skeleton.Animation;
  */
 public class AnimationBuilder {
 
-	private List<AnimationKeyframe> Keyframes = [];
-	private List<AnimationBlend> FrameBlends = [];
-	private float TotalDuration = 0;
-	private AnimationType Type = AnimationType.Relative;
-
-	public AnimationBuilder() {
-	}
+	public List<AnimationKeyframe> Keyframes { get; private set; } = [];
+	public List<AnimationBlend> FrameBlends { get; private set; }= [];
+	public float TotalDuration { get; private set; } = 0;
+	public AnimationXfmType XfmType { get; set; } = AnimationXfmType.None;
 
 	// Sequence builders
 
@@ -142,12 +139,18 @@ public class AnimationBuilder {
 		return Keyframes.Last().TimelinePosition;
 	}
 	public AnimationContainer Export() {
+		TotalDuration = CalculateDuration();
+
+		// Validate state before exporting
+		var (valid, error) = ValidateAnimationContainer();
+		if(!valid)
+			throw new Exception(error); // TODO Throwing for now, consider allowing soft failure
 
 		return new AnimationContainer {
 			Keyframes = this.Keyframes,
 			FrameBlends = this.FrameBlends,
 			TotalDuration = CalculateDuration(),
-			Type = this.Type
+			Type = this.XfmType
 		};
 	}
 
@@ -157,7 +160,10 @@ public class AnimationBuilder {
 		=> FrameBlends.Any(x => x.OriginIndex == i || x.TargetIndex == i);
 	private bool CheckKeyframeExists(int i) 
 		=> (i >= 0 && Keyframes.Count > i);
-	public (bool valid, string msg) Verify() {
+	public (bool valid, string msg) ValidateAnimationContainer() {
+		if(XfmType == AnimationXfmType.None)
+			return (false, "Animation transform type (XfmType) is None, must be set.");
+
 		if(Keyframes.Count < 2) 
 			return (false, "AnimationContainer must have at least 2 keyframes.");
 
@@ -167,9 +173,15 @@ public class AnimationBuilder {
 			return (false, "Too many blend frames, count should be Keyframes.Count-1");
 
 		// Check if first keyframe is at the timeline beginning
-		if(Keyframes.First().TimelinePosition != 0.0f) return (false, "First keyframe must start at 0.0");
+		if(Keyframes.First().TimelinePosition != 0.0f) 
+			return (false, $"Expected: 0.0f, is: {Keyframes.First().TimelinePosition}. First keyframe must start at 0.0");
 
-		// Check that keyframes are an ordered list
+		// Check if the last keyframe is at the timeline end
+		if(Keyframes.Last().TimelinePosition != TotalDuration)
+			return (false, $"Expected: {TotalDuration}, is: {Keyframes.Last().TimelinePosition}. Final keyframe must be equal to TotalDuration.");
+
+
+		// Check that keyframes are an ordered list by TimelinePosition
 		float timelinePos = 0.0f;
 		for(int i = 1; i < Keyframes.Count; i++) {
 			if(Keyframes[i].TimelinePosition > timelinePos) {
