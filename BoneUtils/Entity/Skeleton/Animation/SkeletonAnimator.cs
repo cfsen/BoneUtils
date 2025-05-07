@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -11,7 +12,7 @@ public class SkeletonAnimator {
 
 	public required SkeletonEntity Skeleton;
 
-	private List<SkeletonAnimation> animations = [];
+	public List<SkeletonAnimation> Animations { get; private set; } = [];
 	private int animationCount = 0;
 
 	public bool Running = false;
@@ -31,15 +32,15 @@ public class SkeletonAnimator {
 	public void Load(SkeletonAnimation animation) {
 		// TODO validate animation
 
-		animations.Add(animation);
-		animationCount = animations.Count;
+		Animations.Add(animation);
+		animationCount = Animations.Count;
 	}
 	public void Unload(SkeletonAnimation animation) {
 		// TODO pre-remove cleanup?
-		animations.Remove(animation);
+		Animations.Remove(animation);
 	}
 	public void Clear() {
-		animations.Clear();
+		Animations.Clear();
 		animationCount = 0;
 	}
 
@@ -49,10 +50,10 @@ public class SkeletonAnimator {
 		xfmHandler ??=KeyframeTransformerBasic;
 		
 		for(int i = 0; i < animationCount; i++) {
-			(_valid, _node, _xfm) = animations[i].GetKeyframe(runtime);
+			(_valid, _node, _xfm) = Animations[i].GetKeyframe(timelinePoint);
 			
 			if (_valid && _node != null && _xfm.HasValue)
-				xfmHandler(_node, _xfm.Value, animations[i].Animation.Type);
+				xfmHandler(_node, _xfm.Value, Animations[i].Animation.Type);
 		}
 	}
 
