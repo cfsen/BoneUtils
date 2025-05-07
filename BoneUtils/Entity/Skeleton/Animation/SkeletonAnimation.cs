@@ -46,11 +46,11 @@ public class SkeletonAnimation {
 			return (false, null, null);
 
 		// Fetch frames
-		var (valid, origin, target) = CheckLastFrames(runTime);
-		if(!valid) (valid, origin, target) = GetSequentialKeyframes(runTime);
-		if(!valid) (valid, origin, target) = GetKeyframes(runTime);
+		var (valid, origin, target) = CheckLastFrames(runTime); // sequential lookup
+		if(!valid) (valid, origin, target) = GetKeyframes(runTime); // interpolated binary search
+		if(!valid) (valid, origin, target) = GetSequentialKeyframes(runTime); // last resort linear search
 		if(!valid) return (false, null, null);
-
+		
 		LastOrigin = origin;
 		LastTarget = target;
 
@@ -107,9 +107,9 @@ public class SkeletonAnimation {
 				return (true, i, i+1);
 			}
 			else if(Keyframes[i].TimelinePosition > runTime) {
-				if(Keyframes[int.Max(0, i-1)].TimelinePosition < runTime) { // use Max to stay inside bounds
+				if(Keyframes[int.Max(0, i-1)].TimelinePosition <= runTime) { // use Max to stay inside bounds
 					// match: i + 1 < runTime < i
-					return(true, i, i+1);
+					return(true, i-1, i);
 				}
 				else {
 					// expand search, match is earlier in timeline
