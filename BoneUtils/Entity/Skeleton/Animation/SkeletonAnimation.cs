@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
@@ -87,15 +88,47 @@ public class SkeletonAnimation {
 		return (false, -1, -1);
 	}
 	private (bool valid, int origin, int target) GetKeyframes(float runTime) {
-		int origin = -1, target = -1;
-		for(int i = 0; i < KeyframeCount; i++) 
-			if(Keyframes[i].TimelinePosition < runTime) 
-				origin = i;
+		// Handle edge cases
+		if(KeyframeCount == 2)
+			return (true, 0, 1);
+		if(KeyframeCount < 2)
+			return (false, -1, -1);
+		if(runTime == TotalDuration)
+			return (true, KeyframeCount-2, KeyframeCount-1);
 
-		for(int j = KeyframeCount - 1; j >= 0; j--)
-			if(Keyframes[j].TimelinePosition > runTime)
-				target = j;
+		// hybrid interpolation-binary search
+		// attempt to estimate index
+		int i = (int)MathF.Round((runTime/TotalDuration)*KeyframeCount);
+		int keyframesRemaining = KeyframeCount;
 
-		return (!(origin == -1 || target == -1), origin, target);
+		while (keyframesRemaining >= 2) {
+			if(Keyframes[i].TimelinePosition == runTime) {
+				// exact match
+				return (true, i, i+1);
+			}
+			else if(Keyframes[i].TimelinePosition > runTime) {
+				if(Keyframes[int.Max(0, i-1)].TimelinePosition < runTime) { // use Max to stay inside bounds
+					// match: i + 1 < runTime < i
+					return(true, i, i+1);
+				}
+				else {
+					// expand search, match is earlier in timeline
+					keyframesRemaining -= 2;
+					i = (int)MathF.Round((i-2)/2);
+				}
+			}
+			else if(Keyframes[i].TimelinePosition < runTime) { 
+				if(Keyframes[int.Min(KeyframeCount, i+1)].TimelinePosition > runTime) { // use Min to stay inside bounds
+					// match i < runTime < i + 1
+					return (true, i, i+1);
+				}
+				else {
+					// expand search, match is later in timeline
+					keyframesRemaining -= 2;
+					i = (int)MathF.Round((KeyframeCount-i-1)/2)+i;
+				}
+			}
+		}
+		return (false, -1, -1);
 	}
 }
