@@ -2,6 +2,7 @@
 using BoneUtils.Entity.Skeleton.Animation;
 using BoneUtils.Math;
 using BoneUtils.Mockups;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,5 +55,52 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		// Container check
 		Assert.AreEqual(3.0f, animation.TotalDuration, "Animation duration should be set.");
 		Assert.AreEqual(AnimationXfmType.Static, animation.Type, "Animation type should be Relative.");
+
+		// TODO check amount of blendframes
+	}
+	/// <summary>
+	/// Creates an AnimationContainer with 1000 keyframes
+	/// </summary>
+	[TestMethod]
+	public void AB_CreateLongAnimation() {
+		var (sken, ops) = SetupSkeletonWithAnimator(Mock_Spine);
+		AnimationBuilder ab = new();
+		ab.XfmType = AnimationXfmType.Static;
+
+		// This sequence forms a rotation around origo on the XZ-plane
+		Vector3[] translation = [
+			new(2,0,0),
+			new(0,0,2),
+			new(-2,0,0),
+			new(0,0,-2)
+			];
+
+		// Set up composition
+		int targetKeyframePairs = 100000;
+		float time = 0f;
+		float timeInc = 1.0f;
+
+		// Build initial frames
+		var (xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation[0]);
+		var frame0 = ab.CreateKeyframe(sken.RootNode, xfm0, time);
+		time += timeInc;
+		var frame1 = ab.CreateKeyframe(sken.RootNode, xfm1, time);
+		time += timeInc;
+
+		ab.StartSequence(frame0, frame1, AnimationBlendType.Linear);
+		// Create and add to builder
+		for(int i = 0; i < targetKeyframePairs; i+=2) {
+			(xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation[i % 4]);
+			frame0 = ab.CreateKeyframe(sken.RootNode, xfm0, time);
+			time += timeInc;
+			frame1 = ab.CreateKeyframe(sken.RootNode, xfm1, time);
+			time += timeInc;
+			ab.BuildSequence(frame0, AnimationBlendType.Linear);
+			ab.BuildSequence(frame1, AnimationBlendType.Linear);
+		}
+		ab.EndSequence();
+
+		AnimationContainer ac = ab.Export();
+		
 	}
 }
