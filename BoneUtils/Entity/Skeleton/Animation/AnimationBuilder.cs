@@ -33,10 +33,10 @@ public class AnimationBuilder {
 	/// <param name="blendType">Blend from first to second frame.</param>
 	/// <param name="originToTarget">Optional advanced blending.</param>
 	/// <returns>false on failure to start sequence.</returns>
-	public bool StartSequence(AnimationKeyframe firstFrame, AnimationKeyframe secondFrame, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
+	public bool StartSequence(AnimationKeyframe firstFrame, AnimationKeyframe secondFrame, AnimationBlendType blendType, AnimationBlendType? blendPromise = null, AnimationBlend? originToTarget = null) {
 		if(SequenceStarted || SequenceFinished) return false;
 		SequenceStarted = true;
-		AddSequence(firstFrame, secondFrame, blendType, originToTarget);
+		AddSequence(firstFrame, secondFrame, blendType, blendPromise, originToTarget);
 		return true;
 	}
 
@@ -48,21 +48,12 @@ public class AnimationBuilder {
 	/// <param name="originToTarget">Optional advanced blending.</param>
 	/// <returns>false on failure to add keyframe.</returns>
 	public bool BuildSequence(AnimationKeyframe firstFrame, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
-		if(!SequenceFinished || !SequenceStarted) return false;
+		if(SequenceFinished || !SequenceStarted) return false;
 		var (origin, target) = GetKeyframeIndices();
 
 		Keyframes.Add(firstFrame);
 
-		// TODO retarget to promise blendframe
-		//AnimationBlend? blend = GetBlendFrame(origin, target, blendType, originToTarget);
-		//if(blend == null) {
-		//	// Failed to set blend frame
-		//	Keyframes.RemoveAt(origin);
-		//	return false;
-		//}
 		CreatePromiseBlendSegment(blendType, origin, target, originToTarget);
-
-		//FrameBlends.Add(blend.Value);
 		return true;
 	}
 
@@ -74,11 +65,12 @@ public class AnimationBuilder {
 	/// <param name="blendType">Blend type from second to last to final.</param>
 	/// <param name="originToTarget">Optional advanced blending.</param>
 	/// <returns>false on failure to finalize sequence.</returns>
+	[Obsolete] // Will remove this in favor of always using param-free endsequence
 	public bool EndSequence(AnimationKeyframe secondToLast, AnimationKeyframe finalFrame, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
 		if(SequenceFinished || !SequenceStarted) return false;
 		SequenceFinished = true;
-		AddSequence(secondToLast, finalFrame, blendType, originToTarget);
-		return true;
+		//AddSequence(secondToLast, finalFrame, blendType, originToTarget);
+		return false;
 	}
 
 	/// <summary>
@@ -94,15 +86,23 @@ public class AnimationBuilder {
 		return true;
 	}
 
-	public bool AddSequence(AnimationKeyframe origin, AnimationKeyframe target, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
-		// TODO promise fulfillment if neccessary
+	public bool AddSequence(AnimationKeyframe origin, AnimationKeyframe target, AnimationBlendType blendTypeOrigin, AnimationBlendType? blendPromiseTarget = null, AnimationBlend? originToTarget = null) {
 		var (originIndex, targetIndex) = GetKeyframeIndices();
+		if(_sequenceHasBeenPromised) {
+			// fulfill open blend frame promise
+			// TODO DRY repeated in createpromise
+			var blendTime = Keyframes[originIndex].TimelinePosition - Keyframes[_sequencePromise.OriginIndex].TimelinePosition;
+
+			AnimationBlend _fulfillment = _sequencePromise with { Time = blendTime};
+			FrameBlends.Add(_fulfillment);
+		}
+
 
 		// Add keyframes
 		Keyframes.Add(origin);
 		Keyframes.Add(target);
 
-		AnimationBlend? blend = GetBlendFrame(originIndex, targetIndex, blendType, originToTarget);
+		AnimationBlend? blend = GetBlendFrame(originIndex, targetIndex, blendTypeOrigin, originToTarget);
 		if(blend == null) {
 			// Failed to create blend, clean up inserted keyframes
 			Keyframes.RemoveAt(targetIndex);
@@ -110,6 +110,10 @@ public class AnimationBuilder {
 			return false;
 		}
 		FrameBlends.Add(blend.Value);
+
+		// create blend frame promise
+
+		CreatePromiseBlendSegment(blendPromiseTarget == null ? blendTypeOrigin : blendPromiseTarget.Value, targetIndex, targetIndex+1);
 
 		return true;
 	}
@@ -284,7 +288,11 @@ public class AnimationBuilder {
 			return (false, "AnimationContainer must have at least 2 keyframes.");
 
 		if(FrameBlends.Count < Keyframes.Count - 1)
-			return (false, $"Expected: {Keyframes.Count-1}, is: {FrameBlends.Count}. Missing blend frames, count should be Keyframes.Count-1");
+			return (false, $"""
+				Missing blend frames, count should be Keyframes.Count-1
+				Blendframes expected: {Keyframes.Count-1}, is: {FrameBlends.Count}. 
+				Keyframes: {Keyframes.Count}
+				""");
 		else if(FrameBlends.Count >= Keyframes.Count)
 			return (false, "Too many blend frames, count should be Keyframes.Count-1");
 
