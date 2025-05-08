@@ -77,4 +77,37 @@ public class BoneNode_BufferTests :MockDataBuilder{
 		Assert.AreEqual(expect_rotation, sk.RootNode.Transform.Rotation, "Transform should have expected rotation after setting buffer.");
 		Assert.AreEqual(expect_scale, sk.RootNode.Transform.Scale, "Transform should have expected scale after setting buffer.");
 	}
+
+	[TestMethod]
+	public void BoneNode_BufferDiscard() {
+		SkeletonEntity sk = Mock_Spine();
+
+		Vector3 translate = new(1,2,3);
+		Vector3 scale = new(2,2,2);
+		Quat q0 = Quat.Create(MathF.PI/2, Vector3.UnitY);
+		Quat q1 = Quat.Create(MathF.PI/2, Vector3.UnitZ);
+
+		Quat expect_rotation = sk.RootNode.Transform.Rotation*q0*q1;
+		Vector3 expect_scale = sk.RootNode.Transform.Scale+scale+scale;
+		Vector3 expect_position = sk.RootNode.Transform.Position+translate+translate;
+
+		Assert.IsTrue(sk.RootNode.TransformBuffer.Begin(), "Buffer should allow accumulation to begin");
+
+		// Accumulate rotation and validate
+		Assert.IsTrue(sk.RootNode.TransformBuffer.Accumulate(q0), "Quats should accumulate.");
+		Assert.AreEqual(sk.RootNode.Transform.Rotation*q0, sk.RootNode.TransformBuffer.Rotation, "First buffered rotation should accumulate.");
+		Assert.IsTrue(sk.RootNode.TransformBuffer.Accumulate(q1), "Quats should be accumulated multiple times");
+		Assert.AreEqual(expect_rotation, sk.RootNode.TransformBuffer.Rotation, "First buffered rotation should accumulate.");
+
+		sk.RootNode.DiscardTransformBuffer();
+
+		Assert.AreEqual(Vector3.Zero, sk.RootNode.TransformBuffer.Translation, "Translation should be reset.");
+		Assert.AreEqual(Vector3.One, sk.RootNode.TransformBuffer.Scale, "Scale should be reset.");
+		Assert.AreEqual(Quat.Identity, sk.RootNode.TransformBuffer.Rotation, "Rotation should be reset.");
+		Assert.AreEqual(Matrix4x4.Identity, sk.RootNode.TransformBuffer.Matrix, "Matrix should be reset");
+		Assert.AreEqual(XfmType.None, sk.RootNode.TransformBuffer.BufferedXfms, "Buffer transform flag should be None.");
+		Assert.IsFalse(sk.RootNode.TransformBuffer.Active, "Active flag should be false");
+		Assert.IsFalse(sk.RootNode.TransformBuffer.Complete, "Active flag should be false");
+
+	}
 }
