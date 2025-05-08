@@ -55,9 +55,10 @@ public abstract class MockAnimationBuilder :MockDataBuilder {
 		// Create keyframes
 		var frame0 = builder.CreateKeyframe(sken.RootNode, xfm0, 0.0f);
 		var frame1 = builder.CreateKeyframe(sken.RootNode, xfm1, 3.0f);
-		var blend0 = builder.AddSequence(frame0, frame1, AnimationBlendType.Linear);
+		var blend0 = builder.StartSequence(frame0, frame1, AnimationBlendType.Linear);
 
 		// Export animation
+		builder.EndSequence();
 		AnimationContainer animation = builder.Export();
 
 		return (sken, animation);

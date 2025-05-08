@@ -5,6 +5,7 @@ using BoneUtils.Mockups;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -27,12 +28,13 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		// Create keyframes
 		var frame0 = builder.CreateKeyframe(sken.RootNode, xfm0, 0.0f);
 		var frame1 = builder.CreateKeyframe(sken.RootNode, xfm1, 3.0f);
-		var blend0 = builder.AddSequence(frame0, frame1, AnimationBlendType.Linear);
+		var blend0 = builder.StartSequence(frame0, frame1, AnimationBlendType.Linear);
 
 		// Sequence composition check 
 		Assert.IsTrue(blend0, "Keyframes should be able to form a sequence.");
 
 		// Export animation
+		builder.EndSequence();
 		AnimationContainer animation = builder.Export();
 
 		// Deep copy check
@@ -76,7 +78,8 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 			];
 
 		// Set up composition
-		int targetKeyframePairs = 100000;
+		//int targetKeyframePairs = 2350000;
+		int targetKeyframePairs = 10000;
 		float time = 0f;
 		float timeInc = 1.0f;
 
@@ -88,19 +91,24 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		time += timeInc;
 
 		ab.StartSequence(frame0, frame1, AnimationBlendType.Linear);
+
 		// Create and add to builder
-		for(int i = 0; i < targetKeyframePairs; i+=2) {
+		for(int i = 0; i < targetKeyframePairs; i++) {
 			(xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation[i % 4]);
 			frame0 = ab.CreateKeyframe(sken.RootNode, xfm0, time);
 			time += timeInc;
-			frame1 = ab.CreateKeyframe(sken.RootNode, xfm1, time);
-			time += timeInc;
-			ab.BuildSequence(frame0, AnimationBlendType.Linear);
-			ab.BuildSequence(frame1, AnimationBlendType.Linear);
+			if(!ab.BuildSequence(frame0, AnimationBlendType.Linear))
+				throw new Exception("BuildSequence() failed");
 		}
 		ab.EndSequence();
 
 		AnimationContainer ac = ab.Export();
-		
+
+		// Account for the two frames created by StartSequence()
+		var actual_target_keyframes = targetKeyframePairs + 2;
+
+		// Check if intended amount of key and blend frames have been created
+		Assert.AreEqual(actual_target_keyframes, ac.Keyframes.Count, "Should create the specified amount of frames.");
+		Assert.AreEqual(actual_target_keyframes-1, ac.FrameBlends.Count, "Should create Keyframes-1 blend frames.");
 	}
 }

@@ -45,8 +45,9 @@ public class Animation_Tests :MockAnimationBuilder{
 		sken.Animator.Play(1.0f);
 		Assert.AreEqual(target, sken.RootNode.Transform.Position, "At t=3.0, skeleton should be at its target position");
 
-		// Advance timeline by 1s, t=1.0
+		// Advance timeline past the final frame, t=3.0s+
 		sken.Animator.Play(0.00001f);
 		Assert.AreEqual(origin, sken.RootNode.Transform.Position, "At t=3.0+0.00001s, skeleton should be back at its initial position");
+
 	}
 }
