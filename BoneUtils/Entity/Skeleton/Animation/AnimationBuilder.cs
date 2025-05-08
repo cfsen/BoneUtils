@@ -81,8 +81,8 @@ public class AnimationBuilder {
 	public bool EndSequence() {
 		if(SequenceFinished || !SequenceStarted) return false;
 		SequenceFinished = true;
-		// TODO finalize sequence promise
-		//FrameBlends.Remove(FrameBlends.Last());
+		// Finalize sequence promise
+		_sequenceHasBeenPromised = false;
 		return true;
 	}
 
@@ -281,6 +281,8 @@ public class AnimationBuilder {
 	private bool CheckKeyframeExists(int i) 
 		=> (i >= 0 && Keyframes.Count > i);
 	public (bool valid, string msg) ValidateAnimationContainer() {
+		if(_sequenceHasBeenPromised)
+			return (false, "Build sequence hasn't been completed. Missing EndSequence()?");
 		if(XfmType == AnimationXfmType.None)
 			return (false, "Animation transform type (XfmType) is None, must be set.");
 
