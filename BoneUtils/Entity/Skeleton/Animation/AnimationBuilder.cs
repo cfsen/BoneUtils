@@ -10,15 +10,52 @@ namespace BoneUtils.Entity.Skeleton.Animation;
  * TODO: Reevaluate this approach.
  * Using mutable classes for keyframe/blend staging and export to structs later is cleaner.
  */
+/*
+TODO move to markdown docs
+
+An animation consists of:
+	Keyframes:		Describes the transform 
+	Blend frames:	Describes how the transform will get there
+
+Both keyframes and blend frames are ordered lists.
+
+An animation must have a minimum of 2 keyframes, 1 blend frame.
+
+An animation is self-contained:
+ - The first keyframe must always be set at TimelinePosition=0.0f. 
+ - The final keyframe must always be set at the end of the animation.
+
+The final keyframe in an animation does not have a blend frame associated with it.
+	Keyframe	0	1	2
+				|--->		Blendframe originating from 0, targeting 1
+					|--->	Blendframe originating from 1, targeting 2
+
+Let `n` be the amount of blend frames, `k` the amount of keyframes:
+
+	n = k - 1
+
+XfmType is a flag passed to the external transform handler.
+	Static:		Animation is defined in absolute world space
+	Relative:	Animation is defined in cumulative entity space
+	Custom:		Placeholder for injecting a custom transform handler.
+
+ */
 public class AnimationBuilder {
 
+	// AnimationContainer buffer being built
 	public List<AnimationKeyframe> Keyframes { get; private set; } = [];
 	public List<AnimationBlend> FrameBlends { get; private set; }= [];
 	public float TotalDuration { get; private set; } = 0;
 	public AnimationXfmType XfmType { get; set; } = AnimationXfmType.None;
 
+	// Sequence builder state
 	public bool SequenceStarted { get; private set; } = false;
 	public bool SequenceFinished { get; private set; } = false;
+
+	// Pending promise to be fulfilled with next keyframe
+	private AnimationBlend _sequencePromise;
+	private bool _sequenceHasBeenPromised = false;
+
 	// Sequence builders
 
 	public void CreateTwoFrameAnimation() {
@@ -161,8 +198,6 @@ public class AnimationBuilder {
 			Time = blendTime
 		};
 	}
-	private AnimationBlend _sequencePromise;
-	private bool _sequenceHasBeenPromised = false;
 	private void CreatePromiseBlendSegment(AnimationBlendType blendType, int originIndex, int promiseIndex, AnimationBlend? blend = null) {
 		// TODO consider edge cases, this inherently has big sequence breaking potential.
 		if(_sequenceHasBeenPromised) {
@@ -183,7 +218,8 @@ public class AnimationBuilder {
 			return;
 		}
 
-		// create a promise, note that this promise will need to be fulfilled if AddSequence(frame0, frame1...) is called
+		// create a promise
+		// note that this promise will need to be fulfilled if AddSequence(frame0, frame1...) is called
 		_sequencePromise = new AnimationBlend {
 			BlendType = blendType,
 			OriginIndex = originIndex,
@@ -208,7 +244,7 @@ public class AnimationBuilder {
 		var (hasBlends, deleteFrom, blendList) = RebuildBlendFrames(keyframeIndex);
 
 		if(!hasBlends || deleteFrom == null || blendList == null)
-			return false; // TODO failure at this time indicates state corruption, maybe throw instead of returning false
+			throw new Exception("RebuildBlendFrames() failed to rebuild, possible state corruption.");
 
 		// Reconstruct blendframes and remove keyframe
 		FrameBlends.RemoveRange(deleteFrom.Value, 
@@ -296,16 +332,25 @@ public class AnimationBuilder {
 				Keyframes: {Keyframes.Count}
 				""");
 		else if(FrameBlends.Count >= Keyframes.Count)
-			return (false, "Too many blend frames, count should be Keyframes.Count-1");
+			return (false, $"""
+				Too many blend frames, count should be Keyframes.Count-1
+				Blendframes expected: {Keyframes.Count-1}, is: {FrameBlends.Count}. 
+				Keyframes: {Keyframes.Count}
+				""");
 
 		// Check if first keyframe is at the timeline beginning
 		if(Keyframes.First().TimelinePosition != 0.0f) 
-			return (false, $"Expected: 0.0f, is: {Keyframes.First().TimelinePosition}. First keyframe must start at 0.0");
+			return (false, $"""
+				First keyframe must start at 0.0
+				Expected: 0.0f, is: {Keyframes.First().TimelinePosition}. 
+				""");
 
 		// Check if the last keyframe is at the timeline end
 		if(Keyframes.Last().TimelinePosition != TotalDuration)
-			return (false, $"Expected: {TotalDuration}, is: {Keyframes.Last().TimelinePosition}. Final keyframe must be equal to TotalDuration.");
-
+			return (false, $"""
+				Final keyframe must be equal to TotalDuration.
+				Expected: {TotalDuration}, is: {Keyframes.Last().TimelinePosition}. 
+				""");
 
 		// Check that keyframes are an ordered list by TimelinePosition
 		float timelinePos = 0.0f;
