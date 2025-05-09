@@ -15,6 +15,9 @@ namespace BoneUtilsUnitTests.AnimationTests;
 [TestClass]
 [TestCategory("Animation builder (AB) operations")]
 public class AnimationBuilder_Tests :MockAnimationBuilder{
+	/// <summary>
+	/// Wide-coverage test for a two frame animation build.
+	/// </summary>
 	[TestMethod]
 	public void AB_CreateBasicAnimation() {
 		var (sken, ops) = SetupSkeletonWithAnimator(Mock_Spine);
@@ -61,7 +64,8 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		// TODO check amount of blendframes
 	}
 	/// <summary>
-	/// Creates an AnimationContainer with 1000 keyframes
+	/// Long animation sequence (n=10000) test for gauging performance.
+	/// Takes around 100ms to complete on test system when n=10000, <1s when n=2.35M.
 	/// </summary>
 	[TestMethod]
 	public void AB_CreateLongAnimation() {
@@ -90,13 +94,14 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		var frame1 = ab.CreateKeyframe(sken.RootNode, xfm1, time);
 		time += timeInc;
 
-		ab.StartSequence(frame0, frame1, AnimationBlendType.Linear);
 
 		// Create and add to builder
+		ab.StartSequence(frame0, frame1, AnimationBlendType.Linear);
 		for(int i = 0; i < targetKeyframePairs; i++) {
 			(xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation[i % 4]);
 			frame0 = ab.CreateKeyframe(sken.RootNode, xfm0, time);
 			time += timeInc;
+
 			if(!ab.BuildSequence(frame0, AnimationBlendType.Linear))
 				throw new Exception("BuildSequence() failed");
 		}
@@ -105,10 +110,41 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		AnimationContainer ac = ab.Export();
 
 		// Account for the two frames created by StartSequence()
-		var actual_target_keyframes = targetKeyframePairs + 2;
+		var expected_target_keyframes = targetKeyframePairs + 2;
 
 		// Check if intended amount of key and blend frames have been created
-		Assert.AreEqual(actual_target_keyframes, ac.Keyframes.Count, "Should create the specified amount of frames.");
-		Assert.AreEqual(actual_target_keyframes-1, ac.FrameBlends.Count, "Should create Keyframes-1 blend frames.");
+		Assert.AreEqual(expected_target_keyframes, ac.Keyframes.Count, "Should create the specified amount of frames.");
+		Assert.AreEqual(expected_target_keyframes-1, ac.FrameBlends.Count, "Should create Keyframes-1 blend frames.");
+	}
+	/// <summary>
+	/// 
+	/// </summary>
+	[TestMethod]
+	public void AB_BuildSequence_RejectsInvalidOrder() {
+		var (sken, ops) = SetupSkeletonWithAnimator(Mock_Spine);
+		AnimationBuilder builder = new();
+		builder.XfmType = AnimationXfmType.Static;
+
+		// Create translation over two keyframes
+		Vector3 translation = new(2,2,2);
+		var (xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation);
+		var frame0 = builder.CreateKeyframe(sken.RootNode, xfm0, 0.0f);
+		var frame1 = builder.CreateKeyframe(sken.RootNode, xfm1, 3.0f);
+
+		// Invalid operation, frame time is between frame 0 and 1
+		var frame_invalid_time = builder.CreateKeyframe(sken.RootNode, xfm0, 2.0f);
+
+		builder.StartSequence(frame0, frame1, AnimationBlendType.Linear);
+
+		var expect_failure = builder.BuildSequence(frame_invalid_time, AnimationBlendType.Linear);
+		var expect_success = builder.EndSequence();
+
+		Assert.IsFalse(expect_failure , "Should reject non-sequential frames.");
+		Assert.IsTrue(expect_success , "Should allow finializing the sequence.");
+
+		// Should not fail, exporting the two valid frames
+		AnimationContainer ac = builder.Export();
+
+		Assert.AreEqual(2, ac.Keyframes.Count, "Should export the two valid frames.");
 	}
 }
