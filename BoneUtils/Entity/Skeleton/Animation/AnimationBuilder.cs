@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 
 namespace BoneUtils.Entity.Skeleton.Animation; 
 /* 
- * TODO: Reevaluate this approach.
- * Using mutable classes for keyframe/blend staging and export to structs later is cleaner.
- */
-/*
-TODO move to markdown docs
+TODO:	Reevaluate this approach.
+		Using mutable classes for keyframe/blend staging and export to structs later is cleaner.
+TODO:	Sequence safety on BuildSequence
+TODO:	Builder locking for threading
+TODO:	Promise handling for deletion
+
+TODO:	move to markdown docs
+---
 
 An animation consists of:
 	Keyframes:		Describes the transform 
@@ -72,6 +75,8 @@ public class AnimationBuilder {
 	/// <returns>false on failure to start sequence.</returns>
 	public bool StartSequence(AnimationKeyframe firstFrame, AnimationKeyframe secondFrame, AnimationBlendType blendType, AnimationBlendType? blendPromise = null, AnimationBlend? originToTarget = null) {
 		if(SequenceStarted || SequenceFinished) return false;
+		if(!VerifyNewKeyframePair(firstFrame, secondFrame)) return false;
+
 		SequenceStarted = true;
 		AddSequence(firstFrame, secondFrame, blendType, blendPromise, originToTarget);
 		return true;
@@ -80,34 +85,19 @@ public class AnimationBuilder {
 	/// <summary>
 	/// Adds a keyframe and blend to the tail of the sequence
 	/// </summary>
-	/// <param name="firstFrame">Keyframe to add.</param>
+	/// <param name="frame">Keyframe to add.</param>
 	/// <param name="blendType">The blend from firstFrame to the next frame.</param>
 	/// <param name="originToTarget">Optional advanced blending.</param>
 	/// <returns>false on failure to add keyframe.</returns>
-	public bool BuildSequence(AnimationKeyframe firstFrame, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
+	public bool BuildSequence(AnimationKeyframe frame, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
 		if(SequenceFinished || !SequenceStarted) return false;
-		var (origin, target) = GetKeyframeIndices();
+		if(!VerifyNewKeyframe(frame)) return false;
 
-		Keyframes.Add(firstFrame);
+		var (origin, target) = GetKeyframeIndices();
+		Keyframes.Add(frame);
 
 		CreatePromiseBlendSegment(blendType, origin, target, originToTarget);
 		return true;
-	}
-
-	/// <summary>
-	/// Add the final two keyframes and end the sequence.
-	/// </summary>
-	/// <param name="secondToLast">Second to last frame.</param>
-	/// <param name="finalFrame">Final frame of sequence.</param>
-	/// <param name="blendType">Blend type from second to last to final.</param>
-	/// <param name="originToTarget">Optional advanced blending.</param>
-	/// <returns>false on failure to finalize sequence.</returns>
-	[Obsolete] // Will remove this in favor of always using param-free endsequence
-	public bool EndSequence(AnimationKeyframe secondToLast, AnimationKeyframe finalFrame, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
-		if(SequenceFinished || !SequenceStarted) return false;
-		SequenceFinished = true;
-		//AddSequence(secondToLast, finalFrame, blendType, originToTarget);
-		return false;
 	}
 
 	/// <summary>
@@ -118,12 +108,15 @@ public class AnimationBuilder {
 	public bool EndSequence() {
 		if(SequenceFinished || !SequenceStarted) return false;
 		SequenceFinished = true;
+
 		// Finalize sequence promise
 		_sequenceHasBeenPromised = false;
 		return true;
 	}
 
 	public bool AddSequence(AnimationKeyframe origin, AnimationKeyframe target, AnimationBlendType blendTypeOrigin, AnimationBlendType? blendPromiseTarget = null, AnimationBlend? originToTarget = null) {
+		if(!VerifyNewKeyframePair(origin, target)) return false;
+
 		var (originIndex, targetIndex) = GetKeyframeIndices();
 		if(_sequenceHasBeenPromised) {
 			// fulfill open blend frame promise
@@ -156,6 +149,7 @@ public class AnimationBuilder {
 	}
 
 	// Sequence helpers
+
 	private (int origin, int target) GetKeyframeIndices() => (Keyframes.Count, Keyframes.Count+1);
 	private AnimationBlend? GetBlendFrame(int originIndex, int targetIndex, AnimationBlendType blendType, AnimationBlend? originToTarget = null) {
 		AnimationBlend? blend;
@@ -167,6 +161,16 @@ public class AnimationBuilder {
 		else
 			blend = originToTarget;
 		return blend.Value;
+	}
+	private bool VerifyNewKeyframePair(AnimationKeyframe frame0, AnimationKeyframe frame1) {
+		if(frame0.TimelinePosition > frame1.TimelinePosition) return false;
+		if(Keyframes.Count > 0) 
+			if(frame0.TimelinePosition <= Keyframes.Last().TimelinePosition) return false;
+		return true;
+	}
+	private bool VerifyNewKeyframe(AnimationKeyframe frame) {
+		if(frame.TimelinePosition < Keyframes.Last().TimelinePosition) return false;
+		return true;
 	}
 
 	// Struct builders
