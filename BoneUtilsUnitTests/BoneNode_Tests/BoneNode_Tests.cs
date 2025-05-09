@@ -13,7 +13,7 @@ namespace Tests.BoneNode_Tests;
 [TestCategory("BoneNode construction")]
 public class BoneNode_Tests :MockDataBuilder{
 	[TestMethod]
-	public void BoneNode_CanConstruct() {
+	public void BoneNode_Construct() {
 		BoneNode node = Mock_BoneNode();
 
 		Assert.IsInstanceOfType<BoneNode>(node);
@@ -25,7 +25,7 @@ public class BoneNode_Tests :MockDataBuilder{
 		Assert.IsTrue(node.Transform.Scale == Vector3.One);
 	}
 	[TestMethod]
-	public void BoneNode_CanReset() {
+	public void BoneNode_Reset() {
 		BoneNode node = Mock_BoneNode();
 		BoneNode identical_node = Mock_BoneNode();
 
@@ -51,5 +51,21 @@ public class BoneNode_Tests :MockDataBuilder{
 		Assert.AreEqual(identical_node.Transform.Rotation, node.Transform.Rotation, "Transform rotatino should reset");
 		Assert.AreEqual(identical_node.Transform.Scale, node.Transform.Scale, "Transform scale should reset");
 
+	}
+	[TestMethod]
+	public void BoneNode_SetTransform_SingleNode() {
+		BoneNode node = Mock_BoneNode();
+		Matrix4x4 matrix = new(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+		
+		// Set up delegate
+		Matrix4x4 SetXfmHandler(BoneNode node, List<(BoneNode, Transform)>? Transforms = null) {
+			return matrix;
+		}
+
+		Assert.AreEqual(node.Transform.Matrix, Matrix4x4.Identity, "Initial state should be Matrix4x4.Identity");
+
+		node.SetTransform(SetXfmHandler);
+
+		Assert.AreEqual(node.Transform.Matrix, matrix, "Transform should change.");
 	}
 }

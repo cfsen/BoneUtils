@@ -79,7 +79,7 @@ public class BoneNode_BufferTests :MockDataBuilder{
 	}
 
 	[TestMethod]
-	public void BoneNode_BufferDiscard() {
+	public void BoneNode_TransformBufferDiscard() {
 		SkeletonEntity sk = Mock_Spine();
 
 		Vector3 translate = new(1,2,3);
