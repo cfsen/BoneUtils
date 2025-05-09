@@ -39,6 +39,7 @@ public class RaylibDemoRunner {
 	// Init
 
 	public void InitDemos() {
+		Demos.Add(new DemoAnimatorBasic(SkelOps, RayRender));
 		Demos.Add(new DemoHelix(SkelOps));
 		Demos.Add(new DemoWave(SkelOps));
 		Demos.Add(new DemoSimpleSpine(SkelOps, RayRender));
