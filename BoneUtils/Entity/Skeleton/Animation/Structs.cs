@@ -36,6 +36,13 @@ public readonly struct AnimationKeyframe {
 	public readonly required BoneNode Bone { get; init; } // Reference, can mutate!
 	public readonly required TransformSnapshot TransformState { get; init; } // Immutable
 	public readonly required float TimelinePosition { get; init; } // Relative to TotalDuration, 0 = at the beginning of the animation, = Duration at the end
+	public static AnimationKeyframe Create(BoneNode node, TransformSnapshot transformState, float timelinePosition) {
+		return new AnimationKeyframe {
+			Bone = node,
+			TransformState = transformState,
+			TimelinePosition = timelinePosition
+		};
+	}
 }
 
 /// <summary>
