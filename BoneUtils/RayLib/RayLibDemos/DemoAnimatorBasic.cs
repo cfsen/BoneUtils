@@ -28,8 +28,7 @@ public class DemoAnimatorBasic :DemoBase {
 		//if(Raylib.IsKeyPressed(KeyboardKey.One))
 	}
 	public override void Update(float deltaTime) {
-		if(Spine.Animator != null)
-			Spine.Animator.Play(deltaTime);
+		Spine.Animator?.Play(deltaTime);
 	}
 	private SkeletonEntity ConstructSkeleton() { 
 		var sken = Mock_Spine();
@@ -44,11 +43,11 @@ public class DemoAnimatorBasic :DemoBase {
 		var animation = CreateBasicAnimation(sken);
 
 		// Set up the animation owner (keyframe selection, blending)
-		var animationOwner = new SkeletonAnimation(animation);
+		var animationInstance = new AnimationInstance(animation);
 
 		// Load the animation into the manager
 		// Can safely assume not null due to AddSkeletonAnimator mutator
-		sken.Animator!.Load(animationOwner);
+		sken.Animator!.Load(animationInstance);
 
 		return sken;
 	}
@@ -76,12 +75,17 @@ public class DemoAnimatorBasic :DemoBase {
 		AnimationKeyframe key3 = AnimationKeyframe.Create(sken.RootNode, xfm3, 2.0f);
 		AnimationKeyframe key4 = AnimationKeyframe.Create(sken.RootNode, xfm4, 3.0f);
 
+		//AnimationKeyframe key5 = AnimationKeyframe.Create(sken.RootNode, xfm4, 4.0f);
+
 		AnimationBuilder builder = new AnimationBuilder();
 		builder.XfmType = AnimationXfmType.Static;
 
 		builder.StartSequence(key1, key2, AnimationBlendType.Linear);
 		builder.BuildSequence(key3, AnimationBlendType.Linear);
 		builder.BuildSequence(key4, AnimationBlendType.Linear);
+
+		//builder.BuildSequence(key5, AnimationBlendType.Linear);
+
 		builder.EndSequence();
 
 		return builder.Export();
