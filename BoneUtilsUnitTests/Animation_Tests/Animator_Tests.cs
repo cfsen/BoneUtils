@@ -47,7 +47,7 @@ public class Animator_Tests :MockAnimationBuilder{
 		// Compose mock animation
 		Vector3 expect_position = new(1,0,1);
 		AnimationContainer animationGroup = SetupBasicTranslationAnimation(sken, expect_position);
-		SkeletonAnimation animation = new(animationGroup);
+		AnimationInstance animation = new(animationGroup);
 
 		sken.Animator.Load(animation);
 
@@ -61,7 +61,7 @@ public class Animator_Tests :MockAnimationBuilder{
 	[TestMethod]
 	public void Animator_LoadAnimation() {
 		var (sken, animContainer) = Mock_Skeleton_With_AnimationContainer_RootNode_Translation();
-		SkeletonAnimation animation = new(animContainer);
+		AnimationInstance animation = new(animContainer);
 		sken.Animator!.Load(animation);
 		
 		Assert.AreEqual(1, sken.Animator.LoadedAnimations, "The created animation should be loaded.");
