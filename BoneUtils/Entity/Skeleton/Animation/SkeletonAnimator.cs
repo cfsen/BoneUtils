@@ -7,15 +7,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BoneUtils.Entity.Skeleton.Animation; 
+// Orchestrates animations
 public class SkeletonAnimator {
-	// Manages animation state
 
 	public required SkeletonEntity Skeleton;
-
+	public KeyframeFinder KeyframeFinder;
 	public List<AnimationInstance> Animations { get; private set; } = [];
-	//public List<SkeletonAnimation> Animations { get; private set; } = [];
-	private int animationCount = 0;
 
+	public delegate void KeyframeTransformer(BoneNode bone, TransformSnapshot xfm, AnimationXfmType ac);
+
+	// Animations state
+	private int animationCount = 0;
 	public bool Running = false;
 	public float Runtime { get; private set; }= 0;
 
@@ -24,33 +26,27 @@ public class SkeletonAnimator {
 	private BoneNode? _node;
 	private TransformSnapshot? _xfm;
 
-	public delegate void KeyframeTransformer(BoneNode bone, TransformSnapshot xfm, AnimationXfmType ac);
+	public SkeletonAnimator() {
+		KeyframeFinder = new KeyframeFinder();
+	}
 
 	public int LoadedAnimations => animationCount;
 
-	// Logic structure
-
-	public class AnimationInstance(SkeletonAnimation animation) {
-		public SkeletonAnimation SkeletonAnimation = animation;
-		public bool IsRunning = false;
-		public float deltaTimeStarted = 0.0f;
-		public delegate TransformSnapshot XfmBlender(TransformSnapshot xfmOrigin, TransformSnapshot xfmTarget);
-	}
-
 	// Animation loading/unloading
 
-	public void Load(SkeletonAnimation animation) {
+	public void Load(AnimationInstance animation) {
 		// TODO validate animation
 		// TODO delegate assignment
 
-		Animations.Add(new(animation));
+		Animations.Add(animation);
 		animationCount = Animations.Count;
+		Debug.WriteLine($"animationCount={animationCount}");
 	}
-	public void Unload(SkeletonAnimation animation) {
+	public void Unload(AnimationInstance animation) {
 		// TODO pre-remove cleanup?
-		var logicSelect = Animations.FirstOrDefault(x => x.SkeletonAnimation == animation);
-		if(logicSelect == null) return;
-		Animations.Remove(logicSelect);
+		var instanceSelect = Animations.FirstOrDefault(x => x == animation);
+		if(instanceSelect == null) return; // TODO handle better
+		Animations.Remove(instanceSelect);
 	}
 	public void Clear() {
 		Animations.Clear();
@@ -69,10 +65,15 @@ public class SkeletonAnimator {
 				Animations[i].IsRunning = true;
 			}
 
-			(_valid, _node, _xfm) = Animations[i].SkeletonAnimation.GetKeyframe(timelinePoint-Animations[i].deltaTimeStarted);
+			Debug.WriteLine("---");
+			Debug.WriteLine($"Runtime: {Runtime}");
+			//(_valid, _node, _xfm) = Animations[i].SkeletonAnimation.GetKeyframe(timelinePoint-Animations[i].deltaTimeStarted);
+			(_valid, _node, _xfm) = KeyframeFinder.GetKeyframe(timelinePoint-Animations[i].deltaTimeStarted, Animations[i]);
+
+			//Debug.WriteLine($"{_valid}, {_node}, {_xfm}");
 			
 			if (_valid && _node != null && _xfm.HasValue) {
-				xfmHandler(_node, _xfm.Value, Animations[i].SkeletonAnimation.Animation.Type);
+				xfmHandler(_node, _xfm.Value, Animations[i].Animation.Type);
 
 				//_dbgLastXfm ??= _xfm;
 				//if (_dbgLastXfm.Value.Position != _xfm.Value.Position) {
