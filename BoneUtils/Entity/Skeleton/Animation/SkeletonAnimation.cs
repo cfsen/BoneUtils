@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
@@ -10,12 +11,10 @@ namespace BoneUtils.Entity.Skeleton.Animation;
 public class SkeletonAnimation {
 	// Animation owner 
 
-	public AnimationContainer Animation;
-	public List<AnimationKeyframe> Keyframes;
-
-	public float TotalDuration; // seconds
+	public AnimationContainer Animation { get; private set; }
+	public List<AnimationKeyframe> Keyframes { get; private set; }
+	public float TotalDuration { get; private set; } // seconds
 	public bool Loop = true;
-
 	private int KeyframeCount = 0;
 
 	// for sequential lookup optimization
@@ -23,6 +22,9 @@ public class SkeletonAnimation {
 	private int LastLookupKeyframe = 1; 
 	private int LastOrigin = -1;
 	private int LastTarget = -1;
+
+	// Debugging
+	public bool _dbgEnable = true;
 
 	public SkeletonAnimation(AnimationContainer animationContainer) {
 		Animation = animationContainer;
@@ -40,43 +42,44 @@ public class SkeletonAnimation {
 		if(Loop && runTime > TotalDuration && Animation.Type == AnimationXfmType.Static) 
 			runTime %= TotalDuration; // Wrap time around if looping
 
-		// If xfmtype is relative, transforms are set and propagated by bonenode translate/rotate
 		// TODO this prevents relative animations from looping until dedicated logic can be implemented
+		// If xfmtype is relative, transforms are set and propagated by bonenode translate/rotate
 		if(Loop && runTime > TotalDuration && Animation.Type == AnimationXfmType.Relative)
 			return (false, null, null);
 
 		// Fetch frames
-		var (valid, origin, target) = CheckLastFrames(runTime); // sequential lookup
-		if(!valid) (valid, origin, target) = GetKeyframes(runTime); // interpolated binary search
-		if(!valid) (valid, origin, target) = GetSequentialKeyframes(runTime); // last resort linear search
+		var (valid, origin, target) = GetKeyframes_FromLastHit(runTime); // sequential lookup
+		if(!valid) (valid, origin, target) = GetKeyframes_HybridSearch(runTime); // interpolated binary search
+		if(!valid) (valid, origin, target) = GetKeyframes_Linear(runTime); // last resort linear search
 		if(!valid) return (false, null, null);
 		
 		LastOrigin = origin;
 		LastTarget = target;
 
+		if(_dbgEnable) Debug.WriteLine($"{runTime} : {origin} : {target}");
+
 		// TODO blend and return current state
 
-		// Just return whichever frame is closer for now
-		if(Keyframes[target].TimelinePosition == runTime)
-			return (true, Keyframes[target].Bone, Keyframes[target].TransformState);
-		if(Keyframes[origin].TimelinePosition == runTime)
-			return (true, Keyframes[origin].Bone, Keyframes[origin].TransformState);
-		if(runTime-Keyframes[origin].TimelinePosition >= Keyframes[target].TimelinePosition-runTime)
-			return (true, Keyframes[target].Bone, Keyframes[target].TransformState);
+		// Just return whichever frame is active for now
 		return (true, Keyframes[origin].Bone, Keyframes[origin].TransformState);
 	}
 
-	private (bool valid, int origin, int target) CheckLastFrames(float runTime) {
+	private (bool valid, int origin, int target) GetKeyframes_FromLastHit(float runTime) {
 		if(LastOrigin < 0 || LastOrigin >= KeyframeCount) return (false, -1, -1);
 		if(LastTarget < 0 || LastTarget >= KeyframeCount) return (false, -1, -1);
 
-		if(Keyframes[LastOrigin].TimelinePosition < runTime && Keyframes[LastTarget].TimelinePosition > runTime)
+		if(Keyframes[LastOrigin].TimelinePosition <= runTime 
+			&& Keyframes[LastTarget].TimelinePosition > runTime)
 			return (true, LastOrigin, LastTarget);
+		if(Keyframes[LastTarget].TimelinePosition <= runTime 
+			&& Keyframes[int.Min(LastTarget+1, KeyframeCount-1)].TimelinePosition > runTime)
+			return (true, LastTarget, LastTarget+1);
 
+		if(_dbgEnable) Debug.WriteLine($"Failed at runtime: {runTime} (LastOrigin: {LastOrigin} | LastTarget: {LastTarget}");
 		return (false, -1, -1);
 	}
 
-	private (bool valid, int origin, int target) GetSequentialKeyframes(float runTime) {
+	private (bool valid, int origin, int target) GetKeyframes_Linear(float runTime) {
 		int i = LastLookupTime < runTime ? LastLookupKeyframe : 1;
 		LastLookupTime = runTime;
 
@@ -87,7 +90,7 @@ public class SkeletonAnimation {
 			}
 		return (false, -1, -1);
 	}
-	private (bool valid, int origin, int target) GetKeyframes(float runTime) {
+	private (bool valid, int origin, int target) GetKeyframes_HybridSearch(float runTime) {
 		// Handle edge cases
 		if(KeyframeCount == 2)
 			return (true, 0, 1);
@@ -103,11 +106,17 @@ public class SkeletonAnimation {
 
 		while (keyframesRemaining >= 2) {
 			if(Keyframes[i].TimelinePosition == runTime) {
+				// edge case: when i == KeyframeCount-1 | wrap back to beginning
+				if(i == KeyframeCount-1)
+					return (true, i, 0);
 				// exact match
 				return (true, i, i+1);
 			}
 			else if(Keyframes[i].TimelinePosition > runTime) {
 				if(Keyframes[int.Max(0, i-1)].TimelinePosition <= runTime) { // use Max to stay inside bounds
+					// edge case: when i == 0
+					if(i == 0)
+						return (true, KeyframeCount-1, i);
 					// match: i + 1 < runTime < i
 					return(true, i-1, i);
 				}
@@ -119,6 +128,11 @@ public class SkeletonAnimation {
 			}
 			else if(Keyframes[i].TimelinePosition < runTime) { 
 				if(Keyframes[int.Min(KeyframeCount, i+1)].TimelinePosition > runTime) { // use Min to stay inside bounds
+					// TODO is this desired?
+					// edge case: when i == KeyframeCount-1
+					if(i == KeyframeCount-1)
+						return (true, i, 0); // link last frame to first frame
+
 					// match i < runTime < i + 1
 					return (true, i, i+1);
 				}
