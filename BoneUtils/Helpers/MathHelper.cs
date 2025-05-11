@@ -92,6 +92,8 @@ public static class MathHelper {
 		return FPCorrection(u, childPosition.Length());
 	}
 	public static Vector3 FPCorrection(Vector3 u, float length) {
+		#warning Fix edge case in FPCorrection
+		// TODO edge case: corrections overshooting when provided length is less than len*0.9
 		u.X = MathF.Round(u.X, 6);
 		u.Y = MathF.Round(u.Y, 6);
 		u.Z = MathF.Round(u.Z, 6);
