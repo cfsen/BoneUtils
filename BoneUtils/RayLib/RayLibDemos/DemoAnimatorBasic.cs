@@ -3,7 +3,6 @@ using BoneUtils.Entity.Skeleton.Animation;
 using BoneUtils.Math;
 using Raylib_cs;
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace BoneUtils.RayLib.RayLibDemos;
 public class DemoAnimatorBasic :DemoBase {
@@ -39,52 +38,70 @@ public class DemoAnimatorBasic :DemoBase {
 			SkelOps.AddSkeletonAnimator
 			]);
 
-		// Create an animation
-		var animation = CreateBasicAnimation(sken);
+		// Animate all bones in the simple mockup spine
+		int offset = 0;
+		foreach(var node in sken.Bones) {
+			// Create an animation
+			var animation = CreateBasicAnimation(sken, node.Value, offset);
 
-		// Set up the animation owner (keyframe selection, blending)
-		var animationInstance = new AnimationInstance(animation);
+			// Set up the animation owner (keyframe selection, blending)
+			var animationInstance = new AnimationInstance(animation);
 
-		// Load the animation into the manager
-		// Can safely assume not null due to AddSkeletonAnimator mutator
-		sken.Animator!.Load(animationInstance);
+			// Load the animation into the manager
+			// Can safely assume not null due to AddSkeletonAnimator mutator
+			sken.Animator!.Load(animationInstance);
+			offset++;
+		}
 
 		return sken;
 	}
-	private AnimationContainer CreateBasicAnimation(SkeletonEntity sken) {
-
+	private AnimationContainer CreateBasicAnimation(SkeletonEntity sken, BoneNode node, int offset) {
+		// Define a translation rotating around the xz plane
 		Vector3[] translation = [
-			new(2,0,0),
-			new(0,0,2),
-			new(-2,0,0),
-			new(0,0,-2)
+			new(2,offset,0),
+			new(0,offset,2),
+			new(-2,offset,0),
+			new(0,offset,-2)
 			];
 
+		// Creating an array of shuffled indexes
+		// Lets us reuse translation for all bones, while staggering their motion
+		int[] j = new int[4];
+		if(offset == 0) {
+			// Baseline access of translation[]
+			j = [0,1,2,3];
+		} 
+		else {
+			// Populates j[] with 1,2,3,0 / 2,3,0,1 / etc
+			for(int i = 0; i < 4; i++) {
+				j[i] = (i + offset) % 4;
+			}
+		}
+
 		// Set up transforms to target
-		TransformSnapshot xfm0 = new(sken.RootNode.Transform);
-		TransformSnapshot xfm1 = xfm0 with { Position = translation[0] };
-		TransformSnapshot xfm2 = xfm0 with { Position = translation[1] };
-		TransformSnapshot xfm3 = xfm0 with { Position = translation[2] };
-		TransformSnapshot xfm4 = xfm0 with { Position = translation[3] };
+		TransformSnapshot xfm0 = new(node.Transform);
+		TransformSnapshot xfm1 = xfm0 with { Position = translation[j[0]] };
+		TransformSnapshot xfm2 = xfm0 with { Position = translation[j[1]] };
+		TransformSnapshot xfm3 = xfm0 with { Position = translation[j[2]] };
+		TransformSnapshot xfm4 = xfm0 with { Position = translation[j[3]] };
 
 		// Set up keyframes for transforms 
-		//AnimationKeyframe key0 = AnimationKeyframe.Create(sken.RootNode, xfm0, 0.0f);
+		AnimationKeyframe key1 = AnimationKeyframe.Create(node, xfm1, 0.0f);
+		AnimationKeyframe key2 = AnimationKeyframe.Create(node, xfm2, 1.0f);
+		AnimationKeyframe key3 = AnimationKeyframe.Create(node, xfm3, 2.0f);
+		AnimationKeyframe key4 = AnimationKeyframe.Create(node, xfm4, 3.0f);
+		// The final frame is set at the same position as the intial frame, creating a smooth loop
+		AnimationKeyframe key5 = AnimationKeyframe.Create(node, xfm1, 4.0f);
 
-		AnimationKeyframe key1 = AnimationKeyframe.Create(sken.RootNode, xfm1, 0.0f);
-		AnimationKeyframe key2 = AnimationKeyframe.Create(sken.RootNode, xfm2, 1.0f);
-		AnimationKeyframe key3 = AnimationKeyframe.Create(sken.RootNode, xfm3, 2.0f);
-		AnimationKeyframe key4 = AnimationKeyframe.Create(sken.RootNode, xfm4, 3.0f);
-
-		//AnimationKeyframe key5 = AnimationKeyframe.Create(sken.RootNode, xfm4, 4.0f);
-
-		AnimationBuilder builder = new AnimationBuilder();
-		builder.XfmType = AnimationXfmType.Static;
+		// Build the sequence
+		AnimationBuilder builder = new() {
+			XfmType = AnimationXfmType.Static
+		};
 
 		builder.StartSequence(key1, key2, AnimationBlendType.Linear);
 		builder.BuildSequence(key3, AnimationBlendType.Linear);
 		builder.BuildSequence(key4, AnimationBlendType.Linear);
-
-		//builder.BuildSequence(key5, AnimationBlendType.Linear);
+		builder.BuildSequence(key5, AnimationBlendType.Linear);
 
 		builder.EndSequence();
 
