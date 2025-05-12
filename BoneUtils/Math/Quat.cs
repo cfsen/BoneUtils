@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+// TODO refactor namespace
+#warning Ambiguous naming of Math namespace
 namespace BoneUtils.Math;
 /*
 	This was ported from math.net: 

@@ -56,6 +56,9 @@ public class MathHelpers_Tests {
 
 		Assert.ThrowsException<ArgumentOutOfRangeException>(() => MathHelper.ClampToLength(v0, clampLength_illegal));
 	}
+	/// <summary>
+	/// Checks correction approach for floating point errors
+	/// </summary>
 	[TestMethod]
 	public void Vector3_FPCorrection() {
 		/*
@@ -107,5 +110,32 @@ public class MathHelpers_Tests {
 		Assert.AreEqual(expect_v3.X, result_v3.X, "[v3] Should not change vector X component.");
 		Assert.AreEqual(expect_v3.Y, result_v3.Y, "[v3] Should change vector Y component.");
 		Assert.AreEqual(expect_v3.Z, result_v3.Z, "[v3] Should not change vector Z component.");
+	}
+	/// <summary>
+	/// Checks helper for Quat rotation with FP drift correction
+	/// </summary>
+	[TestMethod]
+	public void Vector3_RotateWithDriftCorrection(){ 
+		Vector3 v0 = Vector3.UnitX;
+		Quat q0 = Quat.Create(MathF.PI/2, Vector3.UnitY);
+		Quat q1 = Quat.Create(MathF.PI, Vector3.UnitY);
+		Quat q2 = Quat.Create(MathF.PI/6, Vector3.UnitY);
+		
+		var expect_v0q0 = new Vector3(0,0,1);
+		var expect_v0q1 = new Vector3(-1,0,0);
+		var expect_v0q2 = new Vector3(0.866025f,0,0.499999f);
+
+		var result_v0q0 = MathHelper.RotateWithDriftCorrection(v0, q0, Vector3.Zero);
+		var result_v0q1 = MathHelper.RotateWithDriftCorrection(v0, q1, Vector3.Zero);
+		var result_v0q2 = MathHelper.RotateWithDriftCorrection(v0, q2, Vector3.Zero);
+
+		float tolerance_v0q2 = 5E-6f;
+
+		Assert.AreEqual(expect_v0q0, result_v0q0, "Should not induce rounding errors on simple orientations.");
+		Assert.AreEqual(expect_v0q1, result_v0q1, "Should not induce rounding errors on simple orientations.");
+
+		Assert.AreEqual(expect_v0q2.X, result_v0q2.X, tolerance_v0q2, "X component should change within tolerance.");
+		Assert.AreEqual(expect_v0q2.Y, result_v0q2.Y, tolerance_v0q2, "Y component should change within tolerance.");
+		Assert.AreEqual(expect_v0q2.Z, result_v0q2.Z, tolerance_v0q2, "Z component should change within tolerance.");
 	}
 }
