@@ -65,9 +65,9 @@ public class SkeletonAnimator {
 				Animations[i].IsRunning = true;
 			}
 
-			Debug.WriteLine("---");
-			Debug.WriteLine($"Runtime: {Runtime}");
-			//(_valid, _node, _xfm) = Animations[i].SkeletonAnimation.GetKeyframe(timelinePoint-Animations[i].deltaTimeStarted);
+			//Debug.WriteLine("---");
+			//Debug.WriteLine($"Runtime: {Runtime}");
+
 			(_valid, _node, _xfm) = KeyframeFinder.GetKeyframe(timelinePoint-Animations[i].deltaTimeStarted, Animations[i]);
 
 			//Debug.WriteLine($"{_valid}, {_node}, {_xfm}");

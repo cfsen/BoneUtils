@@ -8,9 +8,6 @@ public class AnimationInstance {
 	public bool Loop = true;
 	public float deltaTimeStarted = 0.0f;
 
-	// Blending delegate for animatinon
-	public delegate TransformSnapshot XfmBlender(TransformSnapshot xfmOrigin, TransformSnapshot xfmTarget);
-
 	// KeyframeFinder lookup optimizers
 	public int KeyframeCount = 0;
 	public float LastLookupTime = 0;
