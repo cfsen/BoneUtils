@@ -6,6 +6,8 @@ using System.Numerics;
 
 namespace BoneUtils.RayLib.RayLibDemos;
 public class DemoAnimatorBasic :DemoBase {
+	private const string text_Title = "Keyframe animation (proof of concept)";
+
 	private RaylibRenderer Renderer;
 
 	private SkeletonEntity Spine;
@@ -21,7 +23,7 @@ public class DemoAnimatorBasic :DemoBase {
 		Render(Spine, Renderer);
 	}
 	public override void Draw2D() {
-		Raylib.DrawText("Keyframe animation (Proof of concept)", 10, 50, 20, Color.Red);
+		Raylib.DrawText(text_Title, 10, 50, 20, Color.Red);
 	}
 	public override void HandleDemoInput() {
 		//if(Raylib.IsKeyPressed(KeyboardKey.One))
