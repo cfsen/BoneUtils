@@ -6,11 +6,13 @@ public class KeyframeFinder {
 	/// Searches the keyframes of an AnimationInstance at a given time,
 	/// returning a transform for the bone to animate.
 	/// </summary>
-	/// <param name="runTime"></param>
-	/// <param name="inst"></param>
-	/// <returns>true, node to transform, transform state at runTime, or false, null, null</returns>
+	/// <param name="runTime">runtime managed by SkeletonAnimator</param>
+	/// <param name="inst">AnimationInstance to search</param>
+	/// <returns>
+	/// On success: true, node to transform, transform state at runTime. 
+	/// On failure: false, null, null
+	/// </returns>
 	public static (bool valid, BoneNode? node, TransformSnapshot? state) GetKeyframe(float runTime, AnimationInstance inst, xfmSnapshotBlender? blender = null) { 
-		//Debug.WriteLine(inst.ToString());
 		if(runTime > inst.Animation.TotalDuration && !inst.Loop) 
 			return (false, null, null); 
 
@@ -33,67 +35,57 @@ public class KeyframeFinder {
 		inst.LastTarget = target;
 
 		// Blending
-		blender ??= GetBlendMode(inst, origin, target);
+		blender ??= GetAssignedBlendMode(inst, origin);
 
-		float timeBetweenFrames = inst.Animation.Keyframes[target].TimelinePosition - inst.Animation.Keyframes[origin].TimelinePosition;
-		float runTimeBetweenFrames = runTime - inst.Animation.Keyframes[origin].TimelinePosition;
-		float normalizedTime = runTimeBetweenFrames / timeBetweenFrames;
-
-		var blendedFrame = blender(
-			inst.Animation.Keyframes[origin].TransformState, 
-			inst.Animation.Keyframes[target].TransformState, 
-			normalizedTime);
-
-		return (true, inst.Animation.Keyframes[origin].Bone, blendedFrame);
-		// TODO blend and return current state
-		//Debug.WriteLine($"""
-		//	runTime={runTime}
-		//	LastOrigin={inst.LastOrigin} | LastTarget={inst.LastTarget}
-		//	origin = {origin} | target = {target}
-		//	""");
-
-		// Just return whichever frame is active for now
-		//return (true, inst.Animation.Keyframes[origin].Bone, inst.Animation.Keyframes[origin].TransformState);
+		return (
+			true, 
+			inst.Animation.Keyframes[origin].Bone, 
+			blender(
+				inst.Animation.Keyframes[origin].TransformState,
+				inst.Animation.Keyframes[target].TransformState,
+				CalculateKeyframeNormalizedTime(inst, runTime, origin, target)
+				)
+			);
 	}
 
-	private static xfmSnapshotBlender GetBlendMode(AnimationInstance inst, int origin, int target) {
-		AnimationBlend blending = inst.Animation.FrameBlends
-			.Where(x => x.OriginIndex == origin && x.TargetIndex == target).FirstOrDefault();
-		return blending.BlendType switch {
+	// Fetches blend handler for blend mode assigned at composition time.
+	private static xfmSnapshotBlender GetAssignedBlendMode(AnimationInstance inst, int origin) {
+		// Leverage FrameBlends & Keyframes being synchronized ordered lists
+		// FrameBlends[origin] always maps to originIdx=Keyframes[origin] && targetIdx=Keyframes[origin+1]
+		return inst.Animation.FrameBlends[origin].BlendType switch {
 			AnimationBlendType.Linear => KeyframeBlendHandlers.BlendLinear,
 			_ => KeyframeBlendHandlers.BlendNone
 		};
 	}
-
+	// Calculates the normalized time between origin and target keyframe
+	private static float CalculateKeyframeNormalizedTime(AnimationInstance inst, float runTime, int origin, int target) {
+		return (runTime - inst.Animation.Keyframes[origin].TimelinePosition)
+			/ (inst.Animation.Keyframes[target].TimelinePosition - inst.Animation.Keyframes[origin].TimelinePosition);
+	}
+	// Checks if the last frame lookup is still valid for passed runtime
 	private static (bool valid, int origin, int target) GetKeyframes_FromLastHit(float runTime, AnimationInstance inst) {
-		//Debug.WriteLine("FromLastHit");
-		if(inst.LastOrigin < 0 || inst.LastOrigin >= inst.KeyframeCount) return (false, -1, -1);
-		if(inst.LastTarget < 0 || inst.LastTarget >= inst.KeyframeCount) return (false, -1, -1);
+		if(IsLastOriginOutOfBounds()) return (false, -1, -1);
+		if(IsLastTargetOutOfBounds()) return (false, -1, -1);
 
-		if(inst.Animation.Keyframes[inst.LastOrigin].TimelinePosition <= runTime 
-			&& inst.Animation.Keyframes[inst.LastTarget].TimelinePosition > runTime)
-			return (true, inst.LastOrigin, inst.LastTarget);
-		if(inst.Animation.Keyframes[inst.LastTarget].TimelinePosition <= runTime 
-			&& inst.Animation.Keyframes[int.Min(inst.LastTarget+1, inst.KeyframeCount-1)].TimelinePosition > runTime)
-			return (true, inst.LastTarget, inst.LastTarget+1);
+		if(CanReuseLastOrigin())	return (true, inst.LastOrigin, inst.LastTarget);
+		if(PeekNextFrame())			return (true, inst.LastTarget, inst.LastTarget+1);
 
 		return (false, -1, -1);
-	}
 
-	private static (bool valid, int origin, int target) GetKeyframes_Linear(float runTime, AnimationInstance inst) {
-		//Debug.WriteLine("Linear");
-		int i = inst.LastLookupTime < runTime ? inst.LastLookupKeyframe : 1;
-		inst.LastLookupTime = runTime;
-
-		for (int j = i; j < inst.KeyframeCount; j++)
-			if (inst.Animation.Keyframes[j].TimelinePosition > runTime) {
-				inst.LastLookupKeyframe = j;
-				return (true, j-1, j);
-			}
-		return (false, -1, -1);
+		// Locals
+		bool IsLastOriginOutOfBounds() 
+			=> inst.LastOrigin < 0 || inst.LastOrigin >= inst.KeyframeCount;
+		bool IsLastTargetOutOfBounds()
+			=> inst.LastTarget < 0 || inst.LastTarget >= inst.KeyframeCount;
+		bool CanReuseLastOrigin()
+			=> inst.Animation.Keyframes[inst.LastOrigin].TimelinePosition <= runTime 
+			&& inst.Animation.Keyframes[inst.LastTarget].TimelinePosition > runTime;
+		bool PeekNextFrame()
+			=> inst.Animation.Keyframes[inst.LastTarget].TimelinePosition <= runTime 
+			&& inst.Animation.Keyframes[int.Min(inst.LastTarget+1, inst.KeyframeCount-1)].TimelinePosition > runTime;
 	}
+	// Searches for valid frames at passed runtime
 	private static (bool valid, int origin, int target) GetKeyframes_HybridSearch(float runTime, AnimationInstance inst) {
-		//Debug.WriteLine("Hybrid");
 		// Handle edge cases
 		if(inst.KeyframeCount == 2)
 			return (true, 0, 1);
@@ -148,6 +140,7 @@ public class KeyframeFinder {
 		}
 		return (false, -1, -1);
 
+		// Locals
 		bool PeekEarlierFrame(int i, float runTime) 
 			=> inst.Animation.Keyframes[int.Max(0, i-1)].TimelinePosition <= runTime;
 		bool PeekLaterFrame(int i, float runTime)
@@ -158,5 +151,17 @@ public class KeyframeFinder {
 			=> inst.Animation.Keyframes[i].TimelinePosition > runTime;
 		bool IsMatch(int i, float runTime)
 			=> inst.Animation.Keyframes[i].TimelinePosition == runTime;
+	}
+	// Linearly searches for keyframes at passed runtime
+	private static (bool valid, int origin, int target) GetKeyframes_Linear(float runTime, AnimationInstance inst) {
+		int i = inst.LastLookupTime < runTime ? inst.LastLookupKeyframe : 1;
+		inst.LastLookupTime = runTime;
+
+		for (int j = i; j < inst.KeyframeCount; j++)
+			if (inst.Animation.Keyframes[j].TimelinePosition > runTime) {
+				inst.LastLookupKeyframe = j;
+				return (true, j-1, j);
+			}
+		return (false, -1, -1);
 	}
 }
