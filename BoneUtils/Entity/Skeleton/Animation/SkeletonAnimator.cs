@@ -14,8 +14,6 @@ public class SkeletonAnimator {
 	public KeyframeFinder KeyframeFinder;
 	public List<AnimationInstance> Animations { get; private set; } = [];
 
-	public delegate void KeyframeTransformer(BoneNode bone, TransformSnapshot xfm, AnimationXfmType ac);
-
 	// Animations state
 	private int animationCount = 0;
 	public bool Running = false;
@@ -57,7 +55,7 @@ public class SkeletonAnimator {
 
 	//TransformSnapshot? _dbgLastXfm;
 	public void Scrub(float timelinePoint, KeyframeTransformer? xfmHandler = null) {
-		xfmHandler ??=KeyframeTransformerBasic;
+		xfmHandler ??= KeyframeXfmHandlers.KeyframeTransformerBasic;
 		
 		for(int i = 0; i < animationCount; i++) {
 			if(!Animations[i].IsRunning && Running) {
@@ -89,27 +87,5 @@ public class SkeletonAnimator {
 		Runtime += deltaTime;
 
 		Scrub(Runtime, xfmHandler);
-	}
-
-
-	// TODO consider moving this out of animator
-	/// <summary>
-	/// Basic transformer for keyframes. Leverages built-ins for propagation.
-	/// </summary>
-	/// <param name="bone">BoneNode to mutate.</param>
-	/// <param name="xfm">Transform to set.</param>
-	public void KeyframeTransformerBasic(BoneNode bone, TransformSnapshot xfm, AnimationXfmType animType) {
-
-		bone.Transform.Scale = xfm.Scale;
-
-		if(animType == AnimationXfmType.Relative) {
-			// Leverage BoneNode propagation
-			bone.Rotate(xfm.Rotation);
-			bone.Translate(xfm.Position);
-		}
-		else if(animType == AnimationXfmType.Static) {
-			bone.Transform.Rotation = xfm.Rotation;
-			bone.Transform.Position = xfm.Position;
-		}
 	}
 }
