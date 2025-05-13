@@ -117,7 +117,7 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		Assert.AreEqual(expected_target_keyframes-1, ac.FrameBlends.Count, "Should create Keyframes-1 blend frames.");
 	}
 	/// <summary>
-	/// 
+	/// Checks AnimationBuilder rejecting out-of-order sequence building
 	/// </summary>
 	[TestMethod]
 	public void AB_BuildSequence_RejectsInvalidOrder() {

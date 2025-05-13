@@ -43,6 +43,9 @@ XfmType is a flag passed to the external transform handler.
 	Custom:		Placeholder for injecting a custom transform handler.
 
  */
+/// <summary>
+/// Sequential builder for AnimationContainer's, to populate AnimationInstance's.
+/// </summary>
 public class AnimationBuilder {
 
 	// AnimationContainer buffer being built
@@ -60,10 +63,6 @@ public class AnimationBuilder {
 	private bool _sequenceHasBeenPromised = false;
 
 	// Sequence builders
-
-	public void CreateTwoFrameAnimation() {
-		// should start and finish the sequence by adding two keyframes, one blend frame
-	}
 
 	/// <summary>
 	/// Starts an animation sequence with two keyframes and a blend frame
@@ -295,6 +294,7 @@ public class AnimationBuilder {
 	}
 
 	// Export
+
 	private float CalculateDuration() {
 		return Keyframes.Last().TimelinePosition;
 	}

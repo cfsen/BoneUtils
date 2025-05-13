@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
 
 namespace BoneUtils.Entity.Skeleton.Animation; 
+/// <summary>
+/// Finds keyframes in an AnimationInstance at an arbitraty runtime.
+/// </summary>
 public class KeyframeFinder {
 	/// <summary>
 	/// Searches the keyframes of an AnimationInstance at a given time,
@@ -101,38 +104,36 @@ public class KeyframeFinder {
 
 		while (keyframesRemaining >= 2) {
 			if(IsMatch(i, runTime)) {
-				if(i == inst.KeyframeCount-1)	// edge case: when i == inst.KeyframeCount-1 
+				// edge case: when i == inst.KeyframeCount-1 
+				if(i == inst.KeyframeCount-1)	
 					return (true, i, 0);		// link last frame to first frame
 
-				// exact match
-				return (true, i, i+1);			// link to next frame
+				return (true, i, i+1);			// link to next frame | exact match
 			}
 			else if(IsCursorLate(i, runTime)) {
-				// check the frame ahead of cursor
 				if(PeekEarlierFrame(i, runTime)){
-					if(i == 0)									// edge case: when i == 0
+					// edge case: when i == 0
+					if(i == 0)
 						return (true, inst.KeyframeCount-1, i); // link last frame to first frame
 
-					// match: i + 1 < runTime < i
-					return(true, i-1, i);						// link from frame ahead of cursor
+					return(true, i-1, i);	// link from frame ahead of cursor | match: i + 1 < runTime < i
 				}
-				// expand search, match is earlier in timeline
 				else {
+					// expand search, match is earlier in timeline
 					keyframesRemaining -= 2;
 					i = (int)MathF.Round((i-2)/2);
 				}
 			}
 			else if(IsCursorEarly(i, runTime)) { 
-				// check the frame after cursor
 				if(PeekLaterFrame(i, runTime)) {
-					if(i == inst.KeyframeCount-1)	// edge case: when i == inst.KeyframeCount-1
+					// edge case: when i == inst.KeyframeCount-1
+					if(i == inst.KeyframeCount-1)	
 						return (true, i, 0);		// link last frame to first frame
 
-					// match i < runTime < i + 1
-					return (true, i, i+1);			// link cursor to next frame
+					return (true, i, i+1);			// link cursor to next frame | match: i < runTime < i + 1
 				}
-				// expand search, match is later in timeline
 				else {
+					// expand search, match is later in timeline
 					keyframesRemaining -= 2;
 					i = (int)MathF.Round((inst.KeyframeCount-i-1)/2)+i;
 				}

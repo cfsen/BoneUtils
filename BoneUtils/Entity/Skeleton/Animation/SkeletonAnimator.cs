@@ -7,7 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BoneUtils.Entity.Skeleton.Animation; 
-// Orchestrates animations
+/// <summary>
+/// Attaches to a SkeletonEntity and orchestrates animations
+/// </summary>
 public class SkeletonAnimator {
 
 	public required SkeletonEntity Skeleton;

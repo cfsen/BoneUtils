@@ -8,6 +8,9 @@ namespace BoneUtils.Entity.Skeleton.Animation;
 
 public delegate void KeyframeTransformer(BoneNode bone, TransformSnapshot xfm, AnimationXfmType ac);
 
+/// <summary>
+/// Transform handlers for updating skeletons. WIP.
+/// </summary>
 public static class KeyframeXfmHandlers {
 	/// <summary>
 	/// Basic transformer for keyframes. Leverages built-ins for propagation.

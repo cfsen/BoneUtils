@@ -1,4 +1,7 @@
 ﻿namespace BoneUtils.Entity.Skeleton.Animation;
+/// <summary>
+/// State layer for animation data
+/// </summary>
 public class AnimationInstance {
 	// Animation data
 	public AnimationContainer Animation; 
@@ -14,6 +17,7 @@ public class AnimationInstance {
 	public int LastLookupKeyframe = 1;
 	public int LastOrigin = -1;
 	public int LastTarget = -1;
+
 	public AnimationInstance(AnimationContainer animationContainer) {
 		Animation = animationContainer;
 		KeyframeCount = Animation.Keyframes.Count;
