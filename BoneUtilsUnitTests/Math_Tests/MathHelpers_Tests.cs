@@ -112,7 +112,7 @@ public class MathHelpers_Tests {
 		Assert.AreEqual(expect_v3.Z, result_v3.Z, "[v3] Should not change vector Z component.");
 	}
 	/// <summary>
-	/// Checks helper for Quat rotation with FP drift correction
+	/// Checks Vector3 rotation with FP drift correction
 	/// </summary>
 	[TestMethod]
 	public void Vector3_RotateWithDriftCorrection(){ 
@@ -121,13 +121,13 @@ public class MathHelpers_Tests {
 		Quat q1 = Quat.Create(MathF.PI, Vector3.UnitY);
 		Quat q2 = Quat.Create(MathF.PI/6, Vector3.UnitY);
 		
-		var expect_v0q0 = new Vector3(0,0,1);
-		var expect_v0q1 = new Vector3(-1,0,0);
-		var expect_v0q2 = new Vector3(0.866025f,0,0.499999f);
+		Vector3 expect_v0q0 = new(0,0,1);
+		Vector3 expect_v0q1 = new(-1,0,0);
+		Vector3 expect_v0q2 = new(0.866025f,0,0.499999f);
 
-		var result_v0q0 = MathHelper.RotateWithDriftCorrection(v0, q0, Vector3.Zero);
-		var result_v0q1 = MathHelper.RotateWithDriftCorrection(v0, q1, Vector3.Zero);
-		var result_v0q2 = MathHelper.RotateWithDriftCorrection(v0, q2, Vector3.Zero);
+		Vector3 result_v0q0 = MathHelper.RotateWithDriftCorrection(v0, q0, Vector3.Zero);
+		Vector3 result_v0q1 = MathHelper.RotateWithDriftCorrection(v0, q1, Vector3.Zero);
+		Vector3 result_v0q2 = MathHelper.RotateWithDriftCorrection(v0, q2, Vector3.Zero);
 
 		float tolerance_v0q2 = 5E-6f;
 
@@ -137,5 +137,34 @@ public class MathHelpers_Tests {
 		Assert.AreEqual(expect_v0q2.X, result_v0q2.X, tolerance_v0q2, "X component should change within tolerance.");
 		Assert.AreEqual(expect_v0q2.Y, result_v0q2.Y, tolerance_v0q2, "Y component should change within tolerance.");
 		Assert.AreEqual(expect_v0q2.Z, result_v0q2.Z, tolerance_v0q2, "Z component should change within tolerance.");
+	}
+	[TestMethod]
+	public void Quat_ToEuler() {
+		Quat q0 = Quat.Create(MathF.PI/2, Vector3.UnitX);
+		Quat q1 = Quat.Create(MathF.PI/2, Vector3.UnitY);
+		Quat q2 = Quat.Create(MathF.PI/2, Vector3.UnitZ);
+
+		Vector3 v0 = MathHelper.QuatToEuler(q0);
+		Vector3 v1 = MathHelper.QuatToEuler(q1);
+		Vector3 v2 = MathHelper.QuatToEuler(q2);
+
+		// Expected angles in radians
+		Vector3 expect_v0 = new(1.570f,0,0);
+		Vector3 expect_v1 = new(0,1.570f,0);
+		Vector3 expect_v2 = new(0,0,1.570f);
+
+		float tolerance = 5e-3f;
+
+		Assert.AreEqual(expect_v0.X, v0.X, tolerance, "[v0] X component should be the expected angle in radians.");
+		Assert.AreEqual(expect_v0.Y, v0.Y, tolerance, "[v0] Y component should be the expected angle in radians.");
+		Assert.AreEqual(expect_v0.Z, v0.Z, tolerance, "[v0] Z component should be the expected angle in radians.");
+
+		Assert.AreEqual(expect_v1.X, v1.X, tolerance, "[v1] X component should be the expected angle in radians.");
+		Assert.AreEqual(expect_v1.Y, v1.Y, tolerance, "[v1] Y component should be the expected angle in radians.");
+		Assert.AreEqual(expect_v1.Z, v1.Z, tolerance, "[v1] Z component should be the expected angle in radians.");
+
+		Assert.AreEqual(expect_v2.X, v2.X, tolerance, "[v2] X component should be the expected angle in radians.");
+		Assert.AreEqual(expect_v2.Y, v2.Y, tolerance, "[v2] Y component should be the expected angle in radians.");
+		Assert.AreEqual(expect_v2.Z, v2.Z, tolerance, "[v2] Z component should be the expected angle in radians.");
 	}
 }
