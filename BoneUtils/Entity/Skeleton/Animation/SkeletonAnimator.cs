@@ -24,8 +24,9 @@ public class SkeletonAnimator {
 	private BoneNode? _node;
 	private TransformSnapshot? _xfm;
 
-	public SkeletonAnimator() {
-		KeyframeFinder = new KeyframeFinder();
+	public SkeletonAnimator(KeyframeFinder? keyframeFinder = null) {
+		keyframeFinder ??= new KeyframeFinder();
+		KeyframeFinder = keyframeFinder;
 	}
 
 	public int LoadedAnimations => animationCount;
@@ -38,13 +39,13 @@ public class SkeletonAnimator {
 
 		Animations.Add(animation);
 		animationCount = Animations.Count;
-		Debug.WriteLine($"animationCount={animationCount}");
 	}
 	public void Unload(AnimationInstance animation) {
 		// TODO pre-remove cleanup?
 		var instanceSelect = Animations.FirstOrDefault(x => x == animation);
 		if(instanceSelect == null) return; // TODO handle better
 		Animations.Remove(instanceSelect);
+		animationCount = Animations.Count;
 	}
 	public void Clear() {
 		Animations.Clear();
@@ -53,7 +54,6 @@ public class SkeletonAnimator {
 
 	// Playback
 
-	//TransformSnapshot? _dbgLastXfm;
 	public void Scrub(float timelinePoint, KeyframeTransformer? xfmHandler = null) {
 		xfmHandler ??= KeyframeXfmHandlers.KeyframeTransformerBasic;
 		
@@ -63,21 +63,10 @@ public class SkeletonAnimator {
 				Animations[i].IsRunning = true;
 			}
 
-			//Debug.WriteLine("---");
-			//Debug.WriteLine($"Runtime: {Runtime}");
-
 			(_valid, _node, _xfm) = KeyframeFinder.GetKeyframe(timelinePoint-Animations[i].deltaTimeStarted, Animations[i]);
 
-			//Debug.WriteLine($"{_valid}, {_node}, {_xfm}");
-			
 			if (_valid && _node != null && _xfm.HasValue) {
 				xfmHandler(_node, _xfm.Value, Animations[i].Animation.Type);
-
-				//_dbgLastXfm ??= _xfm;
-				//if (_dbgLastXfm.Value.Position != _xfm.Value.Position) {
-				//	Debug.WriteLine($"Swapped nodes at global runtime: {timelinePoint}");
-				//	_dbgLastXfm = _xfm;
-				//}
 			}
 		}
 	}
