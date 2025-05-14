@@ -138,6 +138,9 @@ public class MathHelpers_Tests {
 		Assert.AreEqual(expect_v0q2.Y, result_v0q2.Y, tolerance_v0q2, "Y component should change within tolerance.");
 		Assert.AreEqual(expect_v0q2.Z, result_v0q2.Z, tolerance_v0q2, "Z component should change within tolerance.");
 	}
+	/// <summary>
+	/// Checks Quat to euler angle conversion
+	/// </summary>
 	[TestMethod]
 	public void Quat_ToEuler() {
 		Quat q0 = Quat.Create(MathF.PI/2, Vector3.UnitX);
@@ -166,5 +169,46 @@ public class MathHelpers_Tests {
 		Assert.AreEqual(expect_v2.X, v2.X, tolerance, "[v2] X component should be the expected angle in radians.");
 		Assert.AreEqual(expect_v2.Y, v2.Y, tolerance, "[v2] Y component should be the expected angle in radians.");
 		Assert.AreEqual(expect_v2.Z, v2.Z, tolerance, "[v2] Z component should be the expected angle in radians.");
+	}
+	/// <summary>
+	/// Checks the Quat helper function for drawing direction vectors.
+	/// </summary>
+	[TestMethod]
+	public void Quat_CreateLocalDirectionVectors() {
+		Quat q0 = Quat.Create(0, Vector3.UnitX);
+		Quat q1 = Quat.Create(MathF.PI/2, Vector3.UnitY);
+		Quat q2 = Quat.Create(-MathF.PI/2, Vector3.UnitX);
+
+		MathHelper.QuatOrientationVectors res_q0 = new();
+		MathHelper.QuatOrientationVectors res_q1 = new();
+		MathHelper.QuatOrientationVectors res_q2 = new();
+
+		MathHelper.CreateLocalDirectionVectors(q0, Vector3.Zero, ref res_q0, 1.0f);
+		MathHelper.CreateLocalDirectionVectors(q1, Vector3.Zero, ref res_q1, 1.0f);
+		MathHelper.CreateLocalDirectionVectors(q2, Vector3.Zero, ref res_q2, 1.0f);
+
+		Vector3 expect_q0_X = new(1,0,0);
+		Vector3 expect_q0_Y = new(0,1,0);
+		Vector3 expect_q0_Z = new(0,0,1);
+
+		Vector3 expect_q1_X = new(0,0,1);
+		Vector3 expect_q1_Y = new(0,1,0);
+		Vector3 expect_q1_Z = new(-1,0,0);
+
+		Vector3 expect_q2_X = new(1,0,0);
+		Vector3 expect_q2_Y = new(0,0,1);
+		Vector3 expect_q2_Z = new(0,-1,0);
+
+		Assert.AreEqual(expect_q0_X, res_q0.X, "[q0.X]");
+		Assert.AreEqual(expect_q0_Y, res_q0.Y, "[q0.Y]");
+		Assert.AreEqual(expect_q0_Z, res_q0.Z, "[q0.Z]");
+
+		Assert.AreEqual(expect_q1_X, res_q1.X, "[q1.X]");
+		Assert.AreEqual(expect_q1_Y, res_q1.Y, "[q1.Y]");
+		Assert.AreEqual(expect_q1_Z, res_q1.Z, "[q1.Z]");
+
+		Assert.AreEqual(expect_q2_X, res_q2.X, "[q2.X]");
+		Assert.AreEqual(expect_q2_Y, res_q2.Y, "[q2.Y]");
+		Assert.AreEqual(expect_q2_Z, res_q2.Z, "[q2.Z]");
 	}
 }
