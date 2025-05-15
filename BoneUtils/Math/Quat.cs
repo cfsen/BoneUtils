@@ -106,16 +106,25 @@ public struct Quat :IEquatable<Quat> {
 		return new(){ X=u.X, Y=u.Y, Z=u.Z };
 	}
 	public static Quat Slerp(Quat q0, Quat q1, float u) {
-		// https://splines.readthedocs.io/en/latest/rotation/slerp.html
-		// TODO benchmark for performance vs allocating theta
-		// TODO edge case handling
+		float dot = Quat.Dot(q0, q1);
 
-		if(MathF.Sin(MathF.Acos(Quat.Dot(q0,q1))) < float.Epsilon) // Quats are nearly identical
+		if (dot < 0.0f) {
+			q1 *= (-1);
+			dot = -dot;
+		}
+
+		dot = float.Clamp(dot, -1.0f, 1.0f); 
+
+		float theta = MathF.Acos(dot);
+		float sinTheta = MathF.Sin(theta);
+
+		if (sinTheta < float.Epsilon)
 			return q0;
 
-		return 
-			(q0 * MathF.Sin((1-u) * MathF.Acos(Quat.Dot(q0, q1))) + q1 * MathF.Sin(u * MathF.Acos(Quat.Dot(q0, q1))))
-			/ MathF.Max(float.Epsilon, MathF.Sin(MathF.Acos(Quat.Dot(q0, q1))));
+		float w1 = MathF.Sin((1 - u) * theta) / sinTheta;
+		float w2 = MathF.Sin(u * theta) / sinTheta;
+
+		return q0 * w1 + q1 * w2;
 	}
 
 	// Native type conversion
