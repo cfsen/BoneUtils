@@ -16,16 +16,19 @@ public class KeyframeFinder {
 	/// On failure: false, null, null
 	/// </returns>
 	public static (bool valid, BoneNode? node, TransformSnapshot? state) GetKeyframe(float runTime, AnimationInstance inst, xfmSnapshotBlender? blender = null) { 
+		// For non looping animations, return the last frame
 		if(runTime > inst.Animation.TotalDuration && !inst.Loop) 
-			return (false, null, null); 
+			return lastKeyframe();
 
-		// If xfmtype is static, transforms are set directly, this will loop without reversing 
-		if(inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.Static) 
+		if(isAbsoluteAndLoop()) // transforms are set directly without accumulation
 			runTime %= inst.Animation.TotalDuration; // Wrap time around if looping
 
-		// TODO this prevents relative animations from looping until dedicated logic can be implemented
-		// If xfmtype is relative, transforms are set and propagated by bonenode translate/rotate
-		if(inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.Relative)
+		// TODO
+		// reconsider if this feature is desired in the first place
+		// relative (accumulated) transforms are hard to conceptualize and use
+		// and might be better handled by simply transforming static animations
+		// extend AnimationInstance to store initial position, and implement logic to restart the animation here
+		if(isAccumulateAndLoop()) // transforms are set and propagated by bonenode translate/rotate
 			return (false, null, null);
 
 		// Fetch frames
@@ -49,6 +52,14 @@ public class KeyframeFinder {
 				CalculateKeyframeNormalizedTime(inst, runTime, origin, target)
 				)
 			);
+
+		// Locals
+		bool isAbsoluteAndLoop() 
+			=> inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.Static;
+		bool isAccumulateAndLoop()
+			=> inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.Relative;
+		(bool, BoneNode?, TransformSnapshot?) lastKeyframe() 
+			=> (true, inst.Animation.Keyframes[inst.KeyframeCount-1].Bone, inst.Animation.Keyframes[inst.KeyframeCount-1].TransformState);
 	}
 
 	// Fetches blend handler for blend mode assigned at composition time.
