@@ -26,7 +26,7 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 		// Describe a translation animation
 		Vector3 translation = new(2, 0, 0);
 		var (xfm0, xfm1) = CreateKeyframePair_BoneNode_Translation(sken.RootNode, translation);
-		builder.XfmType = AnimationXfmType.Static;
+		builder.XfmType = AnimationXfmType.Absolute;
 
 		// Create keyframes
 		var frame0 = builder.CreateKeyframe(sken.RootNode, xfm0, 0.0f);
@@ -59,7 +59,7 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 
 		// Container check
 		Assert.AreEqual(3.0f, animation.TotalDuration, "Animation duration should be set.");
-		Assert.AreEqual(AnimationXfmType.Static, animation.Type, "Animation type should be Relative.");
+		Assert.AreEqual(AnimationXfmType.Absolute, animation.Type, "Animation type should be Relative.");
 
 		// TODO check amount of blendframes
 	}
@@ -71,7 +71,7 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 	public void AB_CreateLongAnimation() {
 		var (sken, ops) = SetupSkeletonWithAnimator(Mock_Spine);
 		AnimationBuilder ab = new();
-		ab.XfmType = AnimationXfmType.Static;
+		ab.XfmType = AnimationXfmType.Absolute;
 
 		// This sequence forms a rotation around origo on the XZ-plane
 		Vector3[] translation = [
@@ -123,7 +123,7 @@ public class AnimationBuilder_Tests :MockAnimationBuilder{
 	public void AB_BuildSequence_RejectsInvalidOrder() {
 		var (sken, ops) = SetupSkeletonWithAnimator(Mock_Spine);
 		AnimationBuilder builder = new();
-		builder.XfmType = AnimationXfmType.Static;
+		builder.XfmType = AnimationXfmType.Absolute;
 
 		// Create translation over two keyframes
 		Vector3 translation = new(2,2,2);

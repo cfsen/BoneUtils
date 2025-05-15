@@ -23,8 +23,8 @@ public struct AnimationContainer {
 /// </summary>
 public enum AnimationXfmType {
 	None,
-	Static, // Should animate in world space
-	Relative, // Should animate in skeleton local space
+	Absolute, // Should animate in world space
+	AdditiveRotation, // Should animate using BoneNode built-ins
 	Custom // prep for IoC 
 }
 

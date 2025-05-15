@@ -47,7 +47,9 @@ public class DemoAnimatorBasic :DemoBase {
 			var animation = CreateBasicAnimation(sken, node.Value, offset);
 
 			// Set up the animation owner (keyframe selection, blending)
-			var animationInstance = new AnimationInstance(animation);
+			AnimationInstance animationInstance = new(animation) {
+				Loop = false
+			};
 
 			// Load the animation into the manager
 			// Can safely assume not null due to AddSkeletonAnimator mutator
@@ -97,7 +99,7 @@ public class DemoAnimatorBasic :DemoBase {
 
 		// Build the sequence
 		AnimationBuilder builder = new() {
-			XfmType = AnimationXfmType.Static
+			XfmType = AnimationXfmType.Absolute
 		};
 
 		builder.StartSequence(key1, key2, AnimationBlendType.Linear);

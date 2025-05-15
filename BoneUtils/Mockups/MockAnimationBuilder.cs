@@ -46,7 +46,7 @@ public abstract class MockAnimationBuilder :MockDataBuilder {
 		AnimationBuilder builder = new();
 
 		// Set transform type
-		builder.XfmType = AnimationXfmType.Static;
+		builder.XfmType = AnimationXfmType.Absolute;
 
 		// Describe a translation animation
 		Vector3 translation = new(2, 0, 0);
@@ -133,7 +133,7 @@ public abstract class MockAnimationBuilder :MockDataBuilder {
 			Keyframes = [f0, f1],
 			FrameBlends = [blend_f0f1],
 			TotalDuration = 3.0f,
-			Type = AnimationXfmType.Relative,
+			Type = AnimationXfmType.AdditiveRotation,
 		};
 
 		return animationGroup;

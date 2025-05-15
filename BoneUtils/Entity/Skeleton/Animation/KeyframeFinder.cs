@@ -28,7 +28,7 @@ public class KeyframeFinder {
 		// relative (accumulated) transforms are hard to conceptualize and use
 		// and might be better handled by simply transforming static animations
 		// extend AnimationInstance to store initial position, and implement logic to restart the animation here
-		if(isAccumulateAndLoop()) // transforms are set and propagated by bonenode translate/rotate
+		if(isAdditiveRotationAndLoop()) // transforms are set and propagated by bonenode translate/rotate
 			return (false, null, null);
 
 		// Fetch frames
@@ -55,9 +55,9 @@ public class KeyframeFinder {
 
 		// Locals
 		bool isAbsoluteAndLoop() 
-			=> inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.Static;
-		bool isAccumulateAndLoop()
-			=> inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.Relative;
+			=> inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.Absolute;
+		bool isAdditiveRotationAndLoop()
+			=> inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.AdditiveRotation;
 		(bool, BoneNode?, TransformSnapshot?) lastKeyframe() 
 			=> (true, inst.Animation.Keyframes[inst.KeyframeCount-1].Bone, inst.Animation.Keyframes[inst.KeyframeCount-1].TransformState);
 	}

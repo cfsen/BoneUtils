@@ -18,16 +18,14 @@ public static class KeyframeXfmHandlers {
 	/// <param name="bone">BoneNode to mutate.</param>
 	/// <param name="xfm">Transform to set.</param>
 	public static void KeyframeTransformerBasic(BoneNode bone, TransformSnapshot xfm, AnimationXfmType animType) {
-		bone.Transform.Scale = xfm.Scale;
-
-		if(animType == AnimationXfmType.Relative) {
+		if(animType == AnimationXfmType.AdditiveRotation) {
 			// Leverage BoneNode propagation
 			bone.Rotate(xfm.Rotation);
-			bone.Translate(xfm.Position);
 		}
-		else if(animType == AnimationXfmType.Static) {
+		else if(animType == AnimationXfmType.Absolute) {
 			bone.Transform.Rotation = xfm.Rotation;
 			bone.Transform.Position = xfm.Position;
+			bone.Transform.Scale = xfm.Scale;
 		}
 	}
 }
