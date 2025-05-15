@@ -39,6 +39,7 @@ public class RaylibDemoRunner {
 	// Init
 
 	public void InitDemos() {
+		Demos.Add(new DemoAnimationPropagate(SkelOps, RayRender));
 		Demos.Add(new DemoAnimatorBasic(SkelOps, RayRender));
 		Demos.Add(new DemoHelix(SkelOps));
 		Demos.Add(new DemoWave(SkelOps));
@@ -68,6 +69,10 @@ public class RaylibDemoRunner {
 			DemoSelector = 2;
 		if(Raylib.IsKeyPressed(KeyboardKey.F5))
 			DemoSelector = 3;
+		if(Raylib.IsKeyPressed(KeyboardKey.F6))
+			DemoSelector = 4;
+		if(Raylib.IsKeyPressed(KeyboardKey.F7))
+			DemoSelector = 5;
 		ActiveDemo.HandleDemoInput();
 	}
 	public void Update(float dt) {

@@ -48,7 +48,7 @@ public class DemoAnimatorBasic :DemoBase {
 
 			// Set up the animation owner (keyframe selection, blending)
 			AnimationInstance animationInstance = new(animation) {
-				Loop = false
+				Loop = true
 			};
 
 			// Load the animation into the manager
