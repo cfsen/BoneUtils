@@ -1,6 +1,7 @@
 ﻿using BoneUtils.Math;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -46,7 +47,7 @@ public static class KeyframeBlendHandlers {
 		TransformSnapshot blend = new TransformSnapshot {
 			Position = Vector3.Lerp(origin.Position, target.Position, blendFactor),
 			Scale = Vector3.Lerp(origin.Scale, target.Scale, blendFactor),
-			Rotation = Quat.Slerp(origin.Rotation, target.Rotation, blendFactor),
+			Rotation = target.Rotation,
 		};
 		return blend;
 	}

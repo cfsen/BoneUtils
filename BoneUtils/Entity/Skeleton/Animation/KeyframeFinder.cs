@@ -29,7 +29,7 @@ public class KeyframeFinder {
 		// and might be better handled by simply transforming static animations
 		// extend AnimationInstance to store initial position, and implement logic to restart the animation here
 		if(isAdditiveRotationAndLoop()) // transforms are set and propagated by bonenode translate/rotate
-			return (false, null, null);
+			runTime %= inst.Animation.TotalDuration;
 
 		// Fetch frames
 		var (valid, origin, target) = GetKeyframes_FromLastHit(runTime, inst); // sequential lookup
@@ -55,11 +55,16 @@ public class KeyframeFinder {
 
 		// Locals
 		bool isAbsoluteAndLoop() 
-			=> inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.Absolute;
+			=> inst.Loop && runTime > inst.Animation.TotalDuration 
+			&& (inst.Animation.Type == AnimationXfmType.Absolute
+				|| inst.Animation.Type == AnimationXfmType.TranslatePropagate);
 		bool isAdditiveRotationAndLoop()
-			=> inst.Loop && runTime > inst.Animation.TotalDuration && inst.Animation.Type == AnimationXfmType.AdditiveRotation;
+			=> inst.Loop && runTime > inst.Animation.TotalDuration 
+			&& inst.Animation.Type == AnimationXfmType.AdditiveRotation;
 		(bool, BoneNode?, TransformSnapshot?) lastKeyframe() 
-			=> (true, inst.Animation.Keyframes[inst.KeyframeCount-1].Bone, inst.Animation.Keyframes[inst.KeyframeCount-1].TransformState);
+			=> (true, 
+				inst.Animation.Keyframes[inst.KeyframeCount-1].Bone, 
+				inst.Animation.Keyframes[inst.KeyframeCount-1].TransformState);
 	}
 
 	// Fetches blend handler for blend mode assigned at composition time.

@@ -24,7 +24,8 @@ public struct AnimationContainer {
 public enum AnimationXfmType {
 	None,
 	Absolute, // Should animate in world space
-	AdditiveRotation, // Should animate using BoneNode built-ins
+	AdditiveRotation, // Rotate using BoneNode Rotate()
+	TranslatePropagate, // Translate using BoneNode Translate()
 	Custom // prep for IoC 
 }
 

@@ -63,6 +63,8 @@ public class SkeletonAnimator {
 			if(!Animations[i].IsRunning && Running) {
 				Animations[i].deltaTimeStarted = timelinePoint;
 				Animations[i].IsRunning = true;
+
+				// TODO auto unload if !loop && deltaTimeStarted+totalduration <= timelinepoint
 			}
 
 			(_valid, _node, _xfm) = KeyframeFinder.GetKeyframe(timelinePoint-Animations[i].deltaTimeStarted, Animations[i]);

@@ -22,6 +22,10 @@ public static class KeyframeXfmHandlers {
 			// Leverage BoneNode propagation
 			bone.Rotate(xfm.Rotation);
 		}
+		else if(animType == AnimationXfmType.TranslatePropagate) {
+			// Pass translation delta
+			bone.Translate(xfm.Position - bone.Transform.Position);
+		}
 		else if(animType == AnimationXfmType.Absolute) {
 			bone.Transform.Rotation = xfm.Rotation;
 			bone.Transform.Position = xfm.Position;
