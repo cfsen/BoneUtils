@@ -38,4 +38,25 @@ public class SkeletonEntityOps_CompositionTests :MockDataBuilder {
 		Assert.IsTrue(ops.LabelDepthBoneNodeTree(ref en), "Should allow BFS mutator after validation registration.");
 
 	}
+	[TestMethod]
+	public void SkeletonEntityOps_Mutator_RenderList() {
+		SkeletonEntity sken = Mock_Spine();
+		SkeletonEntityOps ops = new();
+		
+		Assert.AreEqual(0, sken.RenderBones.Count, "Should be 0 before preprocessing.");
+
+		ops.PreProcessSkeleton(ref sken, [
+			ops.ValidateBoneNodeTree,
+			ops.BoneNodeTreeBuildRenderLists,
+			]);
+
+		Assert.AreEqual(4, sken.RenderBones.Count, "Should equal the number of bones in skeleton.");
+
+		// Check that all bones were added
+		HashSet<string> registered = [.. sken.Bones.Keys];
+		foreach(var bone in sken.RenderBones)
+			if(!registered.Contains(bone.Name))
+				Assert.Fail($"Missing render bone: {bone.Name}");
+
+	}
 }
