@@ -24,7 +24,8 @@ public struct AnimationContainer {
 public enum AnimationXfmType {
 	None,
 	Absolute, // Should animate in world space
-	AdditiveRotation, // Rotate using BoneNode Rotate()
+	AdditiveRotation, // Continous additive rotation for duration of keyframe
+	RotatePropagate, // Slerp with propagate
 	TranslatePropagate, // Translate using BoneNode Translate()
 	Custom // prep for IoC 
 }
@@ -76,6 +77,7 @@ public enum AnimationBlendType {
 	Exponential,
 	Logarithmic,
 	Oscillating,
+	Testing,
 	Custom // prep for IoC
 }
 

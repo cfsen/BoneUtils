@@ -43,7 +43,7 @@ public class DemoAnimationPropagate :DemoBase {
 			]);
 
 		var translationContainer = CreateTranslation(sken, sken.RootNode);
-		var rotation_spinea = CreateRotation(sken, sken.Bones["SpineA"]);
+		var rotation_spinea = CreateRotatePropagate(sken, sken.Bones["SpineA"]);
 
 		// Set up the animation owner (keyframe selection, blending)
 		AnimationInstance animTranslate = new(translationContainer) {
@@ -56,12 +56,46 @@ public class DemoAnimationPropagate :DemoBase {
 
 		// Load the animation into the manager
 		// Can safely assume not null due to AddSkeletonAnimator mutator
-		sken.Animator!.Load(animTranslate);
+		//sken.Animator!.Load(animTranslate);
 		sken.Animator!.Load(animRotate);
 
 		return sken;
 	}
-	private AnimationContainer CreateRotation(SkeletonEntity sken, BoneNode node) {
+	private AnimationContainer CreateRotatePropagate(SkeletonEntity sken, BoneNode node) {
+		Quat q0 = Quat.Create(MathHelper.DegToRad(0.0f), Vector3.UnitX);
+		Quat q1 = Quat.Create(MathHelper.DegToRad(-90.0f), Vector3.UnitY);
+		Quat q2 = Quat.Create(MathHelper.DegToRad(-180.1f), Vector3.UnitY);
+		Quat q3 = Quat.Create(MathHelper.DegToRad(0.0f), Vector3.UnitY);
+
+		TransformSnapshot xfm0 = new(node.Transform);
+		TransformSnapshot xfm1 = xfm0 with { Rotation = node.Transform.Rotation };
+		TransformSnapshot xfm2 = xfm0 with { Rotation = q0 };
+		TransformSnapshot xfm3 = xfm0 with { Rotation = q1 };
+		TransformSnapshot xfm4 = xfm0 with { Rotation = q2 };
+		TransformSnapshot xfm5 = xfm0 with { Rotation = q3 };
+		
+		AnimationKeyframe key1 = AnimationKeyframe.Create(node, xfm1, 0.0f);
+		AnimationKeyframe key2 = AnimationKeyframe.Create(node, xfm2, 1.0f);
+		AnimationKeyframe key3 = AnimationKeyframe.Create(node, xfm3, 2.0f);
+		AnimationKeyframe key4 = AnimationKeyframe.Create(node, xfm4, 3.0f);
+		AnimationKeyframe key5 = AnimationKeyframe.Create(node, xfm5, 4.0f);
+		AnimationKeyframe key6 = AnimationKeyframe.Create(node, xfm0, 7.0f);
+
+		AnimationBuilder builder = new() {
+			XfmType = AnimationXfmType.RotatePropagate
+		};
+
+		builder.StartSequence(key1, key2, AnimationBlendType.Testing);
+		builder.BuildSequence(key3, AnimationBlendType.Testing);
+		builder.BuildSequence(key4, AnimationBlendType.Testing);
+		builder.BuildSequence(key5, AnimationBlendType.Testing);
+		builder.BuildSequence(key6, AnimationBlendType.Testing);
+		builder.EndSequence();
+
+		return builder.Export();
+
+	}
+	private AnimationContainer CreateAddtiveRotation(SkeletonEntity sken, BoneNode node) {
 		Quat q0 = Quat.Create(MathHelper.DegToRad(1.0f), Vector3.UnitX);
 		Quat q1 = Quat.Create(MathHelper.DegToRad(1.0f), Vector3.UnitZ);
 		Quat q2 = Quat.Create(MathHelper.DegToRad(5.0f), Vector3.UnitY);
@@ -75,7 +109,7 @@ public class DemoAnimationPropagate :DemoBase {
 		AnimationKeyframe key1 = AnimationKeyframe.Create(node, xfm1, 0.0f);
 		AnimationKeyframe key2 = AnimationKeyframe.Create(node, xfm2, 2.0f);
 		AnimationKeyframe key3 = AnimationKeyframe.Create(node, xfm3, 4.0f);
-		AnimationKeyframe key4 = AnimationKeyframe.Create(node, xfm4, 5.0f);
+		AnimationKeyframe key4 = AnimationKeyframe.Create(node, xfm4, 6.0f);
 
 		AnimationBuilder builder = new() {
 			XfmType = AnimationXfmType.AdditiveRotation

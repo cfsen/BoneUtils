@@ -51,4 +51,12 @@ public static class KeyframeBlendHandlers {
 		};
 		return blend;
 	}
+
+	public static TransformSnapshot BlendRotatePropagate(TransformSnapshot origin, TransformSnapshot target, float blendFactor, object? context = null) {
+		return new TransformSnapshot {
+			Position = Vector3.Lerp(origin.Position, target.Position, blendFactor),
+			Scale = Vector3.Lerp(origin.Scale, target.Scale, blendFactor),
+			Rotation = Quat.Slerp(origin.Rotation, target.Rotation, blendFactor),
+		};
+	}
 }

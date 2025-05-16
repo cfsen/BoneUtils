@@ -60,7 +60,8 @@ public class KeyframeFinder {
 				|| inst.Animation.Type == AnimationXfmType.TranslatePropagate);
 		bool isAdditiveRotationAndLoop()
 			=> inst.Loop && runTime > inst.Animation.TotalDuration 
-			&& inst.Animation.Type == AnimationXfmType.AdditiveRotation;
+			&& (inst.Animation.Type == AnimationXfmType.AdditiveRotation
+				|| inst.Animation.Type == AnimationXfmType.RotatePropagate);
 		(bool, BoneNode?, TransformSnapshot?) lastKeyframe() 
 			=> (true, 
 				inst.Animation.Keyframes[inst.KeyframeCount-1].Bone, 
@@ -73,6 +74,7 @@ public class KeyframeFinder {
 		// FrameBlends[origin] always maps to originIdx=Keyframes[origin] && targetIdx=Keyframes[origin+1]
 		return inst.Animation.FrameBlends[origin].BlendType switch {
 			AnimationBlendType.Linear => KeyframeBlendHandlers.BlendLinear,
+			AnimationBlendType.Testing => KeyframeBlendHandlers.BlendRotatePropagate,
 			_ => KeyframeBlendHandlers.BlendNone
 		};
 	}
