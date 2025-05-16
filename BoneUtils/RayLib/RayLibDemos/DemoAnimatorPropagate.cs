@@ -62,6 +62,18 @@ public class DemoAnimationPropagate :DemoBase {
 		return sken;
 	}
 	private AnimationContainer CreateRotatePropagate(SkeletonEntity sken, BoneNode node) {
+		AnimationSimpleBuilder simplebuilder = new(node);
+		simplebuilder
+			.CaptureInitial()
+			.ApplyInitial(				0.0f, AnimationBlendType.Testing)
+			.Rotate(0.0f,		Axis.X, 1.0f)
+			.Rotate(-90.0f,		Axis.Y, 2.0f)
+			.Rotate(-180.0f,	Axis.Y, 3.0f)
+			.Rotate(0.0f,		Axis.Y, 4.0f)
+			.Rotate(90.0f,		Axis.X, 5.0f)
+			.ApplyInitial(				7.0f, AnimationBlendType.Testing);
+		return simplebuilder.Finish();
+
 		Quat q0 = Quat.Create(MathHelper.DegToRad(0.0f), Vector3.UnitX);
 		Quat q1 = Quat.Create(MathHelper.DegToRad(-90.0f), Vector3.UnitY);
 		Quat q2 = Quat.Create(MathHelper.DegToRad(-180.1f), Vector3.UnitY);
