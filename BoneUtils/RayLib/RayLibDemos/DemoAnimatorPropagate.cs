@@ -42,72 +42,39 @@ public class DemoAnimationPropagate :DemoBase {
 			SkelOps.AddSkeletonAnimator
 			]);
 
-		var translationContainer = CreateTranslation(sken, sken.RootNode);
-		var rotation_spinea = CreateRotatePropagate(sken, sken.Bones["SpineA"]);
+		var anim_rotation_spinea = CreateRotatePropagate(sken.Bones["SpineA"]);
+		var anim_rotation_spineb = CreateAddtiveRotation(sken.Bones["SpineB"]);
+		var anim_translate_root = CreateTranslatePropagate(sken.RootNode);
 
 		// Set up the animation owner (keyframe selection, blending)
-		AnimationInstance animTranslate = new(translationContainer) {
+		AnimationInstance anim_spineb = new(anim_rotation_spineb) {
 			Loop = true
 		};
 
-		AnimationInstance animRotate = new(rotation_spinea) {
-			Loop = true 
-		};
-
-		// Load the animation into the manager
-		// Can safely assume not null due to AddSkeletonAnimator mutator
-		//sken.Animator!.Load(animTranslate);
-		sken.Animator!.Load(animRotate);
+		// Load the animations into the manager
+		sken.Animator!.Load(anim_rotation_spinea);
+		sken.Animator!.Load(anim_spineb);
+		sken.Animator!.Load(anim_translate_root);
 
 		return sken;
 	}
-	private AnimationContainer CreateRotatePropagate(SkeletonEntity sken, BoneNode node) {
-		AnimationSimpleBuilder simplebuilder = new(node);
+	private AnimationInstance CreateRotatePropagate(BoneNode node) {
+		// Simple animations can be built with the limited AnimationSimpleBuilder:
+		AnimationSimpleBuilder simplebuilder = new(node, AnimationXfmType.RotatePropagate);
 		simplebuilder
 			.CaptureInitial()
 			.ApplyInitial(				0.0f, AnimationBlendType.Testing)
-			.Rotate(0.0f,		Axis.X, 1.0f)
-			.Rotate(-90.0f,		Axis.Y, 2.0f)
-			.Rotate(-180.0f,	Axis.Y, 3.0f)
-			.Rotate(0.0f,		Axis.Y, 4.0f)
-			.Rotate(90.0f,		Axis.X, 5.0f)
-			.ApplyInitial(				7.0f, AnimationBlendType.Testing);
+			.Rotate(0.0f,		Axis.X, 0.5f)
+			.Rotate(-90.0f,		Axis.Y, 4.0f)
+			.Rotate(-180.0f,	Axis.Y, 6.0f)
+			.ApplyInitial(				7.0f, AnimationBlendType.Testing)
+			.ApplyInitial(				8.0f, AnimationBlendType.Testing)
+			.Rotate(0.0f,		Axis.Y, 9.0f)
+			.ApplyInitial(				13.0f, AnimationBlendType.Testing);
 		return simplebuilder.Finish();
-
-		Quat q0 = Quat.Create(MathHelper.DegToRad(0.0f), Vector3.UnitX);
-		Quat q1 = Quat.Create(MathHelper.DegToRad(-90.0f), Vector3.UnitY);
-		Quat q2 = Quat.Create(MathHelper.DegToRad(-180.1f), Vector3.UnitY);
-		Quat q3 = Quat.Create(MathHelper.DegToRad(0.0f), Vector3.UnitY);
-
-		TransformSnapshot xfm0 = new(node.Transform);
-		TransformSnapshot xfm1 = xfm0 with { Rotation = node.Transform.Rotation };
-		TransformSnapshot xfm2 = xfm0 with { Rotation = q0 };
-		TransformSnapshot xfm3 = xfm0 with { Rotation = q1 };
-		TransformSnapshot xfm4 = xfm0 with { Rotation = q2 };
-		TransformSnapshot xfm5 = xfm0 with { Rotation = q3 };
-		
-		AnimationKeyframe key1 = AnimationKeyframe.Create(node, xfm1, 0.0f);
-		AnimationKeyframe key2 = AnimationKeyframe.Create(node, xfm2, 1.0f);
-		AnimationKeyframe key3 = AnimationKeyframe.Create(node, xfm3, 2.0f);
-		AnimationKeyframe key4 = AnimationKeyframe.Create(node, xfm4, 3.0f);
-		AnimationKeyframe key5 = AnimationKeyframe.Create(node, xfm5, 4.0f);
-		AnimationKeyframe key6 = AnimationKeyframe.Create(node, xfm0, 7.0f);
-
-		AnimationBuilder builder = new() {
-			XfmType = AnimationXfmType.RotatePropagate
-		};
-
-		builder.StartSequence(key1, key2, AnimationBlendType.Testing);
-		builder.BuildSequence(key3, AnimationBlendType.Testing);
-		builder.BuildSequence(key4, AnimationBlendType.Testing);
-		builder.BuildSequence(key5, AnimationBlendType.Testing);
-		builder.BuildSequence(key6, AnimationBlendType.Testing);
-		builder.EndSequence();
-
-		return builder.Export();
-
 	}
-	private AnimationContainer CreateAddtiveRotation(SkeletonEntity sken, BoneNode node) {
+	private AnimationContainer CreateAddtiveRotation(BoneNode node) {
+		// Consuming AnimationBuilder directly offers granular control:
 		Quat q0 = Quat.Create(MathHelper.DegToRad(1.0f), Vector3.UnitX);
 		Quat q1 = Quat.Create(MathHelper.DegToRad(1.0f), Vector3.UnitZ);
 		Quat q2 = Quat.Create(MathHelper.DegToRad(5.0f), Vector3.UnitY);
@@ -135,42 +102,15 @@ public class DemoAnimationPropagate :DemoBase {
 		return builder.Export();
 
 	}
-	private AnimationContainer CreateTranslation(SkeletonEntity sken, BoneNode node) {
-		// Define a translation rotating around the xz plane
-		Vector3[] translation = [
-			new(2,0,0),
-			new(0,0.5f,2),
-			new(-2,0,0),
-			new(0,-0.5f,-2)
-			];
-
-		// Set up transforms to target
-		TransformSnapshot xfm0 = new(node.Transform);
-		TransformSnapshot xfm1 = xfm0 with { Position = translation[0] };
-		TransformSnapshot xfm2 = xfm0 with { Position = translation[1] };
-		TransformSnapshot xfm3 = xfm0 with { Position = translation[2] };
-		TransformSnapshot xfm4 = xfm0 with { Position = translation[3] };
-
-		// Set up keyframes for transforms 
-		AnimationKeyframe key1 = AnimationKeyframe.Create(node, xfm1, 0.0f);
-		AnimationKeyframe key2 = AnimationKeyframe.Create(node, xfm2, 2.0f);
-		AnimationKeyframe key3 = AnimationKeyframe.Create(node, xfm3, 4.0f);
-		AnimationKeyframe key4 = AnimationKeyframe.Create(node, xfm4, 6.0f);
-		// The final frame is set at the same position as the intial frame, creating a smooth loop
-		AnimationKeyframe key5 = AnimationKeyframe.Create(node, xfm1, 8.0f);
-
-		// Build the sequence
-		AnimationBuilder builder = new() {
-			XfmType = AnimationXfmType.TranslatePropagate
-		};
-
-		builder.StartSequence(key1, key2, AnimationBlendType.Linear);
-		builder.BuildSequence(key3, AnimationBlendType.Linear);
-		builder.BuildSequence(key4, AnimationBlendType.Linear);
-		builder.BuildSequence(key5, AnimationBlendType.Linear);
-
-		builder.EndSequence();
-
-		return builder.Export();
+	private AnimationInstance CreateTranslatePropagate(BoneNode node) {
+		// Simple translation animation
+		AnimationSimpleBuilder simplebuilder = new(node, AnimationXfmType.TranslatePropagate);
+		simplebuilder
+			.CaptureInitial()
+			.ApplyInitial(0.0f)
+			.Translate(2.0f, Axis.Z, 2.0f)
+			.Translate(-2.0f, Axis.Z, 6.0f)
+			.ApplyInitial(8.0f);
+		return simplebuilder.Finish();
 	}
 }
