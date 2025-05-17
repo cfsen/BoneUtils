@@ -59,4 +59,39 @@ public class SkeletonEntityOps_CompositionTests :MockDataBuilder {
 				Assert.Fail($"Missing render bone: {bone.Name}");
 
 	}
+	[TestMethod]
+	public void SkeletonEntityOps_Mutator_LabelDepthBoneNodeTree() {
+		SkeletonEntityOps ops = new();
+		SkeletonEntity spine = Mock_Spine();
+		SkeletonEntity chara = Mock_TestEntity01();
+
+		ops.PreProcessSkeleton(ref spine, [
+			ops.ValidateBoneNodeTree, 
+			ops.LabelDepthBoneNodeTree
+			]);
+
+		ops.PreProcessSkeleton(ref chara, [
+			ops.ValidateBoneNodeTree, 
+			ops.LabelDepthBoneNodeTree
+			]);
+
+		// Non-branching skeleton
+		Assert.AreEqual(0, spine.RootNode.TreeDepth, "RootNode should be depth 0.");
+		Assert.AreEqual(1, spine.Bones["SpineA"].TreeDepth, "SpineA should be depth 1.");
+		Assert.AreEqual(2, spine.Bones["SpineB"].TreeDepth, "SpineB should be depth 2.");
+		Assert.AreEqual(3, spine.Bones["SpineC"].TreeDepth, "SpineC should be depth 3.");
+
+		// Branching skeleton
+		Assert.AreEqual(0, chara.RootNode.TreeDepth, "RootNode should be depth 0.");
+		Assert.AreEqual(1, chara.Bones["SpineA"].TreeDepth, "SpineA should be depth 1.");
+		Assert.AreEqual(2, chara.Bones["SpineB"].TreeDepth, "SpineB should be depth 2.");
+		Assert.AreEqual(3, chara.Bones["SpineC"].TreeDepth, "SpineC should be depth 3.");
+
+		// Branches into L_Shoulder, R_Shoulder, Neck
+		Assert.AreEqual(4, chara.Bones["L_Shoulder"].TreeDepth, "L_Shoulder should be depth 4.");
+		Assert.AreEqual(4, chara.Bones["R_Shoulder"].TreeDepth, "R_Shoulder should be depth 4.");
+		Assert.AreEqual(4, chara.Bones["Neck"].TreeDepth, "Neck should be depth 4.");
+
+		Assert.AreEqual(4, chara.Bones["Head"].TreeDepth, "Head should be depth 5.");
+	}
 }
