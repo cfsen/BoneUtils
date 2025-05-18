@@ -14,10 +14,12 @@ public class DemoAnimationPropagate :DemoBase {
 
 	private SkeletonEntity Spine;
 	private SkeletonEntityOps SkelOps;
+	private RaylibAnimationUI AnimationUI;
 
 	public DemoAnimationPropagate(SkeletonEntityOps skeops, RaylibRenderer renderer) {
 		SkelOps = skeops;
 		Spine = ConstructSkeleton();
+		AnimationUI = new(Spine.Animator!);
 		Renderer = renderer;
 		renderMode = RenderMode.Fancy ^ RenderMode.QuatOrientation;
 	}
@@ -26,6 +28,7 @@ public class DemoAnimationPropagate :DemoBase {
 	}
 	public override void Draw2D() {
 		Raylib.DrawText(text_Title, 10, 50, 20, Color.Red);
+		AnimationUI.Draw2DTimeline();
 	}
 	public override void HandleDemoInput() {
 		//if(Raylib.IsKeyPressed(KeyboardKey.One))
