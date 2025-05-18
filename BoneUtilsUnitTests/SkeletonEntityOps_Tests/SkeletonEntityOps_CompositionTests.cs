@@ -94,4 +94,42 @@ public class SkeletonEntityOps_CompositionTests :MockDataBuilder {
 
 		Assert.AreEqual(4, chara.Bones["Head"].TreeDepth, "Head should be depth 5.");
 	}
+	[TestMethod]
+	public void SkeletonEntityOps_Mutator_CalculateConstraints() {
+		SkeletonEntityOps ops = new();
+		SkeletonEntity spine = Mock_Spine();
+
+		ops.PreProcessSkeleton(ref spine, [
+			ops.ValidateBoneNodeTree, 
+			ops.BoneNodeTreeCalculateConstraints
+			]);
+
+		float expect_constraint = 1.0f;
+		Vector3 expect_position = new(0,1,0);
+
+		// Check vector length calculation
+		Assert.AreEqual(expect_constraint, spine.Bones["SpineA"].ParentRelativePosition?.Distance, "Distance should be 1.0f");
+		Assert.AreEqual(expect_constraint, spine.Bones["SpineB"].ParentRelativePosition?.Distance, "Distance should be 1.0f");
+		Assert.AreEqual(expect_constraint, spine.Bones["SpineC"].ParentRelativePosition?.Distance, "Distance should be 1.0f");
+
+		// Check relative position from parent node
+		Assert.AreEqual(expect_position, spine.Bones["SpineA"].ParentRelativePosition?.NodePosition, "Parent relative position should be (0,1,0)");
+		Assert.AreEqual(expect_position, spine.Bones["SpineB"].ParentRelativePosition?.NodePosition, "Parent relative position should be (0,1,0)");
+		Assert.AreEqual(expect_position, spine.Bones["SpineC"].ParentRelativePosition?.NodePosition, "Parent relative position should be (0,1,0)");
+
+		// Check orientation copy
+		Assert.AreEqual(
+			spine.Bones["Root"].Transform.Rotation, 
+			spine.Bones["SpineA"].ParentRelativePosition?.ParentOrientation, 
+			"Should be equal to Root.Transform.Orientation"
+			);
+		Assert.AreEqual(spine.Bones["SpineA"].Transform.Rotation, 
+			spine.Bones["SpineB"].ParentRelativePosition?.ParentOrientation, 
+			"Should be equal to SpineA.Transform.Orientation"
+			);
+		Assert.AreEqual(spine.Bones["SpineB"].Transform.Rotation, 
+			spine.Bones["SpineC"].ParentRelativePosition?.ParentOrientation, 
+			"Should be equal to SpineB.Transform.Orientation"
+			);
+	}
 }
