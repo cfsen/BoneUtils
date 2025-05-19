@@ -92,7 +92,7 @@ public class SkeletonEntityOps_CompositionTests :MockDataBuilder {
 		Assert.AreEqual(4, chara.Bones["R_Shoulder"].TreeDepth, "R_Shoulder should be depth 4.");
 		Assert.AreEqual(4, chara.Bones["Neck"].TreeDepth, "Neck should be depth 4.");
 
-		Assert.AreEqual(4, chara.Bones["Head"].TreeDepth, "Head should be depth 5.");
+		Assert.AreEqual(5, chara.Bones["Head"].TreeDepth, "Head should be depth 5.");
 	}
 	[TestMethod]
 	public void SkeletonEntityOps_Mutator_CalculateConstraints() {
@@ -107,29 +107,49 @@ public class SkeletonEntityOps_CompositionTests :MockDataBuilder {
 		float expect_constraint = 1.0f;
 		Vector3 expect_position = new(0,1,0);
 
+		// Null check
+		Assert.IsNotNull(spine.Bones["SpineA"].ParentRelativePosition, "Should not be null.");
+		Assert.IsNotNull(spine.Bones["SpineB"].ParentRelativePosition, "Should not be null.");
+		Assert.IsNotNull(spine.Bones["SpineC"].ParentRelativePosition, "Should not be null.");
+
 		// Check vector length calculation
-		Assert.AreEqual(expect_constraint, spine.Bones["SpineA"].ParentRelativePosition?.Distance, "Distance should be 1.0f");
-		Assert.AreEqual(expect_constraint, spine.Bones["SpineB"].ParentRelativePosition?.Distance, "Distance should be 1.0f");
-		Assert.AreEqual(expect_constraint, spine.Bones["SpineC"].ParentRelativePosition?.Distance, "Distance should be 1.0f");
+		Assert.AreEqual(expect_constraint, spine.Bones["SpineA"].ParentRelativePosition!.Value.Distance, "Distance should be 1.0f");
+		Assert.AreEqual(expect_constraint, spine.Bones["SpineB"].ParentRelativePosition!.Value.Distance, "Distance should be 1.0f");
+		Assert.AreEqual(expect_constraint, spine.Bones["SpineC"].ParentRelativePosition!.Value.Distance, "Distance should be 1.0f");
 
 		// Check relative position from parent node
-		Assert.AreEqual(expect_position, spine.Bones["SpineA"].ParentRelativePosition?.NodePosition, "Parent relative position should be (0,1,0)");
-		Assert.AreEqual(expect_position, spine.Bones["SpineB"].ParentRelativePosition?.NodePosition, "Parent relative position should be (0,1,0)");
-		Assert.AreEqual(expect_position, spine.Bones["SpineC"].ParentRelativePosition?.NodePosition, "Parent relative position should be (0,1,0)");
+		Assert.AreEqual(expect_position, spine.Bones["SpineA"].ParentRelativePosition!.Value.NodePosition, "Parent relative position should be (0,1,0)");
+		Assert.AreEqual(expect_position, spine.Bones["SpineB"].ParentRelativePosition!.Value.NodePosition, "Parent relative position should be (0,1,0)");
+		Assert.AreEqual(expect_position, spine.Bones["SpineC"].ParentRelativePosition!.Value.NodePosition, "Parent relative position should be (0,1,0)");
 
 		// Check orientation copy
 		Assert.AreEqual(
 			spine.Bones["Root"].Transform.Rotation, 
-			spine.Bones["SpineA"].ParentRelativePosition?.ParentOrientation, 
+			spine.Bones["SpineA"].ParentRelativePosition!.Value.ParentOrientation, 
 			"Should be equal to Root.Transform.Orientation"
 			);
 		Assert.AreEqual(spine.Bones["SpineA"].Transform.Rotation, 
-			spine.Bones["SpineB"].ParentRelativePosition?.ParentOrientation, 
+			spine.Bones["SpineB"].ParentRelativePosition!.Value.ParentOrientation, 
 			"Should be equal to SpineA.Transform.Orientation"
 			);
 		Assert.AreEqual(spine.Bones["SpineB"].Transform.Rotation, 
-			spine.Bones["SpineC"].ParentRelativePosition?.ParentOrientation, 
+			spine.Bones["SpineC"].ParentRelativePosition!.Value.ParentOrientation, 
 			"Should be equal to SpineB.Transform.Orientation"
 			);
+	}
+	[TestMethod]
+	public void SkeletonEntityOps_Mutator_SetParent() {
+		SkeletonEntityOps ops = new();
+		SkeletonEntity Spine = Mock_Spine();
+
+		ops.PreProcessSkeleton(ref Spine, [ops.BoneNodeTreeSetParentEntity]);
+
+		var expect_spinea_parent = Spine.RootNode;
+		var expect_spineb_parent = Spine.Bones["SpineA"];
+		var expect_spinec_parent = Spine.Bones["SpineB"];
+
+		Assert.AreEqual(expect_spinea_parent, Spine.Bones["SpineA"].ParentBone, "SpineA.ParentBone should be Root");
+		Assert.AreEqual(expect_spineb_parent, Spine.Bones["SpineB"].ParentBone, "SpineB.ParentBone should be SpineA");
+		Assert.AreEqual(expect_spinec_parent, Spine.Bones["SpineC"].ParentBone, "SpineC.ParentBone should be SpineB");
 	}
 }
