@@ -4,6 +4,7 @@ using Raylib_cs;
 RaylibDemoRunner rldr = new();
 
 Raylib.SetConfigFlags(ConfigFlags.Msaa4xHint);
+Raylib.SetConfigFlags(ConfigFlags.VSyncHint);
 Raylib.InitWindow(800, 600, "BoneUtils demo");
 Raylib.SetTargetFPS(60);
 rldr.InitDemos();
