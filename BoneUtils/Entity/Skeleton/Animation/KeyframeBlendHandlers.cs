@@ -44,19 +44,27 @@ public static class KeyframeBlendHandlers {
 	/// <param name="context">Ignored.</param>
 	/// <returns>TransformSnapshot of linear interpolation at normalized time.</returns>
 	public static TransformSnapshot BlendLinear(TransformSnapshot origin, TransformSnapshot target, float blendFactor, object? context = null) {
-		TransformSnapshot blend = new TransformSnapshot {
-			Position = Vector3.Lerp(origin.Position, target.Position, blendFactor),
-			Scale = Vector3.Lerp(origin.Scale, target.Scale, blendFactor),
-			Rotation = target.Rotation,
-		};
-		return blend;
-	}
-
-	public static TransformSnapshot BlendRotatePropagate(TransformSnapshot origin, TransformSnapshot target, float blendFactor, object? context = null) {
 		return new TransformSnapshot {
 			Position = Vector3.Lerp(origin.Position, target.Position, blendFactor),
 			Scale = Vector3.Lerp(origin.Scale, target.Scale, blendFactor),
 			Rotation = Quat.Slerp(origin.Rotation, target.Rotation, blendFactor),
 		};
+	}
+
+	/// <summary>
+	/// Perform a additive rotation while linearly blending two transforms.
+	/// Rotation is applied as a fixed delta every update; scale and translation is time-bound.
+	/// </summary>
+	/// <param name="origin">Transform state origin</param>
+	/// <param name="target">Transform state target</param>
+	/// <param name="blendFactor">Normalized time (Lerp/Slerp factor)</param>
+	/// <param name="context">Ignored.</param>
+	/// <returns>TransformSnapshot.</returns>
+	public static TransformSnapshot BlendAdditiveRotation(TransformSnapshot origin, TransformSnapshot target, float blendFactor, object? context = null) {
+		return new TransformSnapshot {
+			Position = Vector3.Lerp(origin.Position, target.Position, blendFactor),
+			Scale = Vector3.Lerp(origin.Scale, target.Scale, blendFactor),
+			Rotation = target.Rotation,
+		}; 
 	}
 }

@@ -74,7 +74,7 @@ public class KeyframeFinder {
 		// FrameBlends[origin] always maps to originIdx=Keyframes[origin] && targetIdx=Keyframes[origin+1]
 		return inst.Animation.FrameBlends[origin].BlendType switch {
 			AnimationBlendType.Linear => KeyframeBlendHandlers.BlendLinear,
-			AnimationBlendType.Testing => KeyframeBlendHandlers.BlendRotatePropagate,
+			AnimationBlendType.AdditiveRotation => KeyframeBlendHandlers.BlendAdditiveRotation,
 			_ => KeyframeBlendHandlers.BlendNone
 		};
 	}

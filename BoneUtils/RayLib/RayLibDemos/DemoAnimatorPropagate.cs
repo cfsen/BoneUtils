@@ -3,7 +3,6 @@ using BoneUtils.Entity.Skeleton.Animation;
 using BoneUtils.Helpers;
 using BoneUtils.Math;
 using Raylib_cs;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace BoneUtils.RayLib.RayLibDemos;
@@ -18,8 +17,9 @@ public class DemoAnimationPropagate :DemoBase {
 
 	public DemoAnimationPropagate(SkeletonEntityOps skeops, RaylibRenderer renderer) {
 		SkelOps = skeops;
-		Spine = ConstructSkeleton();
+		Spine = ConstructSkeleton(SkelOps);
 		AnimationUI = new(Spine.Animator!);
+
 		Renderer = renderer;
 		renderMode = RenderMode.Fancy ^ RenderMode.QuatOrientation;
 	}
@@ -36,18 +36,18 @@ public class DemoAnimationPropagate :DemoBase {
 	public override void Update(float deltaTime) {
 		Spine.Animator?.Play(deltaTime);
 	}
-	private SkeletonEntity ConstructSkeleton() { 
-		var sken = Mock_Spine();
-		SkelOps.PreProcessSkeleton(ref sken, [
-			SkelOps.ValidateBoneNodeTree,
-			SkelOps.BoneNodeTreeCalculateConstraints,
-			SkelOps.BoneNodeTreeBuildRenderLists,
-			SkelOps.AddSkeletonAnimator
+	private SkeletonEntity ConstructSkeleton(SkeletonEntityOps ops) { 
+		var spine = Mock_Spine();
+		ops.PreProcessSkeleton(ref spine, [
+			ops.ValidateBoneNodeTree,
+			ops.BoneNodeTreeCalculateConstraints,
+			ops.BoneNodeTreeBuildRenderLists,
+			ops.AddSkeletonAnimator
 			]);
 
-		var anim_rotation_spinea = CreateRotatePropagate(sken.Bones["SpineA"]);
-		var anim_rotation_spineb = CreateAddtiveRotation(sken.Bones["SpineB"]);
-		var anim_translate_root = CreateTranslatePropagate(sken.RootNode);
+		var anim_rotation_spinea = CreateRotatePropagate(spine.Bones["SpineA"]);
+		var anim_rotation_spineb = CreateAddtiveRotation(spine.Bones["SpineB"]);
+		var anim_translate_root = CreateTranslatePropagate(spine.RootNode);
 
 		// Set up the animation owner (keyframe selection, blending)
 		AnimationInstance anim_spineb = new(anim_rotation_spineb) {
@@ -55,25 +55,25 @@ public class DemoAnimationPropagate :DemoBase {
 		};
 
 		// Load the animations into the manager
-		sken.Animator!.Load(anim_rotation_spinea);
-		sken.Animator!.Load(anim_spineb);
-		sken.Animator!.Load(anim_translate_root);
+		spine.Animator!.Load(anim_rotation_spinea);
+		spine.Animator!.Load(anim_spineb);
+		spine.Animator!.Load(anim_translate_root);
 
-		return sken;
+		return spine;
 	}
 	private AnimationInstance CreateRotatePropagate(BoneNode node) {
 		// Simple animations can be built with the limited AnimationSimpleBuilder:
 		AnimationSimpleBuilder simplebuilder = new(node, AnimationXfmType.RotatePropagate);
 		simplebuilder
 			.CaptureInitial()
-			.ApplyInitial(				0.0f, AnimationBlendType.Testing)
+			.ApplyInitial(				0.0f, AnimationBlendType.Linear)
 			.Rotate(0.0f,		Axis.X, 0.5f)
 			.Rotate(-90.0f,		Axis.Y, 4.0f)
 			.Rotate(-180.0f,	Axis.Y, 6.0f)
-			.ApplyInitial(				7.0f, AnimationBlendType.Testing)
-			.ApplyInitial(				8.0f, AnimationBlendType.Testing)
+			.ApplyInitial(				7.0f, AnimationBlendType.Linear)
+			.ApplyInitial(				8.0f, AnimationBlendType.Linear)
 			.Rotate(0.0f,		Axis.Y, 9.0f)
-			.ApplyInitial(				13.0f, AnimationBlendType.Testing);
+			.ApplyInitial(				13.0f, AnimationBlendType.Linear);
 		return simplebuilder.Finish();
 	}
 	private AnimationContainer CreateAddtiveRotation(BoneNode node) {
@@ -97,9 +97,9 @@ public class DemoAnimationPropagate :DemoBase {
 			XfmType = AnimationXfmType.AdditiveRotation
 		};
 
-		builder.StartSequence(key1, key2, AnimationBlendType.Linear);
-		builder.BuildSequence(key3, AnimationBlendType.Linear);
-		builder.BuildSequence(key4, AnimationBlendType.Linear);
+		builder.StartSequence(key1, key2, AnimationBlendType.AdditiveRotation);
+		builder.BuildSequence(key3, AnimationBlendType.AdditiveRotation);
+		builder.BuildSequence(key4, AnimationBlendType.AdditiveRotation);
 		builder.EndSequence();
 
 		return builder.Export();

@@ -77,7 +77,7 @@ public enum AnimationBlendType {
 	Exponential,
 	Logarithmic,
 	Oscillating,
-	Testing,
+	AdditiveRotation,
 	Custom // prep for IoC
 }
 

@@ -73,7 +73,7 @@ public class AnimationSimpleBuilder {
 	/// <param name="time">Timeline position of keyframe</param>
 	/// <param name="blendType">Blend type for keyframe</param>
 	/// <returns>The current builder to allow chaining additional bone rotation keyframes (see <see cref="AnimationSimpleBuilder"/>).</returns>
-	public AnimationSimpleBuilder Rotate(float degrees, Axis axis, float time, AnimationBlendType blendType = AnimationBlendType.Testing) {
+	public AnimationSimpleBuilder Rotate(float degrees, Axis axis, float time, AnimationBlendType blendType = AnimationBlendType.Linear) {
 		if(xfmType != AnimationXfmType.RotatePropagate) return this;
 
 		Quat q = Quat.Create(MathHelper.DegToRad(degrees), AxisResolve(axis));
