@@ -18,13 +18,14 @@ public abstract class DemoBase :MockDataBuilder, IDemo{
 	// Utility
 
 	internal void Render(SkeletonEntity skeleton, RaylibRenderer? rr = null) {
-		if(renderMode.HasFlag(RenderMode.Basic))
-			DrawBoneNodeNetwork(skeleton, renderMode.HasFlag(RenderMode.Connectors));
-		if(!renderMode.HasFlag(RenderMode.Basic) && renderMode.HasFlag(RenderMode.Connectors))
+		if((renderMode & RenderMode.Basic) != 0)
+			DrawBoneNodeNetwork(skeleton, (renderMode & RenderMode.Connectors) != 0);
+		else if((renderMode & RenderMode.Basic) == 0 && (renderMode & RenderMode.Connectors) != 0)
 			DrawBoneNodeConnectors(skeleton);
-		if(renderMode.HasFlag(RenderMode.QuatOrientation))
+
+		if((renderMode & RenderMode.QuatOrientation) != 0)
 			DrawQuaternionOrientation(skeleton);
-		if(renderMode.HasFlag(RenderMode.Fancy) && rr != null)
+		if((renderMode & RenderMode.Fancy) != 0 && rr != null)
 			DrawBoneNodeRendered(skeleton, rr);
 	}
 
