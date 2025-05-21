@@ -12,17 +12,23 @@ public class RaylibAnimationUI {
 	private int ScreenHeight = 600;
 	private int MarginX = 20;
 	private int MarginY = 30;
-	private int TimelineSpacingY = 10;
-	SkeletonAnimator SkeletonAnimator;
+	private SkeletonAnimator SkeletonAnimator;
 
 	// hoisted
 	float _normalizedTime = 0f;
+	float _normalizedPosition = 0f;
+	int _xpos = 0;
 	public RaylibAnimationUI(SkeletonAnimator animOps) {
 		this.SkeletonAnimator = animOps;
 	} 
 	public void Draw2DTimeline() {
 		for(int i = 0; i < SkeletonAnimator.Animations.Count; i++) {
-			Raylib.DrawLine(MarginX, ScreenHeight-MarginY-(i*MarginY/2), ScreenWidth-MarginX, ScreenHeight-MarginY-(i*MarginY/2), Color.Green);
+			Raylib.DrawLine(
+				MarginX, 
+				ScreenHeight-MarginY-(i*MarginY/2), 
+				ScreenWidth-MarginX, ScreenHeight-MarginY-(i*MarginY/2),
+				Color.DarkGreen
+				);
 
 			_normalizedTime = NormalizeAnimationTime(SkeletonAnimator.Runtime, SkeletonAnimator.Animations[i]);
 			for(int j = 0; j < SkeletonAnimator.Animations[i].KeyframeCount; j++) {
@@ -44,12 +50,14 @@ public class RaylibAnimationUI {
 		return (animatorTime - inst.deltaTimeStarted) % inst.Animation.TotalDuration;
 	}
 	private void TimeToTimelinePos(float key, float animationTotalDuration, int ypos, bool isCursor = false) {
-		float normalizedPosition = key / animationTotalDuration;
-		int xpos = (int)(normalizedPosition*(ScreenWidth-2*MarginX) + MarginX);
-		Raylib.DrawLine(xpos, ypos, xpos, ypos-(MarginY/3), isCursor ? Color.Red : Color.Green);
+		_normalizedPosition = key / animationTotalDuration;
+		_xpos = (int)(_normalizedPosition*(ScreenWidth-2*MarginX) + MarginX);
+		Raylib.DrawLine(_xpos, ypos, _xpos, ypos-(MarginY/3), 
+			isCursor ? Color.SkyBlue : Color.DarkGreen
+			);
 		if(isCursor) {
-			Raylib.DrawLine(xpos, ypos, xpos+5, ypos-(MarginY/6), Color.Red);
-			Raylib.DrawLine(xpos, ypos-(MarginY/3), xpos+5, ypos-(MarginY/6), Color.Red);
+			Raylib.DrawLine(_xpos, ypos, _xpos+5, ypos-(MarginY/6), Color.SkyBlue);
+			Raylib.DrawLine(_xpos, ypos-(MarginY/3), _xpos+5, ypos-(MarginY/6), Color.SkyBlue);
 		}
 	}
 }
